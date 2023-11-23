@@ -1,0 +1,25 @@
+node_modules# Dependency directory
+node_modules/
+
+# Environment variables
+.env
+
+# Logs
+*.log
+
+# Temp files
+*.tmp
+*.temp
+
+# Build directory
+dist/
+
+# Code coverage directory
+coverage/
+
+# IDE specific files
+.vscode/
+.idea/
+
+# Cache files
+.cache/
