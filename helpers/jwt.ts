@@ -5,7 +5,7 @@ import { IUserWithID } from '../interfaces/interfaces';
 
 const { sign, verify } = jwt;
 
-const createToken = (payload: IUserWithID) => {
+export const createToken = (payload: IUserWithID) => {
   if (process.env.JWT_SECRET) {
     const token: string = sign(payload, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_LIFETIME,
@@ -16,9 +16,10 @@ const createToken = (payload: IUserWithID) => {
   }
 };
 
-const isValidToken = (token: string) => verify(token, process.env.JWT_SECRET!);
+export const isValidToken = (token: string) =>
+  verify(token, process.env.JWT_SECRET!);
 
-const attachTokens = (
+export const attachTokens = (
   res: Response,
   user: IUserWithID,
   isReqFromPostMan: boolean
@@ -47,5 +48,3 @@ const attachTokens = (
 
   return token;
 };
-
-export { createToken, isValidToken, attachTokens };

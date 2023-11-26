@@ -4,6 +4,8 @@ import { connectDB } from './db/connect';
 import { InternalServerError } from './errors';
 import 'express-async-errors';
 import cookieParser from 'cookie-parser';
+import { v2 as cloudinary } from 'cloudinary';
+import fileUpload from 'express-fileupload';
 
 //middlewares
 import { notFoundMiddleware } from './middlewares/not-found';
@@ -17,8 +19,20 @@ const server: express.Application = express();
 
 dotenv.config();
 
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
+});
+
 server.use(express.json());
 server.use(cookieParser(process.env.JWT_SECRET));
+server.use(
+  fileUpload({
+    useTempFiles: true,
+    limits: { fileSize: 50 * 1024 * 1024 },
+  })
+);
 
 server.use('/api/v1/al/auth', authRouter);
 
@@ -33,7 +47,7 @@ const startServer = async () => {
     if (process.env.MONGO_URI) {
       await connectDB(process.env.MONGO_URI);
       server.listen(port, () => {
-        console.log(`Server listening at PORT ${port}... With update repo`);
+        console.log(`Server listening at PORT ${port}...`);
       });
     } else {
       throw new InternalServerError(
