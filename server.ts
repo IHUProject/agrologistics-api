@@ -14,6 +14,7 @@ import { errorHandlerMiddleware } from './middlewares/error-handler';
 
 //routes
 import authRouter from './routes/auth-routes';
+import userRouter from './routes/user-routes';
 
 const server: express.Application = express();
 
@@ -35,6 +36,7 @@ server.use(
 );
 
 server.use('/api/v1/al/auth', authRouter);
+server.use('/api/v1/al/user', userRouter);
 
 server.use(notFoundMiddleware);
 server.use(headersMiddleware);

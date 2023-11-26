@@ -3,7 +3,7 @@ import { BadRequestError, ConflictError, UnauthorizedError } from '../errors';
 import User from '../models/User';
 import { IUser, IUserWithID } from '../interfaces/interfaces';
 import { attachTokens } from '../helpers';
-import { createTokenUser } from '../helpers/createTokenUser';
+import { createTokenUser } from '../helpers/create-token-user';
 import validator from 'validator';
 import fs from 'fs';
 import { cloudinaryUpload } from '../helpers/cloudinary-image-handler';

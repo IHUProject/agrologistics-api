@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import { Roles } from './enums';
-import { Request } from 'express';
 
 export interface ICustomError {
   statusCode: number | string;
@@ -36,17 +35,4 @@ export interface IUser extends mongoose.Document {
 
 export interface IUserWithID extends IUser {
   userId: string;
-}
-
-export interface IPayloadUserData {
-  userId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: Roles;
-  image: string;
-}
-
-export interface RequestWithAuth extends Request {
-  currentUser: IPayloadUserData;
 }

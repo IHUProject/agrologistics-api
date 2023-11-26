@@ -1,11 +1,11 @@
 import { ForbiddenError } from '../errors/forbidden';
-import { IPayloadUserData, RequestWithAuth } from '../interfaces/interfaces';
+import { IUserWithID } from '../interfaces/interfaces';
 import { isValidToken } from '../helpers';
 import { Request, Response, NextFunction } from 'express';
 import { BadRequestError } from '../errors';
 
 export const authenticateUser = async (
-  req: RequestWithAuth,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
@@ -16,7 +16,7 @@ export const authenticateUser = async (
   }
 
   try {
-    const payload: IPayloadUserData = isValidToken(token) as IPayloadUserData;
+    const payload: IUserWithID = isValidToken(token) as IUserWithID;
 
     // Attach the user to the req object
     req.currentUser = {

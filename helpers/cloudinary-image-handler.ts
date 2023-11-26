@@ -8,17 +8,6 @@ export const cloudinaryUpload = async (files: UploadedFile[]) => {
     const storeURLs: string[] = [];
 
     for (const i in files) {
-      const type: string = files[i].mimetype;
-
-      if (
-        type !== 'image/png' &&
-        type !== 'image/jpeg' &&
-        type !== 'image/jpg'
-      ) {
-        fs.rmSync('tmp', { recursive: true });
-        throw new ConflictError('This file type is not valid!');
-      }
-
       const result: UploadApiResponse = await Cloudinary.uploader.upload(
         files[i].tempFilePath,
         {
