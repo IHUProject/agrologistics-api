@@ -1,12 +1,38 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
+import * as dotenv from 'dotenv';
+import { connectDB } from './db/connect';
+import { InternalServerError } from './errors';
 
-const app: express.Application = express();
-const port: number = 3000;
+//middlewares
+import { notFoundMiddleware } from './middlewares/not-found';
+import { headersMiddleware } from './middlewares/headers';
+import { errorHandlerMiddleware } from './middlewares/error-handler';
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello1');
-});
+const server: express.Application = express();
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+dotenv.config();
+
+server.use(notFoundMiddleware);
+server.use(headersMiddleware);
+server.use(errorHandlerMiddleware);
+
+const port: number = Number(process.env.PORT) || 4000;
+
+const startServer = async () => {
+  try {
+    if (process.env.MONGO_URI) {
+      await connectDB(process.env.MONGO_URI);
+      server.listen(port, () => {
+        console.log(`Server listening at PORT ${port}...`);
+      });
+    } else {
+      throw new InternalServerError(
+        'Something went wrong with the database connection.'
+      );
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+startServer();
