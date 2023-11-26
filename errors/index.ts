@@ -1,6 +1,6 @@
 import { BadRequestError } from './bad-request';
 import { ConflictError } from './conflict';
-import { InternalServerError } from './Internal-server-error';
+import { InternalServerError } from './internal-server-error';
 import { NotFoundError } from './not-found';
 import { UnauthorizedError } from './unauthorized';
 

@@ -1,12 +1,16 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import StatusCodes from 'http-status-codes';
 import { ICustomError, IUpdatedError } from '../interfaces/interfaces';
 
 export const errorHandlerMiddleware = (
   err: IUpdatedError,
   req: Request,
-  res: Response
+  res: Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  next: NextFunction
 ) => {
+  console.log(err + '');
+
   const customError: ICustomError = {
     statusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
     msg: err.message || 'Something went wrong, please try again',

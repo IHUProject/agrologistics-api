@@ -1,9 +1,12 @@
+import mongoose from 'mongoose';
+import { Roles } from './enums';
+
 export interface ICustomError {
   statusCode: number | string;
   msg: string;
 }
 
-interface IMessage {
+export interface IMessage {
   message: string;
 }
 
@@ -16,4 +19,20 @@ export interface IUpdatedError {
   value: string;
   keyValue: string;
   errors: IMessage[];
+}
+
+export interface IUser extends mongoose.Document {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  image: string;
+  role: Roles;
+  createdAt?: Date;
+  updatedAt?: Date;
+  comparePassword(candidatePassword: string): Promise<boolean>;
+}
+
+export interface IUserWithID extends IUser {
+  userId: string;
 }
