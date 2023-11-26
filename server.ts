@@ -33,7 +33,7 @@ const startServer = async () => {
     if (process.env.MONGO_URI) {
       await connectDB(process.env.MONGO_URI);
       server.listen(port, () => {
-        console.log(`Server listening at PORT ${port}...`);
+        console.log(`Server listening at PORT ${port}... With update repo`);
       });
     } else {
       throw new InternalServerError(
