@@ -40,9 +40,7 @@ export class ImageService {
     }
 
     if (image.length > 1) {
-      throw new BadRequestError(
-        'You allowed to upload only 1 image for profile image'
-      );
+      throw new BadRequestError('You allowed to upload only 1 image');
     }
 
     if (this.req.files && !image) {
@@ -58,6 +56,18 @@ export class ImageService {
         throw new ConflictError('This file type is not valid!');
       }
       return (await this.cloudinaryUpload(image)).join('');
+    }
+  }
+
+  async deleteImage(images: string | string[]) {
+    if (typeof images === 'string') {
+      const publicId: string = images.split('/').slice(-1)[0].split('.')[0];
+      await Cloudinary.uploader.destroy(publicId);
+    } else {
+      for (const image of images) {
+        const publicId: string = image.split('/').slice(-1)[0].split('.')[0];
+        await Cloudinary.uploader.destroy(publicId);
+      }
     }
   }
 }

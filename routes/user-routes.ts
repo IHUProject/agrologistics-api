@@ -1,6 +1,7 @@
 import express, { Router } from 'express';
 import { authenticateUser } from '../middlewares/auth';
 import {
+  changePassword,
   deleteUser,
   getCurrentUser,
   getSingleUser,
@@ -33,6 +34,13 @@ router.patch(
   isOwnerOfTheAccount,
   isUserExits,
   updateUser
+);
+router.patch(
+  '/:id/change-password',
+  authenticateUser,
+  isOwnerOfTheAccount,
+  isUserExits,
+  changePassword
 );
 
 export default router;

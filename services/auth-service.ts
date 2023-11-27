@@ -7,19 +7,17 @@ import { createTokenUser } from '../helpers/create-token-user';
 import validator from 'validator';
 import { UploadedFile } from 'express-fileupload';
 import { ImageService } from './image-service';
+import { DefaultImage } from '../interfaces/enums';
 
 export class AuthService {
   private req: Request;
   private res: Response;
-  private defaultImageProfile: string;
   private isFromPostMan: boolean;
   private imageService: ImageService;
 
   constructor(req: Request, res: Response) {
     this.req = req;
     this.res = res;
-    this.defaultImageProfile =
-      'https://images.squarespace-cdn.com/content/v1/51239e9ae4b0dce195cba126/1556466683303-K5V354MR8E4W0YOOT21G/Question-mark-face.jpg?format=2500w';
     this.isFromPostMan = req.body.isFromPostMan;
     this.imageService = new ImageService(req);
   }
@@ -44,7 +42,7 @@ export class AuthService {
     const image: string | undefined = await this.imageService.uploadSingleImage(
       this.req.files?.image as UploadedFile[]
     );
-    const finalImage: string = image ? image : this.defaultImageProfile;
+    const finalImage: string = image ? image : DefaultImage.PROFILE_IMAGE;
 
     const emailExists: boolean | null = await User.findOne({ email });
     if (emailExists) {

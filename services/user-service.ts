@@ -4,6 +4,7 @@ import User from '../models/User';
 import { IUser, IUserWithID } from '../interfaces/interfaces';
 import { ImageService } from './image-service';
 import { UploadedFile } from 'express-fileupload';
+import { DefaultImage } from '../interfaces/enums';
 
 export class UserService {
   private req: Request;
@@ -20,6 +21,9 @@ export class UserService {
 
   async deleteUser() {
     const user: IUser | null = await User.findByIdAndDelete(this.req.params.id);
+    if (user?.image !== DefaultImage.PROFILE_IMAGE) {
+      await this.imageService.deleteImage(user?.image as string);
+    }
     return `User with ID: ${user?._id}, name: ${user?.firstName} and last name: ${user?.lastName}, has been deleted.`;
   }
 
@@ -27,11 +31,9 @@ export class UserService {
     const { id } = this.req.params;
     const { firstName, lastName, email } = this.req.body;
 
-    const isEmailExists: boolean = (await User.findOne({ email }))
-      ? true
-      : false;
+    const user: IUser | null = await User.findOne({ email });
 
-    if (isEmailExists) {
+    if (user && user.email !== email) {
       throw new BadRequestError('E-mail is already in use!');
     }
     if (this.req.body.role) {
@@ -46,16 +48,21 @@ export class UserService {
       image = await this.imageService.uploadSingleImage(
         this.req.files?.image as UploadedFile[]
       );
+      if (user?.image !== DefaultImage.PROFILE_IMAGE) {
+        await this.imageService.deleteImage(user?.image as string);
+      }
     }
 
-    const user: IUser = await User.findByIdAndUpdate(id, {
+    await User.findByIdAndUpdate(id, {
       firstName,
       lastName,
       image,
       email,
-    }).select('-password -__v -createdAt -updatedAt');
+    });
 
-    return user;
+    return (await User.findById(id).select(
+      '-password  -__v -createdAt -updatedAt'
+    )) as IUser;
   }
 
   async getAllUsers() {
@@ -92,5 +99,27 @@ export class UserService {
     }
 
     return user;
+  }
+
+  async changePassword() {
+    const { id } = this.req.params;
+    const { oldPassword, newPassword } = this.req.body;
+
+    const user: IUser | null = await User.findById(id);
+    if (!user) {
+      throw new NotFoundError('User does not exists!');
+    } else {
+      const isMatch: boolean | undefined = await user?.comparePassword(
+        oldPassword
+      );
+      if (!isMatch) {
+        throw new BadRequestError('Wrong password!');
+      }
+
+      user.password = newPassword;
+      await user?.save();
+
+      return 'Password has been change';
+    }
   }
 }

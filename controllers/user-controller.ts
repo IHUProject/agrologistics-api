@@ -41,3 +41,9 @@ export const getSingleUser = async (req: Request, res: Response) => {
   const user: IUser = await userService.getSingleUser();
   res.status(StatusCodes.OK).json({ userInfo: user });
 };
+
+export const changePassword = async (req: Request, res: Response) => {
+  const userService: UserService = new UserService(req);
+  const result: string = await userService.changePassword();
+  res.status(StatusCodes.OK).json({ msg: result });
+};
