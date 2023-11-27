@@ -6,6 +6,7 @@ import 'express-async-errors';
 import cookieParser from 'cookie-parser';
 import { v2 as cloudinary } from 'cloudinary';
 import fileUpload from 'express-fileupload';
+import { IUserWithID } from './interfaces/interfaces';
 
 //middlewares
 import { notFoundMiddleware } from './middlewares/not-found';
@@ -17,6 +18,12 @@ import authRouter from './routes/auth-routes';
 import userRouter from './routes/user-routes';
 
 const server: express.Application = express();
+
+declare module 'express-serve-static-core' {
+  interface Request {
+    currentUser?: IUserWithID;
+  }
+}
 
 dotenv.config();
 

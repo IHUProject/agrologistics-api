@@ -12,7 +12,7 @@ export const authenticateUser = async (
   const token: string = req.signedCookies.token;
 
   if (!token) {
-    throw new ForbiddenError('Access Denied');
+    throw new ForbiddenError('Access denied, no user available!');
   }
 
   try {
@@ -26,11 +26,11 @@ export const authenticateUser = async (
       email: payload.email,
       role: payload.role,
       image: payload.image,
-    };
+    } as IUserWithID;
 
     next();
   } catch (error) {
-    throw new ForbiddenError('Access Denied');
+    throw new ForbiddenError('Access denied');
   }
 };
 

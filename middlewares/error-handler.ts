@@ -9,7 +9,7 @@ export const errorHandlerMiddleware = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction
 ) => {
-  console.log(err + '');
+  console.error(err);
 
   const customError: ICustomError = {
     statusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
@@ -36,7 +36,7 @@ export const errorHandlerMiddleware = (
   }
 
   if (err.path === '_id') {
-    customError.msg = `Wrong MongoDB ID format (ID : ${err.value})`;
+    customError.msg = `Wrong mongoDB ID format (ID : ${err.value})`;
     customError.statusCode = 404;
   }
 
