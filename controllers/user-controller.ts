@@ -17,10 +17,6 @@ export const deleteUser = (req: Request, res: Response) => {
   res.status(200).json({ asd: 'delete user' });
 };
 
-export const updateProfilePicture = (req: Request, res: Response) => {
-  res.status(200).json({ asd: 'update profile pic user' });
-};
-
 export const getUsers = (req: Request, res: Response) => {
   res.status(200).json({ asd: 'get users' });
 };

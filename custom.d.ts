@@ -1,5 +1,5 @@
 declare module 'express-serve-static-core' {
   interface Request {
-    currentUser?: IPayloadUserData;
+    currentUser?: IUserWithID;
   }
 }

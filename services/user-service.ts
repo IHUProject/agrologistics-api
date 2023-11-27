@@ -10,4 +10,10 @@ export class UserService {
   getCurrentUser() {
     return this.req.currentUser;
   }
+
+  deleteUser() {}
+
+  updateUser() {}
+
+  getAllUsers() {}
 }

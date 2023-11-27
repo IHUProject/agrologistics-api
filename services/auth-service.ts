@@ -1,19 +1,19 @@
 import { Request, Response } from 'express';
-import { BadRequestError, ConflictError, UnauthorizedError } from '../errors';
+import { BadRequestError, UnauthorizedError } from '../errors';
 import User from '../models/User';
 import { IUser, IUserWithID } from '../interfaces/interfaces';
 import { attachTokens } from '../helpers';
 import { createTokenUser } from '../helpers/create-token-user';
 import validator from 'validator';
-import fs from 'fs';
-import { cloudinaryUpload } from '../helpers/cloudinary-image-handler';
 import { UploadedFile } from 'express-fileupload';
+import { ImageService } from './image-service';
 
 export class AuthService {
   private req: Request;
   private res: Response;
   private defaultImageProfile: string;
   private isFromPostMan: boolean;
+  private imageService: ImageService;
 
   constructor(req: Request, res: Response) {
     this.req = req;
@@ -21,6 +21,7 @@ export class AuthService {
     this.defaultImageProfile =
       'https://images.squarespace-cdn.com/content/v1/51239e9ae4b0dce195cba126/1556466683303-K5V354MR8E4W0YOOT21G/Question-mark-face.jpg?format=2500w';
     this.isFromPostMan = req.body.isFromPostMan;
+    this.imageService = new ImageService(req);
   }
 
   async registerUser() {
@@ -40,7 +41,7 @@ export class AuthService {
       throw new BadRequestError('Please provide a valid email');
     }
 
-    const image: string | undefined = await this.profileImageHandler(
+    const image: string | undefined = await this.imageService.uploadSingleImage(
       this.req.files?.image as UploadedFile[]
     );
     const finalImage: string = image ? image : this.defaultImageProfile;
@@ -87,32 +88,5 @@ export class AuthService {
 
     attachTokens(this.res, tokenUser, this.isFromPostMan);
     return tokenUser;
-  }
-
-  async profileImageHandler(image: UploadedFile[]) {
-    if (!Array.isArray(image)) {
-      image = [image];
-    }
-
-    if (image.length > 1) {
-      throw new BadRequestError(
-        'You allowed to upload only 1 image for profile image'
-      );
-    }
-
-    if (this.req.files && !image) {
-      fs.rmSync('tmp', { recursive: true });
-      throw new BadRequestError('Something went wrong, try again!');
-    } else if (this.req.files && image) {
-      if (
-        image[0].mimetype !== 'image/png' &&
-        image[0].mimetype !== 'image/jpeg' &&
-        image[0].mimetype !== 'image/jpg'
-      ) {
-        fs.rmSync('tmp', { recursive: true });
-        throw new ConflictError('This file type is not valid!');
-      }
-      return (await cloudinaryUpload(image)).join('');
-    }
   }
 }
