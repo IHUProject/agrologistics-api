@@ -9,8 +9,6 @@ export const errorHandlerMiddleware = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction
 ) => {
-  console.error(err);
-
   const customError: ICustomError = {
     statusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
     msg: err.message || 'Something went wrong, please try again',
@@ -35,9 +33,18 @@ export const errorHandlerMiddleware = (
     customError.statusCode = 404;
   }
 
+  if (err.errors && err.errors.role && err.errors.role?.kind === 'enum') {
+    customError.statusCode = 400;
+    if (err.errors.role.value !== '') {
+      customError.msg = `Value '${err.errors.role.value}' is wrong!`;
+    } else {
+      customError.msg = `Not allowed empty strings`;
+    }
+  }
+
   if (err.path === '_id') {
     customError.msg = `Wrong mongoDB ID format (ID : ${err.value})`;
-    customError.statusCode = 404;
+    customError.statusCode = 400;
   }
 
   return res

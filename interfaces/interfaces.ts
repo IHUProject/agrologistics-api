@@ -6,11 +6,16 @@ export interface ICustomError {
   msg: string;
 }
 
-export interface IMessage {
+export interface IErrorProperties {
   message: string;
+  role: {
+    kind: string;
+    value: string;
+  };
 }
 
 export interface IUpdatedError {
+  kind: string;
   path: string;
   name: string;
   statusCode: number | string;
@@ -18,7 +23,7 @@ export interface IUpdatedError {
   code: string | number;
   value: string;
   keyValue: string;
-  errors: IMessage[];
+  errors: IErrorProperties;
 }
 
 export interface IUser extends mongoose.Document {
@@ -33,6 +38,26 @@ export interface IUser extends mongoose.Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
+export interface ICompany extends mongoose.Document {
+  name: string;
+  phone: number;
+  address: string;
+  owner: mongoose.Types.ObjectId;
+  afm: number;
+  logo: string;
+  since: Date;
+  latitude?: string;
+  longitude?: string;
+  employees: IUser[];
+  clients: string;
+  revenues: string;
+  expenses: string;
+  accountants: string;
+  products: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export interface IUserWithID extends IUser {
-  userId: string;
+  userId: mongoose.Types.ObjectId;
 }

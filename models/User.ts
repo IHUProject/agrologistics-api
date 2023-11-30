@@ -29,7 +29,7 @@ const userSchema: mongoose.Schema<IUser> = new Schema<IUser>(
     },
     image: {
       type: String,
-      required: true,
+      required: [true, 'Image is required.'],
     },
     role: {
       type: String,
@@ -37,7 +37,7 @@ const userSchema: mongoose.Schema<IUser> = new Schema<IUser>(
       default: Roles.UNCATEGORIZED,
     },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 userSchema.pre<IUser>('save', async function () {
@@ -54,6 +54,10 @@ userSchema.methods.comparePassword = async function (
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-const User: mongoose.Model<IUser> = mongoose.model<IUser>('User', userSchema);
+const User: mongoose.Model<IUser> = mongoose.model<IUser>(
+  'User',
+  userSchema,
+  'Users'
+);
 
 export default User;
