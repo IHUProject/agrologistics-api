@@ -33,9 +33,7 @@ export const deleteUser = async (req: Request, res: Response) => {
 export const getUsers = async (req: Request, res: Response) => {
   const userService: UserService = new UserService(req);
   const users: IUser[] = await userService.getAllUsers();
-  res
-    .status(StatusCodes.OK)
-    .json({ userInfo: users, totalCount: users.length });
+  res.status(StatusCodes.OK).json({ users, totalCount: users.length });
 };
 
 export const getSingleUser = async (req: Request, res: Response) => {

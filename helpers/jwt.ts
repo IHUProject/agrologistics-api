@@ -22,7 +22,7 @@ export const isValidToken = (token: string) =>
 export const attachTokens = (
   res: Response,
   user: IUserWithID,
-  isReqFromPostMan: boolean
+  isReqFromPostMan?: boolean
 ) => {
   const token: string = createToken(user);
 

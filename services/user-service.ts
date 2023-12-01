@@ -106,12 +106,11 @@ export class UserService {
     return 'Password has been change';
   }
 
-  async changeUserRole(newRole?: Roles) {
+  async changeUserRole(newRole?: Roles, idProp?: string) {
     const { role } = this.req.body;
+    const { id } = this.req.params;
 
-    const user: IUser | null = await User.findById(
-      this.req.currentUser?.userId
-    );
+    const user: IUser | null = await User.findById(idProp || id);
     user!.role = newRole ? newRole : role;
     await user?.save();
 

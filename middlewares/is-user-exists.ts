@@ -8,7 +8,8 @@ export const isUserExits = async (
   res: Response,
   next: NextFunction
 ) => {
-  const user: IUser | null = await User.findById(req.params.id);
+  const id: string = req.body.userId || req.params.id;
+  const user: IUser | null = await User.findById(id);
 
   if (!user) {
     throw new NotFoundError('User does not exists');

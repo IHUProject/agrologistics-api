@@ -4,7 +4,7 @@ import { StatusCodes } from 'http-status-codes';
 import { ICompany } from '../interfaces/interfaces';
 
 export const createCompany = async (req: Request, res: Response) => {
-  const companyService: CompanyService = new CompanyService(req);
+  const companyService: CompanyService = new CompanyService(req, res);
   const company: ICompany = await companyService.createCompany();
   res.status(StatusCodes.CREATED).json({ company });
 };
@@ -12,25 +12,35 @@ export const createCompany = async (req: Request, res: Response) => {
 export const getSingleCompany = async (req: Request, res: Response) => {
   const companyService: CompanyService = new CompanyService(req);
   const company: ICompany | null = await companyService.getCompany();
-  res.status(StatusCodes.CREATED).json({ company });
+  res.status(StatusCodes.OK).json({ company });
 };
 
 export const getCompanies = async (req: Request, res: Response) => {
   const companyService: CompanyService = new CompanyService(req);
   const companies: ICompany[] = await companyService.getCompanies();
-  res
-    .status(StatusCodes.CREATED)
-    .json({ companies, totalCount: companies.length });
+  res.status(StatusCodes.OK).json({ companies, totalCount: companies.length });
 };
 
 export const updateCompany = async (req: Request, res: Response) => {
   const companyService: CompanyService = new CompanyService(req);
   const company: ICompany | null = await companyService.updateCompany();
-  res.status(StatusCodes.CREATED).json({ company });
+  res.status(StatusCodes.OK).json({ company });
 };
 
 export const deleteCompany = async (req: Request, res: Response) => {
   const companyService: CompanyService = new CompanyService(req);
   const result: string = await companyService.deleteCompany();
-  res.status(StatusCodes.CREATED).json({ result });
+  res.status(StatusCodes.OK).json({ result });
+};
+
+export const addEmploy = async (req: Request, res: Response) => {
+  const companyService: CompanyService = new CompanyService(req);
+  const result: string = await companyService.addEmploy();
+  res.status(StatusCodes.OK).json({ result });
+};
+
+export const removeEmploy = async (req: Request, res: Response) => {
+  const companyService: CompanyService = new CompanyService(req);
+  const result: string = await companyService.removeEmploy();
+  res.status(StatusCodes.OK).json({ result });
 };
