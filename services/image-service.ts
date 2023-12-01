@@ -7,6 +7,7 @@ import { BadRequestError } from '../errors';
 
 export class ImageService {
   req: Request;
+
   constructor(req: Request) {
     this.req = req;
   }

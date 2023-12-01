@@ -15,8 +15,13 @@ export const errorHandlerMiddleware = (
   };
 
   if (err.name === 'ValidationError') {
+    console.log(err.errors);
+
     customError.msg = Object.values(err.errors)
-      .map((item) => item.message)
+      .map(
+        (item) =>
+          `Value ${item.value} is wrong type of (${item.valueType}) for property ${item.path}`
+      )
       .join(',');
     customError.statusCode = 400;
   }

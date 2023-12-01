@@ -20,10 +20,14 @@ export class UserService {
   }
 
   async deleteUser() {
-    const user: IUser | null = await User.findByIdAndDelete(this.req.params.id);
+    const { id } = this.req.params;
+
+    const user: IUser | null = await User.findByIdAndDelete(id);
+
     if (user?.image !== DefaultImage.PROFILE_IMAGE) {
       await this.imageService.deleteImage(user?.image as string);
     }
+
     return `User with ID: ${user?._id}, name: ${user?.firstName} and last name: ${user?.lastName}, has been deleted.`;
   }
 
