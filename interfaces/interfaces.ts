@@ -46,8 +46,8 @@ export interface ICompany extends mongoose.Document {
   afm: number;
   logo: string;
   since: Date;
-  latitude?: string;
-  longitude?: string;
+  latitude?: number;
+  longitude?: number;
   employees: IUser[];
   clients: string;
   revenues: string;

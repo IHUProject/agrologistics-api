@@ -9,8 +9,10 @@ export const createCompany = async (req: Request, res: Response) => {
   res.status(StatusCodes.CREATED).json({ company });
 };
 
-export const getSingleCompany = (req: Request, res: Response) => {
-  res.status(200).json({ msg: 'single company' });
+export const getSingleCompany = async (req: Request, res: Response) => {
+  const companyService: CompanyService = new CompanyService(req);
+  const company: ICompany | null = await companyService.getCompany();
+  res.status(StatusCodes.CREATED).json({ company });
 };
 
 export const getCompanies = async (req: Request, res: Response) => {
@@ -21,10 +23,14 @@ export const getCompanies = async (req: Request, res: Response) => {
     .json({ companies, totalCount: companies.length });
 };
 
-export const updateCompany = (req: Request, res: Response) => {
-  res.status(200).json({ msg: 'update company' });
+export const updateCompany = async (req: Request, res: Response) => {
+  const companyService: CompanyService = new CompanyService(req);
+  const company: ICompany | null = await companyService.updateCompany();
+  res.status(StatusCodes.CREATED).json({ company });
 };
 
-export const deleteCompany = (req: Request, res: Response) => {
-  res.status(200).json({ msg: 'delete company' });
+export const deleteCompany = async (req: Request, res: Response) => {
+  const companyService: CompanyService = new CompanyService(req);
+  const result: string = await companyService.deleteCompany();
+  res.status(StatusCodes.CREATED).json({ result });
 };
