@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import { authenticateUser } from '../middlewares/auth';
+import { authenticateUser, authorizePermissions } from '../middlewares/auth';
 import {
   changePassword,
   changeUserRole,
@@ -12,6 +12,8 @@ import {
 import { isUserExits } from '../middlewares/is-user-exists';
 import { verifyAccountOwnership } from '../middlewares/verify-account-ownership';
 import { checkPageQuery } from '../middlewares/check-page-query';
+import { Roles } from '../interfaces/enums';
+import { validateRoleProperty } from '../middlewares/validate-role-property';
 
 const router: Router = express.Router();
 
@@ -44,6 +46,13 @@ router.patch(
   isUserExits,
   changePassword
 );
-router.patch('/:id/change-role', authenticateUser, isUserExits, changeUserRole);
+router.patch(
+  '/:id/change-role',
+  authenticateUser,
+  isUserExits,
+  validateRoleProperty,
+  authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
+  changeUserRole
+);
 
 export default router;

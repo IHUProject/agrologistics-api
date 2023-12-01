@@ -3,6 +3,7 @@ import { IUserWithID } from '../interfaces/interfaces';
 import { isValidToken } from '../helpers';
 import { Request, Response, NextFunction } from 'express';
 import { BadRequestError } from '../errors';
+import { Roles } from '../interfaces/enums';
 
 export const authenticateUser = async (
   req: Request,
@@ -61,3 +62,12 @@ export const isNotLoggedIn = async (
 
   next();
 };
+
+export const authorizePermissions =
+  (...roles: Roles[]) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    if (!roles.includes(req.currentUser?.role as Roles)) {
+      throw new ForbiddenError('Unauthorized to access this route');
+    }
+    next();
+  };

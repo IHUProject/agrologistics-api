@@ -15,11 +15,6 @@ export const verifyCompanyOwnership = async (
     select: 'firstName lastName email image _id role',
   });
 
-  console.log(
-    company?.owner._id.toString(),
-    req.currentUser?.userId.toString()
-  );
-
   if (company?.owner._id.toString() !== req.currentUser?.userId.toString()) {
     throw new UnauthorizedError('You can perform this action!');
   }
