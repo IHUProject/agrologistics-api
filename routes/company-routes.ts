@@ -13,9 +13,9 @@ import { checkPageQuery } from '../middlewares/check-page-query';
 import { isCompanyExists } from '../middlewares/is-company-exists';
 import { Roles } from '../interfaces/enums';
 import { isUserExits } from '../middlewares/is-user-exists';
-import { isWorking } from '../middlewares/is-working';
 import { isCurrentUserOnCompany } from '../middlewares/is-current-user-on-company';
-import { isEmploy } from '../middlewares/is-employ';
+import { checkRoleIfIsOwner } from '../middlewares/check-role-if-is-owner';
+import { checkCoordinates } from '../middlewares/check-coordinates';
 
 const router: Router = express.Router();
 
@@ -30,6 +30,7 @@ router.post(
   '/create-company',
   authenticateUser,
   authorizePermissions(Roles.UNCATEGORIZED),
+  checkCoordinates,
   createCompany
 );
 router.delete(
@@ -40,29 +41,30 @@ router.delete(
 );
 router.patch(
   '/:id/update-company',
-  isCompanyExists,
   authenticateUser,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
+  isCompanyExists,
+  checkCoordinates,
   updateCompany
 );
 router.post(
   '/:id/add-employ',
   authenticateUser,
-  isCompanyExists,
-  isCurrentUserOnCompany,
-  isUserExits,
-  isWorking,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
+  isCurrentUserOnCompany,
+  isCompanyExists,
+  isUserExits,
+  checkRoleIfIsOwner,
   addEmploy
 );
 router.post(
   '/:id/remove-employ',
   authenticateUser,
+  authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
   isCompanyExists,
   isCurrentUserOnCompany,
   isUserExits,
-  isEmploy,
-  authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
+
   removeEmploy
 );
 

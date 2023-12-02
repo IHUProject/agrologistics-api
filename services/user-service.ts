@@ -1,12 +1,13 @@
 import { Request, Response } from 'express';
 import { BadRequestError } from '../errors';
 import User from '../models/User';
-import { IUser, IUserWithID } from '../interfaces/interfaces';
+import { ICompany, IUser, IUserWithID } from '../interfaces/interfaces';
 import { ImageService } from './image-service';
 import { UploadedFile } from 'express-fileupload';
 import { DefaultImage, Roles } from '../interfaces/enums';
 import { reattachTokens } from '../helpers/re-attack-tokens';
 import { ForbiddenError } from '../errors/forbidden';
+import Company from '../models/Company';
 
 export class UserService {
   private req: Request;
@@ -113,8 +114,21 @@ export class UserService {
     const { role } = this.req.body;
     const { id } = this.req.params;
 
-    if (role! === Roles.OWNER) {
-      throw new ForbiddenError('You can not make an employ owner!');
+    if (role && id && !idProp && !newRole) {
+      const company: ICompany | null = await Company.findOne({
+        $or: [{ owner: id }, { employees: { $in: [id] } }],
+      });
+
+      const companyCurrentUser: ICompany | null = await Company.findOne({
+        $or: [
+          { owner: this.req.currentUser?.userId },
+          { employees: { $in: [this.req.currentUser?.userId] } },
+        ],
+      });
+
+      if (company?._id.toString() !== companyCurrentUser?._id.toString()) {
+        throw new ForbiddenError('This employ belongs to other company!');
+      }
     }
 
     const user: IUser | null = await User.findById(idProp || id);

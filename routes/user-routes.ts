@@ -13,7 +13,7 @@ import { isUserExits } from '../middlewares/is-user-exists';
 import { verifyAccountOwnership } from '../middlewares/verify-account-ownership';
 import { checkPageQuery } from '../middlewares/check-page-query';
 import { Roles } from '../interfaces/enums';
-import { isEmployOnSameCompany } from '../middlewares/is-employ-on-same-company';
+import { checkRoleIfIsOwner } from '../middlewares/check-role-if-is-owner';
 
 const router: Router = express.Router();
 
@@ -49,9 +49,9 @@ router.patch(
 router.patch(
   '/:id/change-role',
   authenticateUser,
-  isUserExits,
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
-  isEmployOnSameCompany,
+  checkRoleIfIsOwner,
+  isUserExits,
   changeUserRole
 );
 
