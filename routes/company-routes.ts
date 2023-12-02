@@ -11,7 +11,6 @@ import {
 } from '../controllers/companies-controller';
 import { checkPageQuery } from '../middlewares/check-page-query';
 import { isCompanyExists } from '../middlewares/is-company-exists';
-import { verifyCompanyOwnership } from '../middlewares/verify-company-ownership';
 import { Roles } from '../interfaces/enums';
 import { isUserExits } from '../middlewares/is-user-exists';
 import { isWorking } from '../middlewares/is-working';
@@ -35,9 +34,8 @@ router.post(
 );
 router.delete(
   '/:id/delete-company',
-  isCompanyExists,
   authenticateUser,
-  verifyCompanyOwnership,
+  isCompanyExists,
   deleteCompany
 );
 router.patch(
