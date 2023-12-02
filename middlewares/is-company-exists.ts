@@ -13,7 +13,7 @@ export const isCompanyExists = async (
   const company: ICompany | null = await Company.findById(id);
 
   if (!company) {
-    throw new NotFoundError('No company exists with that ID');
+    throw new NotFoundError('No company found!');
   }
 
   next();

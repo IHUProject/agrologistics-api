@@ -15,8 +15,7 @@ import { verifyCompanyOwnership } from '../middlewares/verify-company-ownership'
 import { Roles } from '../interfaces/enums';
 import { isUserExits } from '../middlewares/is-user-exists';
 import { isWorking } from '../middlewares/is-working';
-import { validateRoleProperty } from '../middlewares/validate-role-property';
-import { isCurrentUserValid } from '../middlewares/is-current-user-valid';
+import { isCurrentUserOnCompany } from '../middlewares/is-current-user-on-company';
 import { isEmploy } from '../middlewares/is-employ';
 
 const router: Router = express.Router();
@@ -28,7 +27,12 @@ router.get(
   authenticateUser,
   getSingleCompany
 );
-router.post('/create-company', authenticateUser, createCompany);
+router.post(
+  '/create-company',
+  authenticateUser,
+  authorizePermissions(Roles.UNCATEGORIZED),
+  createCompany
+);
 router.delete(
   '/:id/delete-company',
   isCompanyExists,
@@ -47,18 +51,17 @@ router.post(
   '/:id/add-employ',
   authenticateUser,
   isCompanyExists,
-  isCurrentUserValid,
+  isCurrentUserOnCompany,
   isUserExits,
   isWorking,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
-  validateRoleProperty,
   addEmploy
 );
 router.post(
   '/:id/remove-employ',
   authenticateUser,
   isCompanyExists,
-  isCurrentUserValid,
+  isCurrentUserOnCompany,
   isUserExits,
   isEmploy,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),

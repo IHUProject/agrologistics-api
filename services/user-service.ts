@@ -1,10 +1,12 @@
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { BadRequestError } from '../errors';
 import User from '../models/User';
 import { IUser, IUserWithID } from '../interfaces/interfaces';
 import { ImageService } from './image-service';
 import { UploadedFile } from 'express-fileupload';
 import { DefaultImage, Roles } from '../interfaces/enums';
+import { reattachTokens } from '../helpers/re-attack-tokens';
+import { ForbiddenError } from '../errors/forbidden';
 
 export class UserService {
   private req: Request;
@@ -22,13 +24,19 @@ export class UserService {
   async deleteUser() {
     const { id } = this.req.params;
 
+    if (this.req.currentUser?.role === Roles.OWNER) {
+      throw new ForbiddenError(
+        'Please delete your company to proceed to this action!'
+      );
+    }
+
     const user: IUser | null = await User.findByIdAndDelete(id);
 
     if (user?.image !== DefaultImage.PROFILE_IMAGE) {
       await this.imageService.deleteImage(user?.image as string);
     }
 
-    return `User with ID: ${user?._id}, name: ${user?.firstName} and last name: ${user?.lastName}, has been deleted.`;
+    return `The user ${user?.firstName} ${user?.lastName}, has been deleted.`;
   }
 
   async updateUser() {
@@ -36,16 +44,6 @@ export class UserService {
     const { firstName, lastName, email } = this.req.body;
 
     const user: IUser | null = await User.findOne({ email });
-
-    if (user && user.email !== email) {
-      throw new BadRequestError('E-mail is already in use!');
-    }
-    if (this.req.body.role) {
-      throw new BadRequestError('You are not allowed to change your role!');
-    }
-    if (this.req.body.password) {
-      throw new BadRequestError('You are not allowed to change your password!');
-    }
 
     let image: string | undefined;
     if (this.req.files) {
@@ -97,22 +95,39 @@ export class UserService {
       oldPassword
     );
     if (!isMatch) {
-      throw new BadRequestError('Wrong password!');
+      throw new BadRequestError('Passwords does not match!');
     }
 
     user!.password = newPassword;
     await user?.save();
 
-    return 'Password has been change';
+    return 'Password has been change!';
   }
 
-  async changeUserRole(newRole?: Roles, idProp?: string) {
+  async changeUserRole(
+    newRole?: Roles,
+    idProp?: string,
+    res?: Response,
+    isFromPostMan?: boolean
+  ) {
     const { role } = this.req.body;
     const { id } = this.req.params;
+
+    if (role! === Roles.OWNER) {
+      throw new ForbiddenError('You can not make an employ owner!');
+    }
 
     const user: IUser | null = await User.findById(idProp || id);
     user!.role = newRole ? newRole : role;
     await user?.save();
+
+    if (res) {
+      await reattachTokens(
+        res!,
+        this.req.currentUser?.userId.toString() as string,
+        isFromPostMan ? true : false
+      );
+    }
 
     return `Role change to ${user?.role}`;
   }

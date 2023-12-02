@@ -33,8 +33,6 @@ export interface IUser extends mongoose.Document {
   password: string;
   image: string;
   role: Roles;
-  createdAt?: Date;
-  updatedAt?: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -49,15 +47,19 @@ export interface ICompany extends mongoose.Document {
   latitude?: number;
   longitude?: number;
   employees: IUser[];
-  clients: string;
-  revenues: string;
-  expenses: string;
-  accountants: string;
-  products: string;
-  createdAt?: Date;
-  updatedAt?: Date;
 }
 
 export interface IUserWithID extends IUser {
   userId: mongoose.Types.ObjectId;
+}
+
+export interface IAccountant {
+  firstName: string;
+  lastName: string;
+  email: string;
+  address: string;
+  phone: number;
+  latitude?: number;
+  longitude?: number;
+  company: mongoose.Types.ObjectId;
 }

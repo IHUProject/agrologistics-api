@@ -28,7 +28,7 @@ export const updateCompany = async (req: Request, res: Response) => {
 };
 
 export const deleteCompany = async (req: Request, res: Response) => {
-  const companyService: CompanyService = new CompanyService(req);
+  const companyService: CompanyService = new CompanyService(req, res);
   const result: string = await companyService.deleteCompany();
   res.status(StatusCodes.OK).json({ result });
 };

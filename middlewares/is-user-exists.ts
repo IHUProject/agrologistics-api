@@ -12,7 +12,7 @@ export const isUserExits = async (
   const user: IUser | null = await User.findById(id);
 
   if (!user) {
-    throw new NotFoundError('User does not exists');
+    throw new NotFoundError('User does not exists!');
   }
 
   next();

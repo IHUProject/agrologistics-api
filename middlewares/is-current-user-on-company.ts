@@ -1,9 +1,9 @@
 import { NextFunction, Response, Request } from 'express';
 import Company from '../models/Company';
 import { ICompany } from '../interfaces/interfaces';
-import { ForbiddenError } from '../errors/forbidden';
+import { UnauthorizedError } from '../errors';
 
-export const isCurrentUserValid = async (
+export const isCurrentUserOnCompany = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -21,7 +21,7 @@ export const isCurrentUserValid = async (
   }
 
   if (!members.includes(req.currentUser?.userId.toString() as string)) {
-    throw new ForbiddenError('You cant perform this action');
+    throw new UnauthorizedError('You cant perform this action!');
   }
 
   next();

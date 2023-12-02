@@ -7,8 +7,7 @@ import { UploadedFile } from 'express-fileupload';
 import { ImageService } from './image-service';
 import { DefaultImage, Roles } from '../interfaces/enums';
 import { checkCoordinates } from '../helpers/check-coordinates';
-import { BadRequestError } from '../errors';
-import { reattachTokens } from '../helpers/re-attack-tokens';
+import { ForbiddenError } from '../errors/forbidden';
 
 export class CompanyService {
   req: Request;
@@ -26,24 +25,11 @@ export class CompanyService {
   async createCompany() {
     const { name, phone, afm, address, since, latitude, longitude } =
       this.req.body;
+
     const owner: mongoose.Types.ObjectId = (this.req.currentUser as IUserWithID)
       .userId;
 
     checkCoordinates(latitude, longitude);
-
-    const userService: UserService = new UserService(this.req);
-    console.log(this.req.currentUser?.userId.toString());
-
-    await userService.changeUserRole(
-      Roles.OWNER,
-      this.req.currentUser?.userId.toString()
-    );
-
-    reattachTokens(
-      this.res!,
-      this.req.currentUser?.userId.toString() as string,
-      this.req.body.isFromPostMan
-    );
 
     const image: string | undefined = await this.imageService.uploadSingleImage(
       this.req.files?.image as UploadedFile[]
@@ -66,6 +52,15 @@ export class CompanyService {
       path: 'owner',
       select: 'firstName lastName email image _id role',
     });
+
+    const userService: UserService = new UserService(this.req);
+
+    await userService.changeUserRole(
+      Roles.OWNER,
+      this.req.currentUser?.userId.toString(),
+      this.res,
+      this.req.body.isFromPostMan
+    );
 
     return company;
   }
@@ -120,30 +115,27 @@ export class CompanyService {
       await this.imageService.deleteImage(company?.logo as string);
     }
 
-    const companies: ICompany[] = await this.getCompanies();
+    const companies: ICompany[] | null = await Company.find({
+      owner: this.req.currentUser?.userId,
+    });
 
-    const ids: string[] = companies.map((company) =>
-      company.owner._id.toString()
-    );
-
-    const ownsOtherCompanies: boolean = ids.some(
-      (id) => id === this.req.currentUser?.userId.toString()
-    );
-
-    if (!ownsOtherCompanies) {
-      this.userService.changeUserRole(
+    company?.employees.forEach(async (employ) => {
+      await this.userService.changeUserRole(
         Roles.UNCATEGORIZED,
-        this.req.currentUser?.userId.toString()
+        employ._id.toString()
       );
+    });
 
-      reattachTokens(
-        this.res!,
-        this.req.currentUser?.userId.toString() as string,
+    if (!companies.length) {
+      await this.userService.changeUserRole(
+        Roles.UNCATEGORIZED,
+        this.req.currentUser?.userId.toString(),
+        this.res,
         this.req.body.isFromPostMan
       );
     }
 
-    return `Company with ID: ${company?._id}, name: ${company?.name} and AFM: ${company?.afm}, has been deleted.`;
+    return `The ${company?.name} company, has been deleted.`;
   }
 
   async getCompany() {
@@ -182,16 +174,20 @@ export class CompanyService {
     const { userId, role } = this.req.body;
     const { id } = this.req.params;
 
+    if (role! === Roles.OWNER) {
+      throw new ForbiddenError('You can not make an employ owner!');
+    }
+
     const company: ICompany | null = await Company.findById(id);
 
     company?.employees.push(userId);
     await company?.save();
 
-    this.userService.changeUserRole(role || Roles.EMPLOY, userId);
+    await this.userService.changeUserRole(role || Roles.EMPLOY, userId);
 
-    return `A user with ID: ${userId} added to the company (${
-      company?.name
-    } with role: ${role || Roles.EMPLOY})`;
+    return `Employ has been added to the ${company?.name} company with role: ${
+      role || Roles.EMPLOY
+    }`;
   }
 
   async removeEmploy() {
@@ -205,12 +201,10 @@ export class CompanyService {
     if (employeeIndex! > -1) {
       company?.employees.splice(employeeIndex!, 1);
       await company?.save();
-    } else {
-      throw new BadRequestError('This user does not exist to this company!');
     }
 
-    this.userService.changeUserRole(Roles.UNCATEGORIZED, userId);
+    await this.userService.changeUserRole(Roles.UNCATEGORIZED, userId);
 
-    return `Employ with ID:${userId} has been removed!`;
+    return `Employ has been removed from the ${company?.name} company!`;
   }
 }
