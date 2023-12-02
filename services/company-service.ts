@@ -6,9 +6,9 @@ import mongoose from 'mongoose';
 import { UploadedFile } from 'express-fileupload';
 import { ImageService } from './image-service';
 import { DefaultImage, Roles } from '../interfaces/enums';
-import { checkCoordinates } from '../helpers/check-coordinates';
-import { ForbiddenError } from '../errors/forbidden';
 import { UnauthorizedError } from '../errors';
+import { isEmployToThisCompany } from '../helpers/is-employ-to-this-company';
+import { isWorkingElsewhere } from '../helpers/is-working-elsewhere';
 
 export class CompanyService {
   req: Request;
@@ -29,8 +29,6 @@ export class CompanyService {
 
     const owner: mongoose.Types.ObjectId = (this.req.currentUser as IUserWithID)
       .userId;
-
-    checkCoordinates(latitude, longitude);
 
     const image: string | undefined = await this.imageService.uploadSingleImage(
       this.req.files?.image as UploadedFile[]
@@ -73,8 +71,6 @@ export class CompanyService {
 
     const company: ICompany | null = await Company.findById(id);
 
-    checkCoordinates(latitude, longitude);
-
     let image: string | undefined;
     if (this.req.files) {
       image = await this.imageService.uploadSingleImage(
@@ -111,10 +107,10 @@ export class CompanyService {
     const { id } = this.req.params;
 
     const company: ICompany | null = await Company.findById(id);
+    const isCurrentUserTheOwner: boolean =
+      company?.owner._id.toString() === this.req.currentUser?.userId.toString();
 
-    if (
-      company?.owner._id.toString() !== this.req.currentUser?.userId.toString()
-    ) {
+    if (!isCurrentUserTheOwner) {
       throw new UnauthorizedError(
         'You are not authorized to perform this action!'
       );
@@ -179,12 +175,9 @@ export class CompanyService {
     const { userId, role } = this.req.body;
     const { id } = this.req.params;
 
-    if (role! === Roles.OWNER) {
-      throw new ForbiddenError('You can not make an employ owner!');
-    }
+    await isWorkingElsewhere(userId);
 
     const company: ICompany | null = await Company.findById(id);
-
     company?.employees.push(userId);
     await company?.save();
 
@@ -198,6 +191,8 @@ export class CompanyService {
   async removeEmploy() {
     const { userId } = this.req.body;
     const { id } = this.req.params;
+
+    await isEmployToThisCompany(this.req);
 
     const company: ICompany | null = await Company.findById(id);
     const employeeIndex: number | undefined =
