@@ -8,6 +8,7 @@ import { ImageService } from './image-service';
 import { DefaultImage, Roles } from '../interfaces/enums';
 import { checkCoordinates } from '../helpers/check-coordinates';
 import { ForbiddenError } from '../errors/forbidden';
+import { UnauthorizedError } from '../errors';
 
 export class CompanyService {
   req: Request;
@@ -109,15 +110,21 @@ export class CompanyService {
   async deleteCompany() {
     const { id } = this.req.params;
 
-    const company: ICompany | null = await Company.findByIdAndDelete(id);
+    const company: ICompany | null = await Company.findById(id);
+
+    if (
+      company?.owner._id.toString() !== this.req.currentUser?.userId.toString()
+    ) {
+      throw new UnauthorizedError(
+        'You are not authorized to perform this action!'
+      );
+    }
+
+    await Company.findByIdAndDelete(id);
 
     if (company?.logo !== DefaultImage.LOGO) {
       await this.imageService.deleteImage(company?.logo as string);
     }
-
-    const companies: ICompany[] | null = await Company.find({
-      owner: this.req.currentUser?.userId,
-    });
 
     company?.employees.forEach(async (employ) => {
       await this.userService.changeUserRole(
@@ -126,14 +133,12 @@ export class CompanyService {
       );
     });
 
-    if (!companies.length) {
-      await this.userService.changeUserRole(
-        Roles.UNCATEGORIZED,
-        this.req.currentUser?.userId.toString(),
-        this.res,
-        this.req.body.isFromPostMan
-      );
-    }
+    await this.userService.changeUserRole(
+      Roles.UNCATEGORIZED,
+      this.req.currentUser?.userId.toString(),
+      this.res,
+      this.req.body.isFromPostMan
+    );
 
     return `The ${company?.name} company, has been deleted.`;
   }
