@@ -3,21 +3,16 @@ import { ICompany } from '../interfaces/interfaces';
 
 const companySchema: mongoose.Schema<ICompany> = new Schema<ICompany>(
   {
-    name: { type: String, required: [true, 'Name is required'] },
-    phone: { type: Number },
+    name: { type: String, required: true },
+    phone: { type: Number, unique: true },
     address: { type: String },
     owner: { type: Schema.Types.ObjectId, ref: 'User' },
-    afm: { type: Number, required: [true, 'AFM is required'] },
+    afm: { type: Number, unique: true, required: true },
     logo: String,
     since: { type: Date },
     latitude: Number,
     longitude: Number,
     employees: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-    clients: String,
-    revenues: String,
-    expenses: String,
-    accountants: String,
-    products: String,
   },
   {
     timestamps: true,

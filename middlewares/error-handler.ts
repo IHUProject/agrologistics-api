@@ -15,21 +15,19 @@ export const errorHandlerMiddleware = (
   };
 
   if (err.name === 'ValidationError') {
-    console.log(err.errors);
-
     customError.msg = Object.values(err.errors)
       .map(
         (item) =>
-          `Value ${item.value} is wrong type of (${item.valueType}) for property ${item.path}`
+          `Value ${item.value} is wrong type (${item.valueType}) for property ${item.path}`
       )
       .join(',');
     customError.statusCode = 400;
   }
 
   if (err.code && err.code === 11000) {
-    customError.msg = `There is already a field with the same value as this field you provide ---> ${Object.keys(
+    customError.msg = `There is already a field with the same value as this field you provide (${Object.keys(
       err.keyValue
-    )}, please choose something else`;
+    )}), please choose something else`;
     customError.statusCode = 400;
   }
 

@@ -25,15 +25,6 @@ export class AuthService {
   async registerUser() {
     const { firstName, lastName, email, password } = this.req.body;
 
-    const isMissingRequiredData: boolean =
-      !firstName || !lastName || !email || !password;
-
-    if (isMissingRequiredData) {
-      throw new BadRequestError(
-        'Password, e-mail, first-name and last-name required.'
-      );
-    }
-
     const isValidEmail: boolean = validator.isEmail(email);
     if (!isValidEmail) {
       throw new BadRequestError('Please provide a valid email');
@@ -43,11 +34,6 @@ export class AuthService {
       this.req.files?.image as UploadedFile[]
     );
     const finalImage: string = image ? image : DefaultImage.PROFILE_IMAGE;
-
-    const emailExists: boolean | null = await User.findOne({ email });
-    if (emailExists) {
-      throw new BadRequestError('The e-mail is already in use.');
-    }
 
     const user: IUser = await User.create({
       firstName,
@@ -64,13 +50,6 @@ export class AuthService {
   }
   async loginUser() {
     const { email, password } = this.req.body;
-
-    if (!email) {
-      throw new BadRequestError('Please provide e-mail.');
-    }
-    if (!password) {
-      throw new BadRequestError('Please provide password.');
-    }
 
     const user: IUser | null = await User.findOne({ email });
     if (!user) {

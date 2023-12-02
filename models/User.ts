@@ -7,29 +7,24 @@ const userSchema: mongoose.Schema<IUser> = new Schema<IUser>(
   {
     firstName: {
       type: String,
-      required: [true, 'First name is required.'],
-      minlength: 2,
-      maxlength: 50,
+      required: true,
     },
     lastName: {
       type: String,
-      required: [true, 'Last name is required.'],
-      minlength: 2,
-      maxlength: 50,
+      required: true,
     },
     email: {
       type: String,
       unique: true,
-      required: [true, 'E-mail is required.'],
+      required: true,
     },
     password: {
       type: String,
-      required: [true, 'Password is required.'],
+      required: true,
       minlength: 5,
     },
     image: {
       type: String,
-      required: [true, 'Image is required.'],
     },
     role: {
       type: String,
