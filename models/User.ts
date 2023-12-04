@@ -29,7 +29,7 @@ const userSchema: mongoose.Schema<IUser> = new Schema<IUser>(
       enum: Object.values(Roles),
       default: Roles.UNCATEGORIZED,
     },
-    company: { type: Schema.Types.ObjectId, ref: 'Company' },
+    company: { type: Schema.Types.ObjectId, ref: 'Company', default: null },
   },
   { timestamps: true, versionKey: false }
 );

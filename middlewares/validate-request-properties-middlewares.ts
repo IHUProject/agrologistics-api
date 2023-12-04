@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
 import { BadRequestError } from '../errors';
-import { ForbiddenError } from '../errors/forbidden';
 import { Roles } from '../interfaces/enums';
 
 export const checkCoordinates = (
@@ -39,14 +38,16 @@ export const checkPageQuery = (
   next();
 };
 
-export const checkRoleIfIsOwner = async (
+export const validateRoleProperty = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   const { role } = req.body;
-  if (role! === Roles.OWNER) {
-    throw new ForbiddenError('You can not make an employ owner!');
+  if (role) {
+    if (role === Roles.OWNER || !Object.values(Roles).includes(role)) {
+      throw new BadRequestError('Invalid role provided!');
+    }
   }
   next();
 };

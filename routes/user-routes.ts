@@ -4,23 +4,29 @@ import {
   authorizePermissions,
 } from '../middlewares/auth-middlewares';
 import {
+  addToCompany,
   changePassword,
   changeUserRole,
   deleteUser,
   getCurrentUser,
   getSingleUser,
   getUsers,
+  removeFromCompany,
   updateUser,
 } from '../controllers/user-controller';
 import {
   checkPageQuery,
-  checkRoleIfIsOwner,
+  validateRoleProperty,
 } from '../middlewares/validate-request-properties-middlewares';
 import {
   isUserExits,
   verifyAccountOwnership,
 } from '../middlewares/user-middlewares';
 import { Roles } from '../interfaces/enums';
+import {
+  isCompanyExists,
+  isUserBelongsToCompany,
+} from '../middlewares/company-middlewares';
 
 const router: Router = express.Router();
 
@@ -54,9 +60,26 @@ router.patch(
   '/:userId/change-role',
   authenticateUser,
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
-  checkRoleIfIsOwner,
+  validateRoleProperty,
   isUserExits,
   changeUserRole
+);
+router.patch(
+  '/:userId/add-user-to-company',
+  authenticateUser,
+  authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
+  isUserExits,
+  isCompanyExists,
+  isUserBelongsToCompany,
+  validateRoleProperty,
+  addToCompany
+);
+router.patch(
+  '/:userId/remove-user-from-company',
+  authenticateUser,
+  authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
+  isUserExits,
+  removeFromCompany
 );
 
 export default router;

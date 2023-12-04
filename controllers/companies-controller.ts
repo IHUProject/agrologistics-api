@@ -1,7 +1,7 @@
 import { Response, Request } from 'express';
 import { CompanyService } from '../services/company-service';
 import { StatusCodes } from 'http-status-codes';
-import { ICompany } from '../interfaces/interfaces';
+import { ICompany, IUser } from '../interfaces/interfaces';
 
 export const createCompany = async (req: Request, res: Response) => {
   const companyService: CompanyService = new CompanyService(req, res);
@@ -31,4 +31,10 @@ export const deleteCompany = async (req: Request, res: Response) => {
   const companyService: CompanyService = new CompanyService(req, res);
   const result: string = await companyService.deleteCompany();
   res.status(StatusCodes.OK).json({ result });
+};
+
+export const getEmployees = async (req: Request, res: Response) => {
+  const companyService: CompanyService = new CompanyService(req, res);
+  const employees: IUser[] = await companyService.getEmployees();
+  res.status(StatusCodes.OK).json({ employees, total: employees.length });
 };

@@ -23,7 +23,7 @@ export const deleteUser = async (req: Request, res: Response) => {
 
 export const getUsers = async (req: Request, res: Response) => {
   const userService: UserService = new UserService(req, res);
-  const users: IUser[] = await userService.getAllUsers();
+  const users: IUser[] = await userService.getUsers();
   res.status(StatusCodes.OK).json({ users, totalCount: users.length });
 };
 
@@ -43,4 +43,16 @@ export const changeUserRole = async (req: Request, res: Response) => {
   const userService: UserService = new UserService(req, res);
   const result: string = await userService.changeUserRole();
   res.status(StatusCodes.OK).json({ msg: result });
+};
+
+export const addToCompany = async (req: Request, res: Response) => {
+  const userService: UserService = new UserService(req, res);
+  const user: IUser = await userService.addToCompany();
+  res.status(StatusCodes.OK).json({ user });
+};
+
+export const removeFromCompany = async (req: Request, res: Response) => {
+  const userService: UserService = new UserService(req, res);
+  const result: string = await userService.removeFromCompany();
+  res.status(StatusCodes.OK).json({ result });
 };

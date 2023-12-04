@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { ICompany, IUserWithID } from '../interfaces/interfaces';
+import { ICompany, IUser, IUserWithID } from '../interfaces/interfaces';
 import Company from '../models/Company';
 import { UserService } from './user-service';
-import mongoose from 'mongoose';
+import mongoose, { FilterQuery } from 'mongoose';
 import { UploadedFile } from 'express-fileupload';
 import { ImageService } from './image-service';
 import { DefaultImage, Roles } from '../interfaces/enums';
@@ -152,6 +152,17 @@ export class CompanyService {
       await this.imageService.deleteImages([company.logo as string]);
     }
 
+    const employees: IUser[] = (await User.find({
+      company: companyId,
+    })) as IUser[];
+
+    employees.forEach(async (emp) => {
+      await this.userService.changeUserRole(
+        Roles.UNCATEGORIZED,
+        emp._id.toString()
+      );
+    });
+
     await this.userService.changeUserRole(
       Roles.UNCATEGORIZED,
       userId.toString(),
@@ -172,14 +183,38 @@ export class CompanyService {
   }
 
   async getCompanies() {
+    const { page, searchString } = this.req.query;
+
+    const limit: number = 10;
+    const skip: number = (Number(page) - 1) * limit;
+
+    let query: FilterQuery<IUser> = {};
+
+    if (typeof searchString === 'string' && searchString.trim() !== '') {
+      const searchRegex: RegExp = new RegExp(searchString.trim(), 'i');
+      query = {
+        $or: [{ name: { $regex: searchRegex } }],
+      };
+    }
+
+    return (await Company.find(query).skip(skip).limit(limit).populate({
+      path: 'owner',
+      select: 'firstName lastName email image _id role',
+    })) as ICompany[];
+  }
+
+  async getEmployees() {
+    const { companyId } = this.req.params;
     const { page } = this.req.query;
 
     const limit: number = 10;
     const skip: number = (Number(page) - 1) * limit;
 
-    return (await Company.find({}).skip(skip).limit(limit).populate({
-      path: 'owner',
-      select: 'firstName lastName email image _id role',
-    })) as ICompany[];
+    return (await User.find({
+      company: companyId,
+    })
+      .skip(skip)
+      .limit(limit)
+      .select('-password -createdAt -updatedAt -company')) as IUser[];
   }
 }
