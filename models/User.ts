@@ -23,14 +23,13 @@ const userSchema: mongoose.Schema<IUser> = new Schema<IUser>(
       required: true,
       minlength: 5,
     },
-    image: {
-      type: String,
-    },
+    image: String,
     role: {
       type: String,
       enum: Object.values(Roles),
       default: Roles.UNCATEGORIZED,
     },
+    company: { type: Schema.Types.ObjectId, ref: 'Company' },
   },
   { timestamps: true, versionKey: false }
 );

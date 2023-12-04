@@ -6,7 +6,6 @@ import 'express-async-errors';
 import cookieParser from 'cookie-parser';
 import { v2 as cloudinary } from 'cloudinary';
 import fileUpload from 'express-fileupload';
-import { IUserWithID } from './interfaces/interfaces';
 
 //middlewares
 import { notFoundMiddleware } from './middlewares/not-found';
@@ -17,14 +16,18 @@ import { errorHandlerMiddleware } from './middlewares/error-handler';
 import authRouter from './routes/auth-routes';
 import userRouter from './routes/user-routes';
 import companyRouter from './routes/company-routes';
+import { IUserWithID } from './interfaces/interfaces';
 
-const server: express.Application = express();
-
-declare module 'express-serve-static-core' {
-  interface Request {
-    currentUser?: IUserWithID;
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Express {
+    interface Request {
+      currentUser?: IUserWithID;
+    }
   }
 }
+
+const server: express.Application = express();
 
 dotenv.config();
 

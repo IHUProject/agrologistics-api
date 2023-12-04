@@ -11,7 +11,7 @@ export const createCompany = async (req: Request, res: Response) => {
 
 export const getSingleCompany = async (req: Request, res: Response) => {
   const companyService: CompanyService = new CompanyService(req);
-  const company: ICompany | null = await companyService.getCompany();
+  const company: ICompany = await companyService.getCompany();
   res.status(StatusCodes.OK).json({ company });
 };
 
@@ -30,17 +30,5 @@ export const updateCompany = async (req: Request, res: Response) => {
 export const deleteCompany = async (req: Request, res: Response) => {
   const companyService: CompanyService = new CompanyService(req, res);
   const result: string = await companyService.deleteCompany();
-  res.status(StatusCodes.OK).json({ result });
-};
-
-export const addEmploy = async (req: Request, res: Response) => {
-  const companyService: CompanyService = new CompanyService(req);
-  const result: string = await companyService.addEmploy();
-  res.status(StatusCodes.OK).json({ result });
-};
-
-export const removeEmploy = async (req: Request, res: Response) => {
-  const companyService: CompanyService = new CompanyService(req);
-  const result: string = await companyService.removeEmploy();
   res.status(StatusCodes.OK).json({ result });
 };

@@ -1,6 +1,6 @@
 import express, { Router } from 'express';
 import { login, logout, register } from '../controllers/auth-controller';
-import { isLoggedIn, isNotLoggedIn } from '../middlewares/auth';
+import { isLoggedIn, isNotLoggedIn } from '../middlewares/auth-middlewares';
 
 const router: Router = express.Router();
 

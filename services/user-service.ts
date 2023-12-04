@@ -1,20 +1,21 @@
 import { Request, Response } from 'express';
 import { BadRequestError } from '../errors';
 import User from '../models/User';
-import { ICompany, IUser, IUserWithID } from '../interfaces/interfaces';
+import { IUser, IUserWithID } from '../interfaces/interfaces';
 import { ImageService } from './image-service';
 import { UploadedFile } from 'express-fileupload';
 import { DefaultImage, Roles } from '../interfaces/enums';
 import { reattachTokens } from '../helpers/re-attack-tokens';
 import { ForbiddenError } from '../errors/forbidden';
-import Company from '../models/Company';
 
 export class UserService {
   private req: Request;
+  private res: Response;
   private imageService: ImageService;
 
-  constructor(req: Request) {
+  constructor(req: Request, res: Response) {
     this.req = req;
+    this.res = res;
     this.imageService = new ImageService(req);
   }
 
@@ -23,48 +24,68 @@ export class UserService {
   }
 
   async deleteUser() {
-    const { id } = this.req.params;
+    const { userId } = this.req.params;
+    const { role } = this.req.currentUser as IUserWithID;
 
-    if (this.req.currentUser?.role === Roles.OWNER) {
+    if (role === Roles.OWNER) {
       throw new ForbiddenError(
         'Please delete your company to proceed to this action!'
       );
     }
 
-    const user: IUser | null = await User.findByIdAndDelete(id);
+    const user: IUser = (await User.findByIdAndDelete(userId)) as IUser;
 
-    if (user?.image !== DefaultImage.PROFILE_IMAGE) {
-      await this.imageService.deleteImage(user?.image as string);
+    if (user.image !== DefaultImage.PROFILE_IMAGE) {
+      await this.imageService.deleteImages([user.image as string]);
     }
 
-    return `The user ${user?.firstName} ${user?.lastName}, has been deleted.`;
+    this.res.cookie('token', 'logout', {
+      httpOnly: true,
+      expires: new Date(Date.now() + 1000),
+      secure: true,
+      sameSite: 'none',
+      signed: true,
+    });
+
+    return `The user ${user.firstName} ${user.lastName}, has been deleted.`;
   }
 
   async updateUser() {
-    const { id } = this.req.params;
-    const { firstName, lastName, email } = this.req.body;
+    const { userId } = this.req.params;
+    const { firstName, lastName, email, postmanRequest } = this.req.body;
+    const { currentUser } = this.req;
+    const { files } = this.req;
 
     const user: IUser | null = await User.findOne({ email });
-
-    let image: string | undefined;
-    if (this.req.files) {
-      image = await this.imageService.uploadSingleImage(
-        this.req.files?.image as UploadedFile[]
-      );
-      if (user?.image !== DefaultImage.PROFILE_IMAGE) {
-        await this.imageService.deleteImage(user?.image as string);
-      }
+    if (user && user.email !== currentUser?.email) {
+      throw new BadRequestError('Email is already in use');
     }
 
-    await User.findByIdAndUpdate(id, {
+    let image: string | undefined;
+    if (files) {
+      if (currentUser?.image !== DefaultImage.PROFILE_IMAGE) {
+        await this.imageService.deleteImages([currentUser?.image as string]);
+      }
+      image = await this.imageService.handleSingleImage(
+        files?.image as UploadedFile[]
+      );
+    }
+
+    await User.findByIdAndUpdate(userId, {
       firstName,
       lastName,
       image,
       email,
     });
 
-    return (await User.findById(id).select(
-      '-password -createdAt -updatedAt'
+    await reattachTokens(
+      this.res!,
+      currentUser?.userId.toString() as string,
+      postmanRequest || false
+    );
+
+    return (await User.findById(userId).select(
+      '-createAt -updateAt -password'
     )) as IUser;
   }
 
@@ -74,23 +95,25 @@ export class UserService {
     const limit: number = 10;
     const skip: number = (Number(page) - 1) * limit;
 
-    return await User.find({})
+    return (await User.find({})
       .skip(skip)
       .limit(limit)
-      .select('-password -createdAt -updatedAt');
+      .select('-password -createdAt -updatedAt')) as IUser[];
   }
 
   async getSingleUser(): Promise<IUser> {
-    const { id } = this.req.params;
+    const { userId } = this.req.params;
 
-    return await User.findById(id).select('-password -createdAt -updatedAt');
+    return (await User.findById(userId).select(
+      '-password -createdAt -updatedAt'
+    )) as IUser;
   }
 
   async changePassword() {
-    const { id } = this.req.params;
+    const { userId } = this.req.params;
     const { oldPassword, newPassword } = this.req.body;
 
-    const user: IUser | null = await User.findById(id);
+    const user: IUser = (await User.findById(userId)) as IUser;
 
     const isMatch: boolean | undefined = await user?.comparePassword(
       oldPassword
@@ -99,47 +122,30 @@ export class UserService {
       throw new BadRequestError('Passwords does not match!');
     }
 
-    user!.password = newPassword;
-    await user?.save();
+    user.password = newPassword;
+    await user.save();
 
     return 'Password has been change!';
   }
 
   async changeUserRole(
     newRole?: Roles,
-    idProp?: string,
+    id?: string,
     res?: Response,
-    isFromPostMan?: boolean
+    postmanRequest?: boolean
   ) {
     const { role } = this.req.body;
-    const { id } = this.req.params;
+    const { userId } = this.req.params;
 
-    if (role && id && !idProp && !newRole) {
-      const company: ICompany | null = await Company.findOne({
-        $or: [{ owner: id }, { employees: { $in: [id] } }],
-      });
-
-      const companyCurrentUser: ICompany | null = await Company.findOne({
-        $or: [
-          { owner: this.req.currentUser?.userId },
-          { employees: { $in: [this.req.currentUser?.userId] } },
-        ],
-      });
-
-      if (company?._id.toString() !== companyCurrentUser?._id.toString()) {
-        throw new ForbiddenError('This employ belongs to other company!');
-      }
-    }
-
-    const user: IUser | null = await User.findById(idProp || id);
-    user!.role = newRole ? newRole : role;
-    await user?.save();
+    const user: IUser | null = (await User.findById(id || userId)) as IUser;
+    user.role = newRole ? newRole : role;
+    await user.save();
 
     if (res) {
       await reattachTokens(
         res!,
         this.req.currentUser?.userId.toString() as string,
-        isFromPostMan ? true : false
+        postmanRequest || false
       );
     }
 

@@ -3,16 +3,12 @@ import { IAccountant } from '../interfaces/interfaces';
 
 const accountSchema: mongoose.Schema<IAccountant> = new Schema<IAccountant>(
   {
-    firstName: { type: String },
-    lastName: { type: String },
-    phone: { type: Number, unique: true },
-    email: {
-      type: String,
-      unique: true,
-      required: true,
-    },
-    address: { type: String },
-    company: { type: Schema.Types.ObjectId, ref: 'User' },
+    firstName: String,
+    lastName: String,
+    phone: Number,
+    email: { type: String, required: true },
+    address: String,
+    company: { type: Schema.Types.ObjectId, ref: 'Company' },
     latitude: Number,
     longitude: Number,
   },
