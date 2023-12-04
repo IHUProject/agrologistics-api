@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { BadRequestError } from '../errors';
+import { BadRequestError, UnauthorizedError } from '../errors';
 import User from '../models/User';
 import { IUser, IUserWithID } from '../interfaces/interfaces';
 import { ImageService } from './image-service';
@@ -7,6 +7,7 @@ import { UploadedFile } from 'express-fileupload';
 import { DefaultImage, Roles } from '../interfaces/enums';
 import { reattachTokens } from '../helpers/re-attack-tokens';
 import { ForbiddenError } from '../errors/forbidden';
+import { FilterQuery } from 'mongoose';
 
 export class UserService {
   private req: Request;
@@ -89,13 +90,25 @@ export class UserService {
     )) as IUser;
   }
 
-  async getAllUsers() {
-    const { page } = this.req.query;
+  async getUsers() {
+    const { page, searchString } = this.req.query;
 
     const limit: number = 10;
     const skip: number = (Number(page) - 1) * limit;
 
-    return (await User.find({})
+    let query: FilterQuery<IUser> = {};
+
+    if (typeof searchString === 'string' && searchString.trim() !== '') {
+      const searchRegex: RegExp = new RegExp(searchString.trim(), 'i');
+      query = {
+        $or: [
+          { firstName: { $regex: searchRegex } },
+          { lastName: { $regex: searchRegex } },
+        ],
+      };
+    }
+
+    return (await User.find(query)
       .skip(skip)
       .limit(limit)
       .select('-password -createdAt -updatedAt')) as IUser[];
@@ -138,6 +151,19 @@ export class UserService {
     const { userId } = this.req.params;
 
     const user: IUser | null = (await User.findById(id || userId)) as IUser;
+    if (role && userId && !id && !newRole) {
+      if (
+        user.company.toString() !== this.req.currentUser?.company.toString()
+      ) {
+        throw new UnauthorizedError("You can not change this user's role");
+      }
+      if (userId && !role) {
+        {
+          throw new BadRequestError('Provide a role!');
+        }
+      }
+    }
+
     user.role = newRole ? newRole : role;
     await user.save();
 
@@ -150,5 +176,44 @@ export class UserService {
     }
 
     return `Role change to ${user?.role}`;
+  }
+
+  async addToCompany() {
+    const { userId } = this.req.params;
+    const { companyId, role } = this.req.body;
+
+    const user: IUser = (await User.findById(userId)) as IUser;
+
+    if (user.company) {
+      throw new BadRequestError('User working elsewhere!');
+    }
+
+    user.role = role || Roles.EMPLOY;
+    user.company = companyId;
+    await user.save();
+
+    return (await User.findById(userId).select(
+      '-password -createdAt -updatedAt'
+    )) as IUser;
+  }
+
+  async removeFromCompany() {
+    const { userId } = this.req.params;
+    const { company } = this.req.currentUser as IUserWithID;
+
+    const user: IUser = (await User.findById(userId)) as IUser;
+    if (!user.company) {
+      throw new BadRequestError('User does not work anywhere!');
+    }
+    if (user.company.toString() !== company.toString()) {
+      throw new ForbiddenError('You don not belong at the same company');
+    }
+
+    await this.changeUserRole(Roles.UNCATEGORIZED, userId);
+    await User.findByIdAndUpdate(userId, {
+      company: null,
+    });
+
+    return 'User has been removed for the company!';
   }
 }

@@ -7,6 +7,7 @@ import {
   createCompany,
   deleteCompany,
   getCompanies,
+  getEmployees,
   getSingleCompany,
   updateCompany,
 } from '../controllers/companies-controller';
@@ -50,6 +51,13 @@ router.patch(
   checkCoordinates,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
   updateCompany
+);
+router.get(
+  '/:companyId/get-employees',
+  authenticateUser,
+  checkPageQuery,
+  isCompanyExists,
+  getEmployees
 );
 
 export default router;
