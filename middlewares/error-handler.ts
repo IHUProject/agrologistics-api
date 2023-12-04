@@ -25,14 +25,14 @@ export const errorHandlerMiddleware = (
   }
 
   if (err.code && err.code === 11000) {
-    customError.msg = `There is already a field with the same value as this field you provide (${Object.keys(
+    customError.msg = `${Object.keys(
       err.keyValue
-    )}), please choose something else`;
+    )} is already in use, please choose something else`;
     customError.statusCode = 400;
   }
 
   if (err.name === 'CastError') {
-    customError.msg = `No results for : ${err.value} (Cast Error)`;
+    customError.msg = `Error for value: ${err.value} (Cast Error)`;
     customError.statusCode = 404;
   }
 
@@ -49,6 +49,8 @@ export const errorHandlerMiddleware = (
     customError.msg = `Wrong mongoDB ID format (ID : ${err.value})`;
     customError.statusCode = 400;
   }
+
+  console.log(err);
 
   return res
     .status(Number(customError.statusCode))

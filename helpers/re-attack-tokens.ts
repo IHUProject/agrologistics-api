@@ -7,12 +7,12 @@ import User from '../models/User';
 export const reattachTokens = async (
   res: Response,
   id: string,
-  isFromPostMan: boolean
+  postmanRequest: boolean
 ) => {
   const updatedUser: IUser | null = await User.findById(id);
 
   if (updatedUser) {
     const tokenUser: IUserWithID = createTokenUser(updatedUser);
-    attachTokens(res, tokenUser, isFromPostMan);
+    attachTokens(res, tokenUser, postmanRequest);
   }
 };

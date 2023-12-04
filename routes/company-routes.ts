@@ -1,71 +1,55 @@
 import express, { Router } from 'express';
-import { authenticateUser, authorizePermissions } from '../middlewares/auth';
 import {
-  addEmploy,
+  authenticateUser,
+  authorizePermissions,
+} from '../middlewares/auth-middlewares';
+import {
   createCompany,
   deleteCompany,
   getCompanies,
   getSingleCompany,
-  removeEmploy,
   updateCompany,
 } from '../controllers/companies-controller';
-import { checkPageQuery } from '../middlewares/check-page-query';
-import { isCompanyExists } from '../middlewares/is-company-exists';
 import { Roles } from '../interfaces/enums';
-import { isUserExits } from '../middlewares/is-user-exists';
-import { isCurrentUserOnCompany } from '../middlewares/is-current-user-on-company';
-import { checkRoleIfIsOwner } from '../middlewares/check-role-if-is-owner';
-import { checkCoordinates } from '../middlewares/check-coordinates';
+import {
+  checkCoordinates,
+  checkPageQuery,
+} from '../middlewares/validate-request-properties-middlewares';
+import {
+  isCompanyExists,
+  isUserBelongsToCompany,
+} from '../middlewares/company-middlewares';
 
 const router: Router = express.Router();
 
-router.get('/get-companies', authenticateUser, checkPageQuery, getCompanies);
+router.get('/get-companies', checkPageQuery, authenticateUser, getCompanies);
 router.get(
-  '/:id/get-single-company',
+  '/:companyId/get-single-company',
   isCompanyExists,
   authenticateUser,
   getSingleCompany
 );
 router.post(
   '/create-company',
+  checkCoordinates,
   authenticateUser,
   authorizePermissions(Roles.UNCATEGORIZED),
-  checkCoordinates,
   createCompany
 );
 router.delete(
-  '/:id/delete-company',
-  authenticateUser,
+  '/:companyId/delete-company',
   isCompanyExists,
+  authenticateUser,
   deleteCompany
 );
 router.patch(
-  '/:id/update-company',
+  '/:companyId/update-company',
   authenticateUser,
-  authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
   isCompanyExists,
+  isUserBelongsToCompany,
   checkCoordinates,
+  authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
   updateCompany
-);
-router.post(
-  '/:id/add-employ',
-  authenticateUser,
-  authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
-  isCurrentUserOnCompany,
-  isCompanyExists,
-  isUserExits,
-  checkRoleIfIsOwner,
-  addEmploy
-);
-router.post(
-  '/:id/remove-employ',
-  authenticateUser,
-  authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
-  isCompanyExists,
-  isCurrentUserOnCompany,
-  isUserExits,
-
-  removeEmploy
 );
 
 export default router;

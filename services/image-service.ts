@@ -3,7 +3,8 @@ import fs from 'fs';
 import { v2 as Cloudinary, UploadApiResponse } from 'cloudinary';
 import { ConflictError } from '../errors/conflict';
 import { UploadedFile } from 'express-fileupload';
-import { BadRequestError } from '../errors';
+import { BadRequestError, NotFoundError } from '../errors';
+import { DefaultImage } from '../interfaces/enums';
 
 export class ImageService {
   req: Request;
@@ -16,9 +17,9 @@ export class ImageService {
     try {
       const storeURLs: string[] = [];
 
-      for (const i in images) {
+      for (const image of images) {
         const result: UploadApiResponse = await Cloudinary.uploader.upload(
-          images[i].tempFilePath,
+          image.tempFilePath,
           {
             use_filename: true,
           }
@@ -29,21 +30,21 @@ export class ImageService {
       fs.rmSync('tmp', { recursive: true });
       return storeURLs;
     } catch (error) {
-      console.log(error);
       fs.rmSync('tmp', { recursive: true });
       throw new ConflictError('Something went wrong, try again!');
     }
   }
 
-  async uploadSingleImage(image: UploadedFile[]) {
+  async handleSingleImage(image: UploadedFile[], defaultImage?: DefaultImage) {
+    if (!image) {
+      return defaultImage;
+    }
     if (!Array.isArray(image)) {
       image = [image];
     }
-
     if (image.length > 1) {
       throw new BadRequestError('You allowed to upload only 1 image');
     }
-
     if (this.req.files && !image) {
       fs.rmSync('tmp', { recursive: true });
       throw new BadRequestError('Something went wrong, try again!');
@@ -56,18 +57,19 @@ export class ImageService {
         fs.rmSync('tmp', { recursive: true });
         throw new ConflictError('This file type is not valid!');
       }
+
       return (await this.cloudinaryUpload(image)).join('');
     }
   }
 
-  async deleteImage(images: string | string[]) {
-    if (typeof images === 'string') {
-      const publicId: string = images.split('/').slice(-1)[0].split('.')[0];
-      await Cloudinary.uploader.destroy(publicId);
-    } else {
-      for (const image of images) {
-        const publicId: string = image.split('/').slice(-1)[0].split('.')[0];
-        await Cloudinary.uploader.destroy(publicId);
+  async deleteImages(images: string[]) {
+    for (const image of images) {
+      const publicId: string = image.split('/').slice(-1)[0].split('.')[0];
+      const res: { result: string } = await Cloudinary.uploader.destroy(
+        publicId
+      );
+      if (res.result === 'not found') {
+        throw new NotFoundError('Old image did not found in the cloud!');
       }
     }
   }

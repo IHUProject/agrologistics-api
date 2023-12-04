@@ -22,13 +22,13 @@ export const isValidToken = (token: string) =>
 export const attachTokens = (
   res: Response,
   user: IUserWithID,
-  isReqFromPostMan?: boolean
+  postmanRequest?: boolean
 ) => {
   const token: string = createToken(user);
 
   const sixMonths: number = 1000 * 60 * 60 * 24 * 183; //6 months
 
-  if (!isReqFromPostMan) {
+  if (!postmanRequest) {
     //origin cookie
     res.cookie('token', token, {
       httpOnly: true,

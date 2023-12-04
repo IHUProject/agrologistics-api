@@ -1,5 +1,8 @@
 import express, { Router } from 'express';
-import { authenticateUser, authorizePermissions } from '../middlewares/auth';
+import {
+  authenticateUser,
+  authorizePermissions,
+} from '../middlewares/auth-middlewares';
 import {
   changePassword,
   changeUserRole,
@@ -9,45 +12,46 @@ import {
   getUsers,
   updateUser,
 } from '../controllers/user-controller';
-import { isUserExits } from '../middlewares/is-user-exists';
-import { verifyAccountOwnership } from '../middlewares/verify-account-ownership';
-import { checkPageQuery } from '../middlewares/check-page-query';
+import {
+  checkPageQuery,
+  checkRoleIfIsOwner,
+} from '../middlewares/validate-request-properties-middlewares';
+import {
+  isUserExits,
+  verifyAccountOwnership,
+} from '../middlewares/user-middlewares';
 import { Roles } from '../interfaces/enums';
-import { checkRoleIfIsOwner } from '../middlewares/check-role-if-is-owner';
 
 const router: Router = express.Router();
 
 router.get('/get-current-user', authenticateUser, getCurrentUser);
 router.get('/get-users', checkPageQuery, authenticateUser, getUsers);
 router.get(
-  '/:id/get-single-user',
-  authenticateUser,
+  '/:userId/get-single-user',
   isUserExits,
+  authenticateUser,
   getSingleUser
 );
 router.delete(
-  '/:id/delete-user',
+  '/:userId/delete-user',
   authenticateUser,
   verifyAccountOwnership,
-  isUserExits,
   deleteUser
 );
 router.patch(
-  '/:id/update-user',
+  '/:userId/update-user',
   authenticateUser,
   verifyAccountOwnership,
-  isUserExits,
   updateUser
 );
 router.patch(
-  '/:id/change-password',
+  '/:userId/change-password',
   authenticateUser,
   verifyAccountOwnership,
-  isUserExits,
   changePassword
 );
 router.patch(
-  '/:id/change-role',
+  '/:userId/change-role',
   authenticateUser,
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   checkRoleIfIsOwner,

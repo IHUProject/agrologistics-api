@@ -12,39 +12,38 @@ import { DefaultImage } from '../interfaces/enums';
 export class AuthService {
   private req: Request;
   private res: Response;
-  private isFromPostMan: boolean;
   private imageService: ImageService;
 
   constructor(req: Request, res: Response) {
     this.req = req;
     this.res = res;
-    this.isFromPostMan = req.body.isFromPostMan;
     this.imageService = new ImageService(req);
   }
 
   async registerUser() {
     const { firstName, lastName, email, password } = this.req.body;
+    const { files } = this.req;
 
     const isValidEmail: boolean = validator.isEmail(email);
     if (!isValidEmail) {
       throw new BadRequestError('Please provide a valid email');
     }
 
-    const image: string | undefined = await this.imageService.uploadSingleImage(
-      this.req.files?.image as UploadedFile[]
+    const image: string | undefined = await this.imageService.handleSingleImage(
+      files?.image as UploadedFile[],
+      DefaultImage.PROFILE_IMAGE
     );
-    const finalImage: string = image ? image : DefaultImage.PROFILE_IMAGE;
 
     const user: IUser = await User.create({
       firstName,
       lastName,
       email,
       password,
-      image: finalImage,
+      image,
     });
 
     const tokenUser: IUserWithID = createTokenUser(user);
-    attachTokens(this.res, tokenUser, this.isFromPostMan);
+    attachTokens(this.res, tokenUser, this.req.body.postmanRequest);
 
     return tokenUser;
   }
@@ -63,7 +62,7 @@ export class AuthService {
 
     const tokenUser: IUserWithID = createTokenUser(user);
 
-    attachTokens(this.res, tokenUser, this.isFromPostMan);
+    attachTokens(this.res, tokenUser, this.req.body.postmanRequest);
     return tokenUser;
   }
 }
