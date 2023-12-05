@@ -16,10 +16,12 @@ export const errorHandlerMiddleware = (
 
   if (err.name === 'ValidationError') {
     customError.msg = Object.values(err.errors)
-      .map(
-        (item) =>
-          `Value ${item.value} is wrong type (${item.valueType}) for property ${item.path}`
-      )
+      .map((item) => {
+        if (item.kind === 'minlength') {
+          return `${item.path} must have bigger length that ${item.value.length}`;
+        }
+        return `Value ${item.value} is wrong type (${item.valueType}) for property ${item.path}`;
+      })
       .join(',');
     customError.statusCode = 400;
   }
@@ -46,7 +48,7 @@ export const errorHandlerMiddleware = (
   }
 
   if (err.path === '_id') {
-    customError.msg = `Wrong mongoDB ID format (ID : ${err.value})`;
+    customError.msg = `Wrong database ID format (ID : ${err.value})`;
     customError.statusCode = 400;
   }
 
