@@ -8,6 +8,7 @@ import { DefaultImage, Roles } from '../interfaces/enums';
 import { reattachTokens } from '../helpers/re-attack-tokens';
 import { ForbiddenError } from '../errors/forbidden';
 import { FilterQuery } from 'mongoose';
+import { createSearchQuery } from '../helpers/create-search-query';
 
 export class UserService {
   private req: Request;
@@ -96,19 +97,12 @@ export class UserService {
     const limit: number = 10;
     const skip: number = (Number(page) - 1) * limit;
 
-    let query: FilterQuery<IUser> = {};
+    const searchQuery: FilterQuery<IUser> = createSearchQuery<IUser>(
+      searchString as string,
+      ['firstName', 'lastName']
+    );
 
-    if (typeof searchString === 'string' && searchString.trim() !== '') {
-      const searchRegex: RegExp = new RegExp(searchString.trim(), 'i');
-      query = {
-        $or: [
-          { firstName: { $regex: searchRegex } },
-          { lastName: { $regex: searchRegex } },
-        ],
-      };
-    }
-
-    return (await User.find(query)
+    return (await User.find(searchQuery)
       .skip(skip)
       .limit(limit)
       .select('-password -createdAt -updatedAt')) as IUser[];
@@ -164,7 +158,7 @@ export class UserService {
       }
     }
 
-    user.role = newRole ? newRole : role;
+    user.role = newRole || role;
     await user.save();
 
     if (res) {
@@ -192,9 +186,9 @@ export class UserService {
     user.company = companyId;
     await user.save();
 
-    return (await User.findById(userId).select(
-      '-password -createdAt -updatedAt'
-    )) as IUser;
+    return `The user ${user.firstName} ${
+      user.lastName
+    } has been add to the company with as ${role || Roles.EMPLOY}`;
   }
 
   async removeFromCompany() {
