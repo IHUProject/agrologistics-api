@@ -4,15 +4,17 @@ import { ICompany } from '../interfaces/interfaces';
 const companySchema: mongoose.Schema<ICompany> = new Schema<ICompany>(
   {
     name: { type: String, required: true, minlength: 3, maxlength: 35 },
-    phone: { type: Number, unique: true, minlength: 10, maxlength: 10 },
+    phone: {
+      type: Number,
+      unique: true,
+      default: null,
+    },
     address: { type: String, minlength: 5, maxlength: 35 },
     owner: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     afm: {
       type: Number,
       unique: true,
       required: true,
-      minlength: 9,
-      maxlength: 9,
     },
     logo: { type: String, default: null },
     founded: { type: Date, default: null },

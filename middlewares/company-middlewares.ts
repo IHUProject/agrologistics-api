@@ -8,7 +8,7 @@ export const isCompanyExists = async (
   res: Response,
   next: NextFunction
 ) => {
-  const companyId: string = req.body.companyId || req.params.companyId;
+  const companyId = req.body.companyId || req.params.companyId;
   const company: ICompany | null = await Company.findById(companyId);
 
   if (!company) {

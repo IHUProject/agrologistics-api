@@ -64,7 +64,7 @@ export class ImageService {
 
   async deleteImages(images: string[]) {
     for (const image of images) {
-      const publicId: string = image.split('/').slice(-1)[0].split('.')[0];
+      const publicId = image.split('/').slice(-1)[0].split('.')[0];
       const res: { result: string } = await Cloudinary.uploader.destroy(
         publicId
       );

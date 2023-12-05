@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import StatusCodes from 'http-status-codes';
 import { ICustomError, IUpdatedError } from '../interfaces/interfaces';
+import fs from 'fs';
 
 export const errorHandlerMiddleware = (
   err: IUpdatedError,
@@ -52,6 +53,9 @@ export const errorHandlerMiddleware = (
     customError.statusCode = 400;
   }
 
+  if (fs.existsSync('tmp')) {
+    fs.rmSync('tmp', { recursive: true });
+  }
   console.log(err);
 
   return res

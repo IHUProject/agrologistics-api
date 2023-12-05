@@ -16,13 +16,6 @@
       "error",
       { "vars": "all", "args": "after-used", "ignoreRestSiblings": false }
     ],
-    "@typescript-eslint/typedef": [
-      "error",
-      {
-        "variableDeclaration": true,
-        "variableDeclarationIgnoreFunction": true
-      }
-    ],
     "arrow-body-style": ["error", "as-needed"],
     "curly": ["error", "all"]
   }

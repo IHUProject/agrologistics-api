@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
 import { NotFoundError, UnauthorizedError } from '../errors';
-import { IUser } from '../interfaces/interfaces';
 import User from '../models/User';
 
 export const verifyAccountOwnership = async (
@@ -23,7 +22,7 @@ export const isUserExits = async (
   next: NextFunction
 ) => {
   const { userId } = req.params;
-  const user: IUser | null = await User.findById(userId);
+  const user = await User.findById(userId);
 
   if (!user) {
     throw new NotFoundError('User does not exists!');
