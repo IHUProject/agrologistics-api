@@ -8,15 +8,21 @@ const userSchema: mongoose.Schema<IUser> = new Schema<IUser>(
     firstName: {
       type: String,
       required: true,
+      minlength: 3,
+      maxlength: 50,
     },
     lastName: {
       type: String,
       required: true,
+      minlength: 3,
+      maxlength: 50,
     },
     email: {
       type: String,
       unique: true,
       required: true,
+      minlength: 7,
+      maxlength: 35,
     },
     password: {
       type: String,
