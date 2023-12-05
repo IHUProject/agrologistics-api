@@ -8,6 +8,7 @@ import { ImageService } from './image-service';
 import { DefaultImage, Roles } from '../interfaces/enums';
 import { BadRequestError, UnauthorizedError } from '../errors';
 import User from '../models/User';
+import { createSearchQuery } from '../helpers/create-search-query';
 
 export class CompanyService {
   req: Request;
@@ -92,9 +93,7 @@ export class CompanyService {
     const { companyId } = this.req.params;
     const { files } = this.req;
 
-    const company: ICompany | null = (await Company.findById(
-      companyId
-    )) as ICompany;
+    const company: ICompany = (await Company.findById(companyId)) as ICompany;
 
     const companyByAFK: ICompany | null = await Company.findOne({ afm });
     const companyByPhone: ICompany | null = await Company.findOne({ phone });
@@ -161,6 +160,7 @@ export class CompanyService {
         Roles.UNCATEGORIZED,
         emp._id.toString()
       );
+      await User.findByIdAndUpdate(emp._id, { company: null });
     });
 
     await this.userService.changeUserRole(
@@ -188,16 +188,12 @@ export class CompanyService {
     const limit: number = 10;
     const skip: number = (Number(page) - 1) * limit;
 
-    let query: FilterQuery<IUser> = {};
+    const searchQuery: FilterQuery<ICompany> = createSearchQuery<ICompany>(
+      searchString as string,
+      ['name']
+    );
 
-    if (typeof searchString === 'string' && searchString.trim() !== '') {
-      const searchRegex: RegExp = new RegExp(searchString.trim(), 'i');
-      query = {
-        $or: [{ name: { $regex: searchRegex } }],
-      };
-    }
-
-    return (await Company.find(query).skip(skip).limit(limit).populate({
+    return (await Company.find(searchQuery).skip(skip).limit(limit).populate({
       path: 'owner',
       select: 'firstName lastName email image _id role',
     })) as ICompany[];
@@ -205,14 +201,22 @@ export class CompanyService {
 
   async getEmployees() {
     const { companyId } = this.req.params;
-    const { page } = this.req.query;
+    const { page, searchString } = this.req.query;
 
     const limit: number = 10;
     const skip: number = (Number(page) - 1) * limit;
 
-    return (await User.find({
+    const searchQuery: FilterQuery<IUser> = createSearchQuery<IUser>(
+      searchString as string,
+      ['firstName', 'lastName']
+    );
+
+    const query: FilterQuery<IUser> = {
+      ...searchQuery,
       company: companyId,
-    })
+    };
+
+    return (await User.find(query)
       .skip(skip)
       .limit(limit)
       .select('-password -createdAt -updatedAt -company')) as IUser[];

@@ -47,8 +47,8 @@ export const changeUserRole = async (req: Request, res: Response) => {
 
 export const addToCompany = async (req: Request, res: Response) => {
   const userService: UserService = new UserService(req, res);
-  const user: IUser = await userService.addToCompany();
-  res.status(StatusCodes.OK).json({ user });
+  const result: string = await userService.addToCompany();
+  res.status(StatusCodes.OK).json({ result });
 };
 
 export const removeFromCompany = async (req: Request, res: Response) => {
