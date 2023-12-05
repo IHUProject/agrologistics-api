@@ -17,7 +17,7 @@ export const authenticateUser = async (
   }
 
   try {
-    const payload: IUserWithID = isValidToken(token) as IUserWithID;
+    const payload = isValidToken(token) as IUserWithID;
 
     // Attach the user to the req object
     req.currentUser = {

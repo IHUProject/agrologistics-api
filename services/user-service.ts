@@ -7,7 +7,6 @@ import { UploadedFile } from 'express-fileupload';
 import { DefaultImage, Roles } from '../interfaces/enums';
 import { reattachTokens } from '../helpers/re-attack-tokens';
 import { ForbiddenError } from '../errors/forbidden';
-import { FilterQuery } from 'mongoose';
 import { createSearchQuery } from '../helpers/create-search-query';
 
 export class UserService {
@@ -35,7 +34,7 @@ export class UserService {
       );
     }
 
-    const user: IUser = (await User.findByIdAndDelete(userId)) as IUser;
+    const user = (await User.findByIdAndDelete(userId)) as IUser;
 
     if (user.image !== DefaultImage.PROFILE_IMAGE) {
       await this.imageService.deleteImages([user.image as string]);
@@ -58,7 +57,7 @@ export class UserService {
     const { currentUser } = this.req;
     const { files } = this.req;
 
-    const user: IUser | null = await User.findOne({ email });
+    const user = await User.findOne({ email });
     if (user && user.email !== currentUser?.email) {
       throw new BadRequestError('Email is already in use');
     }
@@ -94,33 +93,33 @@ export class UserService {
   async getUsers() {
     const { page, searchString } = this.req.query;
 
-    const limit: number = 10;
-    const skip: number = (Number(page) - 1) * limit;
+    const limit = 10;
+    const skip = (Number(page) - 1) * limit;
 
-    const searchQuery: FilterQuery<IUser> = createSearchQuery<IUser>(
-      searchString as string,
-      ['firstName', 'lastName']
-    );
+    const searchQuery = createSearchQuery<IUser>(searchString as string, [
+      'firstName',
+      'lastName',
+    ]);
 
-    return (await User.find(searchQuery)
+    return await User.find(searchQuery)
       .skip(skip)
       .limit(limit)
-      .select('-password -createdAt -updatedAt')) as IUser[];
+      .select('-password -createdAt -updatedAt');
   }
 
   async getSingleUser(): Promise<IUser> {
     const { userId } = this.req.params;
 
-    return (await User.findById(userId).select(
+    return await User.findById(userId).select(
       '-password -createdAt -updatedAt'
-    )) as IUser;
+    );
   }
 
   async changePassword() {
     const { userId } = this.req.params;
     const { oldPassword, newPassword } = this.req.body;
 
-    const user: IUser = (await User.findById(userId)) as IUser;
+    const user = (await User.findById(userId)) as IUser;
 
     const isMatch: boolean | undefined = await user?.comparePassword(
       oldPassword
@@ -144,17 +143,17 @@ export class UserService {
     const { role } = this.req.body;
     const { userId } = this.req.params;
 
-    const user: IUser | null = (await User.findById(id || userId)) as IUser;
+    const user = (await User.findById(id || userId)) as IUser;
     if (role && userId && !id && !newRole) {
-      if (
-        user.company.toString() !== this.req.currentUser?.company.toString()
-      ) {
+      const { company } = this.req.currentUser as IUserWithID;
+      if (user.company.toString() !== company.toString()) {
         throw new UnauthorizedError("You can not change this user's role");
       }
+      if (user.role === Roles.OWNER) {
+        throw new BadRequestError('You can not change the owners role!');
+      }
       if (userId && !role) {
-        {
-          throw new BadRequestError('Provide a role!');
-        }
+        throw new BadRequestError('Please provide role');
       }
     }
 
@@ -176,7 +175,7 @@ export class UserService {
     const { userId } = this.req.params;
     const { companyId, role } = this.req.body;
 
-    const user: IUser = (await User.findById(userId)) as IUser;
+    const user = (await User.findById(userId)) as IUser;
 
     if (user.company) {
       throw new BadRequestError('User working elsewhere!');
@@ -195,7 +194,7 @@ export class UserService {
     const { userId } = this.req.params;
     const { company } = this.req.currentUser as IUserWithID;
 
-    const user: IUser = (await User.findById(userId)) as IUser;
+    const user = (await User.findById(userId)) as IUser;
     if (!user.company) {
       throw new BadRequestError('User does not work anywhere!');
     }

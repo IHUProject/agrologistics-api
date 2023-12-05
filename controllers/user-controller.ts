@@ -40,19 +40,19 @@ export const changePassword = async (req: Request, res: Response) => {
 };
 
 export const changeUserRole = async (req: Request, res: Response) => {
-  const userService: UserService = new UserService(req, res);
-  const result: string = await userService.changeUserRole();
+  const userService = new UserService(req, res);
+  const result = await userService.changeUserRole();
   res.status(StatusCodes.OK).json({ msg: result });
 };
 
 export const addToCompany = async (req: Request, res: Response) => {
-  const userService: UserService = new UserService(req, res);
-  const result: string = await userService.addToCompany();
+  const userService = new UserService(req, res);
+  const result = await userService.addToCompany();
   res.status(StatusCodes.OK).json({ result });
 };
 
 export const removeFromCompany = async (req: Request, res: Response) => {
-  const userService: UserService = new UserService(req, res);
-  const result: string = await userService.removeFromCompany();
+  const userService = new UserService(req, res);
+  const result = await userService.removeFromCompany();
   res.status(StatusCodes.OK).json({ result });
 };

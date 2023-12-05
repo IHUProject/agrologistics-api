@@ -8,7 +8,7 @@ export const createSearchQuery = <T>(
     return {};
   }
 
-  const searchRegex: RegExp = new RegExp(searchString.trim(), 'i');
+  const searchRegex = new RegExp(searchString.trim(), 'i');
   const searchConditions: FilterQuery<T>[] = fields.map(
     (field) =>
       ({

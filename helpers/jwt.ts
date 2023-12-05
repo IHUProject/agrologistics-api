@@ -7,7 +7,7 @@ const { sign, verify } = jwt;
 
 export const createToken = (payload: IUserWithID) => {
   if (process.env.JWT_SECRET) {
-    const token: string = sign(payload, process.env.JWT_SECRET, {
+    const token = sign(payload, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_LIFETIME,
     });
     return token;
@@ -24,9 +24,9 @@ export const attachTokens = (
   user: IUserWithID,
   postmanRequest?: boolean
 ) => {
-  const token: string = createToken(user);
+  const token = createToken(user);
 
-  const sixMonths: number = 1000 * 60 * 60 * 24 * 183; //6 months
+  const sixMonths = 1000 * 60 * 60 * 24 * 183; //6 months
 
   if (!postmanRequest) {
     //origin cookie

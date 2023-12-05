@@ -17,6 +17,7 @@ import {
 import {
   checkPageQuery,
   validateRoleProperty,
+  validateUserPayload,
 } from '../middlewares/validate-request-properties-middlewares';
 import {
   isUserExits,
@@ -47,6 +48,7 @@ router.delete(
 router.patch(
   '/:userId/update-user',
   authenticateUser,
+  validateUserPayload,
   verifyAccountOwnership,
   updateUser
 );

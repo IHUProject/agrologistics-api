@@ -1,10 +1,8 @@
 import { Request, Response } from 'express';
 import { BadRequestError, UnauthorizedError } from '../errors';
 import User from '../models/User';
-import { IUser, IUserWithID } from '../interfaces/interfaces';
 import { attachTokens } from '../helpers';
 import { createTokenUser } from '../helpers/create-token-user';
-import validator from 'validator';
 import { UploadedFile } from 'express-fileupload';
 import { ImageService } from './image-service';
 import { DefaultImage } from '../interfaces/enums';
@@ -24,17 +22,17 @@ export class AuthService {
     const { firstName, lastName, email, password } = this.req.body;
     const { files } = this.req;
 
-    const isValidEmail: boolean = validator.isEmail(email);
-    if (!isValidEmail) {
-      throw new BadRequestError('Please provide a valid email');
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      throw new BadRequestError('Email is already in use');
     }
 
-    const image: string | undefined = await this.imageService.handleSingleImage(
+    const image = await this.imageService.handleSingleImage(
       files?.image as UploadedFile[],
       DefaultImage.PROFILE_IMAGE
     );
 
-    const user: IUser = await User.create({
+    const user = await User.create({
       firstName,
       lastName,
       email,
@@ -42,7 +40,7 @@ export class AuthService {
       image,
     });
 
-    const tokenUser: IUserWithID = createTokenUser(user);
+    const tokenUser = createTokenUser(user);
     attachTokens(this.res, tokenUser, this.req.body.postmanRequest);
 
     return tokenUser;
@@ -50,17 +48,17 @@ export class AuthService {
   async loginUser() {
     const { email, password } = this.req.body;
 
-    const user: IUser | null = await User.findOne({ email });
+    const user = await User.findOne({ email });
     if (!user) {
       throw new UnauthorizedError('The e-mail or password are not correct!');
     }
 
-    const isPasswordCorrect: boolean = await user.comparePassword(password);
+    const isPasswordCorrect = await user.comparePassword(password);
     if (!isPasswordCorrect) {
       throw new UnauthorizedError('The e-mail or password are not correct!');
     }
 
-    const tokenUser: IUserWithID = createTokenUser(user);
+    const tokenUser = createTokenUser(user);
 
     attachTokens(this.res, tokenUser, this.req.body.postmanRequest);
     return tokenUser;

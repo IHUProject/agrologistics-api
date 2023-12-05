@@ -39,8 +39,8 @@ export class CompanyService {
 
     const owner: mongoose.Types.ObjectId = userId;
 
-    const companyByAFK: ICompany | null = await Company.findOne({ afm });
-    const companyByPhone: ICompany | null = await Company.findOne({ phone });
+    const companyByAFK = await Company.findOne({ afm });
+    const companyByPhone = await Company.findOne({ phone });
     if (companyByAFK) {
       throw new BadRequestError('AFM already in user');
     }
@@ -48,12 +48,12 @@ export class CompanyService {
       throw new BadRequestError('Phone already in user');
     }
 
-    const logo: string | undefined = await this.imageService.handleSingleImage(
+    const logo = await this.imageService.handleSingleImage(
       files?.image as UploadedFile[],
       DefaultImage.LOGO
     );
 
-    const company: ICompany = await (
+    const company = await (
       await Company.create({
         name,
         phone,
@@ -81,10 +81,10 @@ export class CompanyService {
       postmanRequest
     );
 
-    return (await Company.findById(company._id).populate({
+    return await Company.findById(company._id).populate({
       path: 'owner',
       select: 'firstName lastName email image _id role',
-    })) as ICompany;
+    });
   }
 
   async updateCompany() {
@@ -93,10 +93,10 @@ export class CompanyService {
     const { companyId } = this.req.params;
     const { files } = this.req;
 
-    const company: ICompany = (await Company.findById(companyId)) as ICompany;
+    const company = (await Company.findById(companyId)) as ICompany;
 
-    const companyByAFK: ICompany | null = await Company.findOne({ afm });
-    const companyByPhone: ICompany | null = await Company.findOne({ phone });
+    const companyByAFK = await Company.findOne({ afm });
+    const companyByPhone = await Company.findOne({ phone });
     if (companyByAFK && company.afm !== companyByAFK.afm) {
       throw new BadRequestError('AFM already in user');
     }
@@ -125,10 +125,10 @@ export class CompanyService {
       logo,
     });
 
-    return (await Company.findById(companyId).populate({
+    return await Company.findById(companyId).populate({
       path: 'owner',
       select: 'firstName lastName email image _id role',
-    })) as ICompany;
+    });
   }
 
   async deleteCompany() {
@@ -137,7 +137,7 @@ export class CompanyService {
     const { userId } = this.req.currentUser as IUserWithID;
 
     const company: ICompany = (await Company.findById(companyId)) as ICompany;
-    const isOwner: boolean = company.owner._id.toString() === userId.toString();
+    const isOwner = company.owner._id.toString() === userId.toString();
 
     if (!isOwner) {
       throw new UnauthorizedError(
@@ -151,7 +151,7 @@ export class CompanyService {
       await this.imageService.deleteImages([company.logo as string]);
     }
 
-    const employees: IUser[] = (await User.find({
+    const employees = (await User.find({
       company: companyId,
     })) as IUser[];
 
@@ -176,27 +176,26 @@ export class CompanyService {
   async getCompany() {
     const { companyId } = this.req.params;
 
-    return (await Company.findById(companyId).populate({
+    return await Company.findById(companyId).populate({
       path: 'owner',
       select: 'firstName lastName email image _id role',
-    })) as ICompany;
+    });
   }
 
   async getCompanies() {
     const { page, searchString } = this.req.query;
 
-    const limit: number = 10;
-    const skip: number = (Number(page) - 1) * limit;
+    const limit = 10;
+    const skip = (Number(page) - 1) * limit;
 
-    const searchQuery: FilterQuery<ICompany> = createSearchQuery<ICompany>(
-      searchString as string,
-      ['name']
-    );
+    const searchQuery = createSearchQuery<ICompany>(searchString as string, [
+      'name',
+    ]);
 
-    return (await Company.find(searchQuery).skip(skip).limit(limit).populate({
+    return await Company.find(searchQuery).skip(skip).limit(limit).populate({
       path: 'owner',
       select: 'firstName lastName email image _id role',
-    })) as ICompany[];
+    });
   }
 
   async getEmployees() {
@@ -216,9 +215,9 @@ export class CompanyService {
       company: companyId,
     };
 
-    return (await User.find(query)
+    return await User.find(query)
       .skip(skip)
       .limit(limit)
-      .select('-password -createdAt -updatedAt -company')) as IUser[];
+      .select('-password -createdAt -updatedAt -company');
   }
 }

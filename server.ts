@@ -6,6 +6,7 @@ import 'express-async-errors';
 import cookieParser from 'cookie-parser';
 import { v2 as cloudinary } from 'cloudinary';
 import fileUpload from 'express-fileupload';
+import cors from 'cors';
 
 //middlewares
 import { notFoundMiddleware } from './middlewares/not-found';
@@ -39,6 +40,12 @@ cloudinary.config({
 
 server.use(express.json());
 server.use(cookieParser(process.env.JWT_SECRET));
+server.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
 server.use(
   fileUpload({
     useTempFiles: true,
