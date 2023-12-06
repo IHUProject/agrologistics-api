@@ -15,15 +15,32 @@ export const errorHandlerMiddleware = (
     msg: err.message || 'Something went wrong, please try again',
   };
 
+  if (err.name === 'CastError') {
+    customError.msg = err.message;
+    customError.statusCode = 404;
+  }
+
   if (err.name === 'ValidationError') {
     customError.msg = Object.values(err.errors)
       .map((item) => {
         if (item.kind === 'minlength') {
-          return `${item.path} must have bigger length that ${item.value.length}`;
+          return `The ${item.path} must be more than ${
+            item.properties.minlength - 1
+          } characters.`;
         }
-        return `Value ${item.value} is wrong type (${item.valueType}) for property ${item.path}`;
+
+        if (item.kind === 'maxlength') {
+          return `The ${item.path} must be less than ${
+            item.properties.maxlength + 1
+          } characters.`;
+        }
+
+        return item;
       })
-      .join(',');
+      .join(' ');
+
+    console.log(Object.values(err.errors));
+
     customError.statusCode = 400;
   }
 
@@ -34,20 +51,6 @@ export const errorHandlerMiddleware = (
     customError.statusCode = 400;
   }
 
-  if (err.name === 'CastError') {
-    customError.msg = `Error for value: ${err.value} (Cast Error)`;
-    customError.statusCode = 404;
-  }
-
-  if (err.errors && err.errors.role && err.errors.role?.kind === 'enum') {
-    customError.statusCode = 400;
-    if (err.errors.role.value !== '') {
-      customError.msg = `Value '${err.errors.role.value}' is wrong!`;
-    } else {
-      customError.msg = `Not allowed empty strings`;
-    }
-  }
-
   if (err.path === '_id') {
     customError.msg = `Wrong database ID format (ID : ${err.value})`;
     customError.statusCode = 400;
@@ -56,7 +59,7 @@ export const errorHandlerMiddleware = (
   if (fs.existsSync('tmp')) {
     fs.rmSync('tmp', { recursive: true });
   }
-  console.log(err);
+  // console.log(err);
 
   return res
     .status(Number(customError.statusCode))

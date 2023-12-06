@@ -2,13 +2,14 @@ import { Request, Response } from 'express';
 import { ICompany, IUser, IUserWithID } from '../interfaces/interfaces';
 import Company from '../models/Company';
 import { UserService } from './user-service';
-import mongoose, { FilterQuery } from 'mongoose';
+import { FilterQuery } from 'mongoose';
 import { UploadedFile } from 'express-fileupload';
 import { ImageService } from './image-service';
 import { DefaultImage, Roles } from '../interfaces/enums';
-import { BadRequestError, UnauthorizedError } from '../errors';
+import { UnauthorizedError } from '../errors';
 import User from '../models/User';
 import { createSearchQuery } from '../helpers/create-search-query';
+import { reattachTokens } from '../helpers/re-attack-tokens';
 
 export class CompanyService {
   req: Request;
@@ -37,54 +38,54 @@ export class CompanyService {
     const { files } = this.req;
     const { userId } = this.req.currentUser as IUserWithID;
 
-    const owner: mongoose.Types.ObjectId = userId;
-
-    const companyByAFK = await Company.findOne({ afm });
-    const companyByPhone = await Company.findOne({ phone });
-    if (companyByAFK) {
-      throw new BadRequestError('AFM already in user');
-    }
-    if (companyByPhone) {
-      throw new BadRequestError('Phone already in user');
-    }
-
-    const logo = await this.imageService.handleSingleImage(
-      files?.image as UploadedFile[],
-      DefaultImage.LOGO
-    );
-
-    const company = await (
+    let newCompany = (await (
       await Company.create({
         name,
         phone,
-        owner,
+        owner: userId,
         afm,
         address,
         founded,
         latitude,
         longitude,
-        logo,
       })
     ).populate({
       path: 'owner',
       select: 'firstName lastName email image _id role',
-    });
+    })) as ICompany;
+
+    if (files?.image) {
+      const logo = await this.imageService.handleSingleImage(
+        files?.image as UploadedFile[]
+      );
+
+      newCompany = (await Company.findByIdAndUpdate(
+        newCompany._id,
+        {
+          logo,
+        },
+        { new: true }
+      ).populate({
+        path: 'owner',
+        select: 'firstName lastName email image _id role',
+      })) as ICompany;
+    }
 
     await User.findByIdAndUpdate(userId, {
-      company: company._id,
+      company: newCompany._id,
+      role: Roles.OWNER,
     });
 
-    await this.userService.changeUserRole(
-      Roles.OWNER,
-      userId.toString(),
-      this.res,
-      postmanRequest
+    await reattachTokens(
+      this.res!,
+      userId.toString() as string,
+      postmanRequest || false
     );
 
-    return await Company.findById(company._id).populate({
+    return (await Company.findById(newCompany._id).populate({
       path: 'owner',
       select: 'firstName lastName email image _id role',
-    });
+    })) as ICompany;
   }
 
   async updateCompany() {
@@ -93,42 +94,43 @@ export class CompanyService {
     const { companyId } = this.req.params;
     const { files } = this.req;
 
-    const company = (await Company.findById(companyId)) as ICompany;
-
-    const companyByAFK = await Company.findOne({ afm });
-    const companyByPhone = await Company.findOne({ phone });
-    if (companyByAFK && company.afm !== companyByAFK.afm) {
-      throw new BadRequestError('AFM already in user');
-    }
-    if (companyByPhone && company.phone !== companyByPhone.phone) {
-      throw new BadRequestError('Phone already in user');
-    }
-
-    let logo: string | undefined;
-    if (files) {
-      if (company?.logo !== DefaultImage.PROFILE_IMAGE) {
-        await this.imageService.deleteImages([company?.logo as string]);
-      }
-      logo = await this.imageService.handleSingleImage(
-        files?.image as UploadedFile[]
-      );
-    }
-
-    await Company.findByIdAndUpdate(companyId, {
-      name,
-      phone,
-      afm,
-      address,
-      founded,
-      latitude,
-      longitude,
-      logo,
-    });
-
-    return await Company.findById(companyId).populate({
+    let updateCompany = (await Company.findByIdAndUpdate(
+      companyId,
+      {
+        name,
+        phone,
+        afm,
+        address,
+        founded,
+        latitude,
+        longitude,
+      },
+      { new: true, runValidators: true }
+    ).populate({
       path: 'owner',
       select: 'firstName lastName email image _id role',
-    });
+    })) as ICompany;
+
+    if (files?.image) {
+      if (updateCompany?.logo !== DefaultImage.LOGO) {
+        await this.imageService.deleteImages([updateCompany?.logo as string]);
+      }
+      const logo = await this.imageService.handleSingleImage(
+        files?.image as UploadedFile[]
+      );
+      updateCompany = (await Company.findByIdAndUpdate(
+        companyId,
+        {
+          logo,
+        },
+        { new: true }
+      ).populate({
+        path: 'owner',
+        select: 'firstName lastName email image _id role',
+      })) as ICompany;
+    }
+
+    return updateCompany;
   }
 
   async deleteCompany() {
@@ -136,7 +138,7 @@ export class CompanyService {
     const { postmanRequest } = this.req.body;
     const { userId } = this.req.currentUser as IUserWithID;
 
-    const company: ICompany = (await Company.findById(companyId)) as ICompany;
+    const company = (await Company.findById(companyId)) as ICompany;
     const isOwner = company.owner._id.toString() === userId.toString();
 
     if (!isOwner) {
@@ -156,21 +158,24 @@ export class CompanyService {
     })) as IUser[];
 
     employees.forEach(async (emp) => {
-      await this.userService.changeUserRole(
-        Roles.UNCATEGORIZED,
-        emp._id.toString()
-      );
-      await User.findByIdAndUpdate(emp._id, { company: null });
+      await User.findByIdAndUpdate(emp._id, {
+        company: null,
+        role: Roles.UNCATEGORIZED,
+      });
     });
 
-    await this.userService.changeUserRole(
-      Roles.UNCATEGORIZED,
-      userId.toString(),
-      this.res,
-      postmanRequest
+    await User.findByIdAndUpdate(userId, {
+      company: null,
+      role: Roles.UNCATEGORIZED,
+    });
+
+    await reattachTokens(
+      this.res!,
+      userId.toString() as string,
+      postmanRequest || false
     );
 
-    return `The ${company.name} company, has been deleted.`;
+    return `The ${company.name} company, has been deleted!`;
   }
 
   async getCompany() {
@@ -190,6 +195,7 @@ export class CompanyService {
 
     const searchQuery = createSearchQuery<ICompany>(searchString as string, [
       'name',
+      'phone',
     ]);
 
     return await Company.find(searchQuery).skip(skip).limit(limit).populate({

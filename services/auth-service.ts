@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { BadRequestError, UnauthorizedError } from '../errors';
+import { UnauthorizedError } from '../errors';
 import User from '../models/User';
 import { attachTokens } from '../helpers';
 import { createTokenUser } from '../helpers/create-token-user';
 import { UploadedFile } from 'express-fileupload';
 import { ImageService } from './image-service';
-import { DefaultImage } from '../interfaces/enums';
+import { IUser } from '../interfaces/interfaces';
 
 export class AuthService {
   private req: Request;
@@ -22,23 +22,24 @@ export class AuthService {
     const { firstName, lastName, email, password } = this.req.body;
     const { files } = this.req;
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      throw new BadRequestError('Email is already in use');
-    }
-
-    const image = await this.imageService.handleSingleImage(
-      files?.image as UploadedFile[],
-      DefaultImage.PROFILE_IMAGE
-    );
-
-    const user = await User.create({
+    let user = (await User.create({
       firstName,
       lastName,
       email,
       password,
-      image,
-    });
+    })) as IUser;
+
+    if (files?.image) {
+      const image = await this.imageService.handleSingleImage(
+        files?.image as UploadedFile[]
+      );
+
+      user = (await User.findByIdAndUpdate(
+        user._id,
+        { image },
+        { new: true }
+      )) as IUser;
+    }
 
     const tokenUser = createTokenUser(user);
     attachTokens(this.res, tokenUser, this.req.body.postmanRequest);
