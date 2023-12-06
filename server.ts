@@ -20,6 +20,8 @@ import companyRouter from './routes/company-routes';
 import { IUserWithID } from './interfaces/interfaces';
 import { validateFiles } from './middlewares/validate-request-properties-middlewares';
 
+const server = express();
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
@@ -28,8 +30,6 @@ declare global {
     }
   }
 }
-
-const server: express.Application = express();
 
 dotenv.config();
 
@@ -63,7 +63,7 @@ server.use(notFoundMiddleware);
 server.use(headersMiddleware);
 server.use(errorHandlerMiddleware);
 
-const port: number = Number(process.env.PORT) || 4500;
+const port = Number(process.env.PORT) || 4500;
 
 const startServer = async () => {
   try {

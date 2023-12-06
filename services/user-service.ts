@@ -102,7 +102,7 @@ export class UserService {
     const { page, searchString } = this.req.query;
 
     const limit = 10;
-    const skip = (Number(page) - 1) * limit;
+    const skip = (Number(page || 1) - 1) * limit;
 
     const searchQuery = createSearchQuery<IUser>(searchString as string, [
       'firstName',

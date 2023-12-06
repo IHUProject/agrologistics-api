@@ -18,7 +18,7 @@ export const isCompanyExists = async (
   next();
 };
 
-export const isUserBelongsToCompany = async (
+export const verifyUserCompanyMembership = async (
   req: Request,
   res: Response,
   next: NextFunction

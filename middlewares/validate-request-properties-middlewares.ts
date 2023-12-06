@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { BadRequestError } from '../errors';
 
-export const checkCoordinates = (
+export const validateCoordinates = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -18,12 +18,13 @@ export const checkCoordinates = (
   next();
 };
 
-export const checkPageQuery = (
+export const validateQueryPage = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   const { page } = req.query;
+
   if (page && isNaN(Number(page))) {
     throw new BadRequestError('Page number must be a valid number');
   }

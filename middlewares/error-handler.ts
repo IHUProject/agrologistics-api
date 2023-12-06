@@ -38,9 +38,6 @@ export const errorHandlerMiddleware = (
         return item;
       })
       .join(' ');
-
-    console.log(Object.values(err.errors));
-
     customError.statusCode = 400;
   }
 
@@ -59,7 +56,6 @@ export const errorHandlerMiddleware = (
   if (fs.existsSync('tmp')) {
     fs.rmSync('tmp', { recursive: true });
   }
-  // console.log(err);
 
   return res
     .status(Number(customError.statusCode))

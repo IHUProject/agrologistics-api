@@ -6,6 +6,10 @@ export interface ICustomError {
   msg: string;
 }
 
+export interface RequestBody<T> {
+  body: T;
+}
+
 export interface IErrorProperties {
   message: string;
   role: {

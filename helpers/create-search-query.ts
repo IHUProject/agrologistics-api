@@ -9,7 +9,7 @@ export const createSearchQuery = <T>(
   }
 
   const searchRegex = new RegExp(searchString.trim(), 'i');
-  const searchConditions: FilterQuery<T>[] = fields.map(
+  const searchConditions = fields.map(
     (field) =>
       ({
         [field]: { $regex: searchRegex },

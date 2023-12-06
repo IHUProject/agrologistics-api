@@ -186,7 +186,7 @@ export class CompanyService {
     const { page, searchString } = this.req.query;
 
     const limit = 10;
-    const skip = (Number(page) - 1) * limit;
+    const skip = (Number(page || 1) - 1) * limit;
 
     const searchQuery = createSearchQuery<ICompany>(searchString as string, [
       'name',
@@ -204,12 +204,12 @@ export class CompanyService {
     const { page, searchString } = this.req.query;
 
     const limit: number = 10;
-    const skip: number = (Number(page) - 1) * limit;
+    const skip: number = (Number(page || 1) - 1) * limit;
 
-    const searchQuery: FilterQuery<IUser> = createSearchQuery<IUser>(
-      searchString as string,
-      ['firstName', 'lastName']
-    );
+    const searchQuery = createSearchQuery<IUser>(searchString as string, [
+      'firstName',
+      'lastName',
+    ]);
 
     const query: FilterQuery<IUser> = {
       ...searchQuery,

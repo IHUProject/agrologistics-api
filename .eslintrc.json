@@ -17,6 +17,7 @@
       { "vars": "all", "args": "after-used", "ignoreRestSiblings": false }
     ],
     "arrow-body-style": ["error", "as-needed"],
-    "curly": ["error", "all"]
+    "curly": ["error", "multi-line", "consistent"],
+    "brace-style": ["error", "1tbs", { "allowSingleLine": true }]
   }
 }
