@@ -14,11 +14,7 @@ import {
   removeFromCompany,
   updateUser,
 } from '../controllers/user-controller';
-import {
-  checkPageQuery,
-  validateRoleProperty,
-  validateUserPayload,
-} from '../middlewares/validate-request-properties-middlewares';
+import { checkPageQuery } from '../middlewares/validate-request-properties-middlewares';
 import {
   isUserExits,
   verifyAccountOwnership,
@@ -48,7 +44,6 @@ router.delete(
 router.patch(
   '/:userId/update-user',
   authenticateUser,
-  validateUserPayload,
   verifyAccountOwnership,
   updateUser
 );
@@ -62,7 +57,6 @@ router.patch(
   '/:userId/change-role',
   authenticateUser,
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
-  validateRoleProperty,
   isUserExits,
   changeUserRole
 );
@@ -73,7 +67,6 @@ router.patch(
   isUserExits,
   isCompanyExists,
   isUserBelongsToCompany,
-  validateRoleProperty,
   addToCompany
 );
 router.patch(

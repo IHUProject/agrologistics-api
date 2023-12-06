@@ -4,7 +4,6 @@ import { v2 as Cloudinary, UploadApiResponse } from 'cloudinary';
 import { ConflictError } from '../errors/conflict';
 import { UploadedFile } from 'express-fileupload';
 import { BadRequestError, NotFoundError } from '../errors';
-import { DefaultImage } from '../interfaces/enums';
 
 export class ImageService {
   req: Request;
@@ -35,31 +34,24 @@ export class ImageService {
     }
   }
 
-  async handleSingleImage(image: UploadedFile[], defaultImage?: DefaultImage) {
-    if (!image) {
-      return defaultImage;
-    }
+  async handleSingleImage(image: UploadedFile[]) {
     if (!Array.isArray(image)) {
       image = [image];
     }
     if (image.length > 1) {
       throw new BadRequestError('You allowed to upload only 1 image');
     }
-    if (this.req.files && !image) {
-      fs.rmSync('tmp', { recursive: true });
-      throw new BadRequestError('Something went wrong, try again!');
-    } else if (this.req.files && image) {
-      if (
-        image[0].mimetype !== 'image/png' &&
-        image[0].mimetype !== 'image/jpeg' &&
-        image[0].mimetype !== 'image/jpg'
-      ) {
-        fs.rmSync('tmp', { recursive: true });
-        throw new ConflictError('This file type is not valid!');
-      }
 
-      return (await this.cloudinaryUpload(image)).join('');
+    if (
+      image[0].mimetype !== 'image/png' &&
+      image[0].mimetype !== 'image/jpeg' &&
+      image[0].mimetype !== 'image/jpg'
+    ) {
+      fs.rmSync('tmp', { recursive: true });
+      throw new ConflictError('This file type is not valid!');
     }
+
+    return (await this.cloudinaryUpload(image)).join('');
   }
 
   async deleteImages(images: string[]) {

@@ -39,12 +39,12 @@ export interface IUser extends mongoose.Document {
 
 export interface ICompany extends mongoose.Document {
   name: string;
-  phone: number;
+  phone: string;
   address: string;
   owner: mongoose.Types.ObjectId;
-  afm: number;
+  afm: string;
   logo: string;
-  founded: Date;
+  founded: string;
   latitude?: number;
   longitude?: number;
 }

@@ -1,38 +1,48 @@
 import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
-import { Roles } from '../interfaces/enums';
+import { DefaultImage, Roles } from '../interfaces/enums';
 import { IUser } from '../interfaces/interfaces';
+import validator from 'validator';
 
 const userSchema: mongoose.Schema<IUser> = new Schema<IUser>(
   {
     firstName: {
       type: String,
-      required: true,
+      required: [true, 'Please provide first name'],
       minlength: 3,
       maxlength: 50,
     },
     lastName: {
       type: String,
-      required: true,
+      required: [true, 'Please provide last name.'],
       minlength: 3,
       maxlength: 50,
     },
     email: {
       type: String,
       unique: true,
-      required: true,
+      required: [true, 'Please provide an email.'],
       minlength: 7,
       maxlength: 35,
+      validate: [validator.isEmail, 'Please provide a valid email address.'],
     },
     password: {
       type: String,
-      required: true,
+      required: [true, 'Please provide password.'],
       minlength: 5,
     },
-    image: String,
+    image: { type: String, default: DefaultImage.PROFILE_IMAGE },
     role: {
       type: String,
-      enum: Object.values(Roles),
+      enum: {
+        values: [
+          Roles.UNCATEGORIZED,
+          Roles.EMPLOY,
+          Roles.SENIOR_EMPLOY,
+          Roles.OWNER,
+        ],
+        message: '{VALUE} is not valid.',
+      },
       default: Roles.UNCATEGORIZED,
     },
     company: { type: Schema.Types.ObjectId, ref: 'Company', default: null },

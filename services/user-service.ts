@@ -57,27 +57,32 @@ export class UserService {
     const { currentUser } = this.req;
     const { files } = this.req;
 
-    const user = await User.findOne({ email });
-    if (user && user.email !== currentUser?.email) {
-      throw new BadRequestError('Email is already in use');
-    }
+    let updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        firstName,
+        lastName,
+        email,
+      },
+      { new: true, runValidators: true }
+    );
 
     let image: string | undefined;
-    if (files) {
-      if (currentUser?.image !== DefaultImage.PROFILE_IMAGE) {
-        await this.imageService.deleteImages([currentUser?.image as string]);
+    if (files?.image) {
+      if (updatedUser?.image !== DefaultImage.PROFILE_IMAGE) {
+        await this.imageService.deleteImages([updatedUser?.image as string]);
       }
       image = await this.imageService.handleSingleImage(
         files?.image as UploadedFile[]
       );
+      updatedUser = await User.findByIdAndUpdate(
+        updatedUser?._id,
+        {
+          image,
+        },
+        { new: true, runValidators: true }
+      );
     }
-
-    await User.findByIdAndUpdate(userId, {
-      firstName,
-      lastName,
-      image,
-      email,
-    });
 
     await reattachTokens(
       this.res!,
@@ -85,9 +90,12 @@ export class UserService {
       postmanRequest || false
     );
 
-    return (await User.findById(userId).select(
-      '-createAt -updateAt -password'
-    )) as IUser;
+    return (await User.findById(userId)
+      .select('-createAt -updateAt -password')
+      .populate({
+        path: 'company',
+        select: 'name',
+      })) as IUser;
   }
 
   async getUsers() {
@@ -101,18 +109,25 @@ export class UserService {
       'lastName',
     ]);
 
-    return await User.find(searchQuery)
+    return (await User.find(searchQuery)
       .skip(skip)
       .limit(limit)
-      .select('-password -createdAt -updatedAt');
+      .select('-password -createdAt -updatedAt')
+      .populate({
+        path: 'company',
+        select: 'name',
+      })) as IUser[];
   }
 
   async getSingleUser(): Promise<IUser> {
     const { userId } = this.req.params;
 
-    return await User.findById(userId).select(
-      '-password -createdAt -updatedAt'
-    );
+    return (await User.findById(userId)
+      .select('-password -createdAt -updatedAt')
+      .populate({
+        path: 'company',
+        select: 'name',
+      })) as IUser;
   }
 
   async changePassword() {
@@ -134,39 +149,21 @@ export class UserService {
     return 'Password has been change!';
   }
 
-  async changeUserRole(
-    newRole?: Roles,
-    id?: string,
-    res?: Response,
-    postmanRequest?: boolean
-  ) {
-    const { role } = this.req.body;
+  async changeUserRole() {
     const { userId } = this.req.params;
+    const { role } = this.req.body;
 
-    const user = (await User.findById(id || userId)) as IUser;
-    if (role && userId && !id && !newRole) {
-      const { company } = this.req.currentUser as IUserWithID;
-      if (user.company.toString() !== company.toString()) {
-        throw new UnauthorizedError("You can not change this user's role");
-      }
-      if (user.role === Roles.OWNER) {
-        throw new BadRequestError('You can not change the owners role!');
-      }
-      if (userId && !role) {
-        throw new BadRequestError('Please provide role');
-      }
+    const user = (await User.findById(userId)) as IUser;
+    const { company } = this.req.currentUser as IUserWithID;
+    if (user.company.toString() !== company.toString()) {
+      throw new UnauthorizedError("You can not change this user's role");
+    }
+    if (user.role === Roles.OWNER) {
+      throw new BadRequestError('You can not change the owners role!');
     }
 
-    user.role = newRole || role;
+    user.role = role;
     await user.save();
-
-    if (res) {
-      await reattachTokens(
-        res!,
-        this.req.currentUser?.userId.toString() as string,
-        postmanRequest || false
-      );
-    }
 
     return `Role change to ${user?.role}`;
   }
@@ -175,15 +172,23 @@ export class UserService {
     const { userId } = this.req.params;
     const { companyId, role } = this.req.body;
 
-    const user = (await User.findById(userId)) as IUser;
+    if (role && role === Roles.OWNER) {
+      throw new BadRequestError('You can not make an employ owner!');
+    }
 
+    const user = (await User.findById(userId)) as IUser;
     if (user.company) {
       throw new BadRequestError('User working elsewhere!');
     }
 
-    user.role = role || Roles.EMPLOY;
-    user.company = companyId;
-    await user.save();
+    await User.findByIdAndUpdate(
+      userId,
+      {
+        company: companyId,
+        role: role || Roles.EMPLOY,
+      },
+      { runValidators: true }
+    );
 
     return `The user ${user.firstName} ${
       user.lastName
@@ -202,9 +207,9 @@ export class UserService {
       throw new ForbiddenError('You don not belong at the same company');
     }
 
-    await this.changeUserRole(Roles.UNCATEGORIZED, userId);
     await User.findByIdAndUpdate(userId, {
       company: null,
+      role: Roles.UNCATEGORIZED,
     });
 
     return 'User has been removed for the company!';
