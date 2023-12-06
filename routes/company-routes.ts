@@ -13,26 +13,21 @@ import {
 } from '../controllers/companies-controller';
 import { Roles } from '../interfaces/enums';
 import {
-  checkCoordinates,
-  checkPageQuery,
+  validateCoordinates,
+  validateQueryPage,
 } from '../middlewares/validate-request-properties-middlewares';
 import {
   isCompanyExists,
-  isUserBelongsToCompany,
+  verifyUserCompanyMembership,
 } from '../middlewares/company-middlewares';
 
 const router: Router = express.Router();
 
-router.get('/get-companies', checkPageQuery, authenticateUser, getCompanies);
-router.get(
-  '/:companyId/get-single-company',
-  isCompanyExists,
-  authenticateUser,
-  getSingleCompany
-);
+router.get('/get-companies', validateQueryPage, getCompanies);
+router.get('/:companyId/get-single-company', isCompanyExists, getSingleCompany);
 router.post(
   '/create-company',
-  checkCoordinates,
+  validateCoordinates,
   authenticateUser,
   authorizePermissions(Roles.UNCATEGORIZED),
   createCompany
@@ -47,15 +42,15 @@ router.patch(
   '/:companyId/update-company',
   authenticateUser,
   isCompanyExists,
-  isUserBelongsToCompany,
-  checkCoordinates,
+  verifyUserCompanyMembership,
+  validateCoordinates,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
   updateCompany
 );
 router.get(
   '/:companyId/get-employees',
   authenticateUser,
-  checkPageQuery,
+  validateQueryPage,
   isCompanyExists,
   getEmployees
 );

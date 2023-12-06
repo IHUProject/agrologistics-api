@@ -14,10 +14,7 @@ import {
   removeFromCompany,
   updateUser,
 } from '../controllers/user-controller';
-import {
-  checkPageQuery,
-  validateFiles,
-} from '../middlewares/validate-request-properties-middlewares';
+import { validateQueryPage } from '../middlewares/validate-request-properties-middlewares';
 import {
   isUserExits,
   verifyAccountOwnership,
@@ -25,19 +22,14 @@ import {
 import { Roles } from '../interfaces/enums';
 import {
   isCompanyExists,
-  isUserBelongsToCompany,
+  verifyUserCompanyMembership,
 } from '../middlewares/company-middlewares';
 
 const router: Router = express.Router();
 
 router.get('/get-current-user', authenticateUser, getCurrentUser);
-router.get('/get-users', checkPageQuery, authenticateUser, getUsers);
-router.get(
-  '/:userId/get-single-user',
-  isUserExits,
-  authenticateUser,
-  getSingleUser
-);
+router.get('/get-users', validateQueryPage, getUsers);
+router.get('/:userId/get-single-user', isUserExits, getSingleUser);
 router.delete(
   '/:userId/delete-user',
   authenticateUser,
@@ -47,7 +39,6 @@ router.delete(
 router.patch(
   '/:userId/update-user',
   authenticateUser,
-  validateFiles,
   verifyAccountOwnership,
   updateUser
 );
@@ -70,7 +61,7 @@ router.patch(
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   isUserExits,
   isCompanyExists,
-  isUserBelongsToCompany,
+  verifyUserCompanyMembership,
   addToCompany
 );
 router.patch(
