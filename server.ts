@@ -18,6 +18,7 @@ import authRouter from './routes/auth-routes';
 import userRouter from './routes/user-routes';
 import companyRouter from './routes/company-routes';
 import { IUserWithID } from './interfaces/interfaces';
+import { validateFiles } from './middlewares/validate-request-properties-middlewares';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -52,6 +53,7 @@ server.use(
     limits: { fileSize: 50 * 1024 * 1024 },
   })
 );
+server.use(validateFiles);
 
 server.use('/api/v1/al/auth', authRouter);
 server.use('/api/v1/al/user', userRouter);

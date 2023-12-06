@@ -58,12 +58,8 @@ export interface IAccountant {
   lastName: string;
   email: string;
   address: string;
-  phone: number;
-  latitude?: number;
-  longitude?: number;
+  phone: string;
+  latitude?: string;
+  longitude?: string;
   company?: mongoose.Types.ObjectId;
-}
-
-export interface FileUploads {
-  [fieldname: string]: Express.Multer.File[] | Express.Multer.File;
 }

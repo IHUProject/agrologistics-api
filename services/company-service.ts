@@ -164,11 +164,6 @@ export class CompanyService {
       });
     });
 
-    await User.findByIdAndUpdate(userId, {
-      company: null,
-      role: Roles.UNCATEGORIZED,
-    });
-
     await reattachTokens(
       this.res!,
       userId.toString() as string,

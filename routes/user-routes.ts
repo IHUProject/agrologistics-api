@@ -14,7 +14,10 @@ import {
   removeFromCompany,
   updateUser,
 } from '../controllers/user-controller';
-import { checkPageQuery } from '../middlewares/validate-request-properties-middlewares';
+import {
+  checkPageQuery,
+  validateFiles,
+} from '../middlewares/validate-request-properties-middlewares';
 import {
   isUserExits,
   verifyAccountOwnership,
@@ -44,6 +47,7 @@ router.delete(
 router.patch(
   '/:userId/update-user',
   authenticateUser,
+  validateFiles,
   verifyAccountOwnership,
   updateUser
 );

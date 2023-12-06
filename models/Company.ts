@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { ICompany } from '../interfaces/interfaces';
-import { validateDate } from '../helpers/validate-date';
 import { DefaultImage } from '../interfaces/enums';
+import { validateDate } from '../helpers/validate-schema-properties';
 
 const companySchema: mongoose.Schema<ICompany> = new Schema<ICompany>(
   {

@@ -8,7 +8,7 @@ const userSchema: mongoose.Schema<IUser> = new Schema<IUser>(
   {
     firstName: {
       type: String,
-      required: [true, 'Please provide first name'],
+      required: [true, 'Please provide first name.'],
       minlength: 3,
       maxlength: 50,
     },
