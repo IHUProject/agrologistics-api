@@ -24,9 +24,8 @@ export const verifyUserCompanyMembership = async (
   next: NextFunction
 ) => {
   const companyId: string = req.body.companyId || req.params.companyId;
-  const company: ICompany | null = await Company.findById(companyId);
 
-  if (company?._id.toString() !== req.currentUser?.company?.toString()) {
+  if (companyId !== req.currentUser?.company?.toString()) {
     throw new UnauthorizedError('You are not belong to this company!');
   }
 
