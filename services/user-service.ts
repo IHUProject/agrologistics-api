@@ -161,7 +161,7 @@ export class UserService {
     user.role = role;
     await user.save();
 
-    return `Role change to ${user?.role}`;
+    return `The role of employ ${user.firstName} ${user.lastName} has been changed to ${user?.role}`;
   }
 
   async addToCompany(req: Request) {
@@ -208,6 +208,6 @@ export class UserService {
       role: Roles.UNCATEGORIZED,
     });
 
-    return 'User has been removed for the company!';
+    return `The employ ${user.firstName} ${user.lastName} has been removed for the company!`;
   }
 }

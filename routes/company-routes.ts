@@ -29,9 +29,9 @@ router.get(
 );
 router.post(
   '/create-company',
-  validateCoordinates,
   authenticateUser,
   authorizePermissions(Roles.UNCATEGORIZED),
+  validateCoordinates,
   companyController.createCompany.bind(companyController)
 );
 router.delete(
@@ -43,15 +43,14 @@ router.delete(
 router.patch(
   '/:companyId/update-company',
   authenticateUser,
-  isCompanyExists,
   verifyUserCompanyMembership,
-  validateCoordinates,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
+  isCompanyExists,
+  validateCoordinates,
   companyController.updateCompany.bind(companyController)
 );
 router.get(
   '/:companyId/get-employees',
-  authenticateUser,
   validateQueryPage,
   isCompanyExists,
   companyController.getEmployees.bind(companyController)
