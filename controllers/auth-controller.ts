@@ -2,26 +2,30 @@ import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 import { AuthService } from '../services/auth-service';
 
-export const register = async (req: Request, res: Response) => {
-  const authService = new AuthService(req, res);
-  const newUser = await authService.registerUser();
-  res.status(StatusCodes.CREATED).json(newUser);
-};
+export class AuthController {
+  private authService: AuthService;
+  constructor() {
+    this.authService = new AuthService();
+  }
 
-export const login = async (req: Request, res: Response) => {
-  const authService = new AuthService(req, res);
-  const loggedInUser = await authService.loginUser();
-  res.status(StatusCodes.OK).json({ userInfo: loggedInUser });
-};
+  public async register(req: Request, res: Response) {
+    const newUser = await this.authService.registerUser(req, res);
+    res.status(StatusCodes.CREATED).json({ userInfo: newUser });
+  }
 
-export const logout = (req: Request, res: Response) => {
-  res.cookie('token', 'logout', {
-    httpOnly: true,
-    expires: new Date(Date.now() + 1000),
-    secure: true,
-    sameSite: 'none',
-    signed: true,
-  });
+  public async login(req: Request, res: Response) {
+    const loggedInUser = await this.authService.loginUser(req, res);
+    res.status(StatusCodes.OK).json({ userInfo: loggedInUser });
+  }
 
-  res.status(StatusCodes.OK).json({ result: 'User logged out!' });
-};
+  logout(req: Request, res: Response) {
+    res.cookie('token', 'logout', {
+      httpOnly: true,
+      expires: new Date(Date.now() + 1000),
+      secure: true,
+      sameSite: 'none',
+      signed: true,
+    });
+    res.status(StatusCodes.OK).json({ result: 'User logged out!' });
+  }
+}

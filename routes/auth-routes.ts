@@ -1,11 +1,20 @@
 import express, { Router } from 'express';
-import { login, logout, register } from '../controllers/auth-controller';
+import { AuthController } from '../controllers/auth-controller';
 import { isLoggedIn, isNotLoggedIn } from '../middlewares/auth-middlewares';
 
 const router: Router = express.Router();
+const authController = new AuthController();
 
-router.post('/register', isLoggedIn, register);
-router.post('/login', isLoggedIn, login);
-router.get('/logout', isNotLoggedIn, logout);
+router.post(
+  '/register',
+  isLoggedIn,
+  authController.register.bind(authController)
+);
+router.post('/login', isLoggedIn, authController.login.bind(authController));
+router.get(
+  '/logout',
+  isNotLoggedIn,
+  authController.logout.bind(authController)
+);
 
 export default router;

@@ -12,19 +12,15 @@ import { createSearchQuery } from '../helpers/create-search-query';
 import { reattachTokens } from '../helpers/re-attack-tokens';
 
 export class CompanyService {
-  req: Request;
-  res?: Response;
-  imageService: ImageService;
-  userService: UserService;
+  private imageService: ImageService;
+  private userService: UserService;
 
-  constructor(req: Request, res?: Response) {
-    this.req = req;
-    this.res = res;
-    this.imageService = new ImageService(req);
-    this.userService = new UserService(req, res!);
+  constructor() {
+    this.imageService = new ImageService();
+    this.userService = new UserService();
   }
 
-  async createCompany() {
+  public async createCompany(req: Request, res: Response) {
     const {
       name,
       phone,
@@ -34,9 +30,9 @@ export class CompanyService {
       latitude,
       longitude,
       postmanRequest,
-    } = this.req.body;
-    const { files } = this.req;
-    const { userId } = this.req.currentUser as IUserWithID;
+    } = req.body;
+    const { files } = req;
+    const { userId } = req.currentUser as IUserWithID;
 
     let newCompany = (await (
       await Company.create({
@@ -55,7 +51,8 @@ export class CompanyService {
     })) as ICompany;
 
     if (files?.image) {
-      const logo = await this.imageService.handleSingleImage(
+      const imageService = new ImageService();
+      const logo = await imageService.handleSingleImage(
         files?.image as UploadedFile[]
       );
 
@@ -77,7 +74,7 @@ export class CompanyService {
     });
 
     await reattachTokens(
-      this.res!,
+      res,
       userId.toString() as string,
       postmanRequest || false
     );
@@ -88,11 +85,11 @@ export class CompanyService {
     })) as ICompany;
   }
 
-  async updateCompany() {
+  public async updateCompany(req: Request) {
     const { name, phone, afm, address, founded, latitude, longitude } =
-      this.req.body;
-    const { companyId } = this.req.params;
-    const { files } = this.req;
+      req.body;
+    const { companyId } = req.params;
+    const { files } = req;
 
     let updateCompany = (await Company.findByIdAndUpdate(
       companyId,
@@ -133,10 +130,10 @@ export class CompanyService {
     return updateCompany;
   }
 
-  async deleteCompany() {
-    const { companyId } = this.req.params;
-    const { postmanRequest } = this.req.body;
-    const { userId } = this.req.currentUser as IUserWithID;
+  public async deleteCompany(req: Request, res: Response) {
+    const { companyId } = req.params;
+    const { postmanRequest } = req.body;
+    const { userId } = req.currentUser as IUserWithID;
 
     const company = (await Company.findById(companyId)) as ICompany;
     const isOwner = company.owner._id.toString() === userId.toString();
@@ -165,7 +162,7 @@ export class CompanyService {
     });
 
     await reattachTokens(
-      this.res!,
+      res,
       userId.toString() as string,
       postmanRequest || false
     );
@@ -173,8 +170,8 @@ export class CompanyService {
     return `The ${company.name} company, has been deleted!`;
   }
 
-  async getCompany() {
-    const { companyId } = this.req.params;
+  async getCompany(req: Request) {
+    const { companyId } = req.params;
 
     return await Company.findById(companyId).populate({
       path: 'owner',
@@ -182,8 +179,8 @@ export class CompanyService {
     });
   }
 
-  async getCompanies() {
-    const { page, searchString } = this.req.query;
+  async getCompanies(req: Request) {
+    const { page, searchString } = req.query;
 
     const limit = 10;
     const skip = (Number(page || 1) - 1) * limit;
@@ -199,9 +196,9 @@ export class CompanyService {
     });
   }
 
-  async getEmployees() {
-    const { companyId } = this.req.params;
-    const { page, searchString } = this.req.query;
+  async getEmployees(req: Request) {
+    const { companyId } = req.params;
+    const { page, searchString } = req.query;
 
     const limit: number = 10;
     const skip: number = (Number(page || 1) - 1) * limit;

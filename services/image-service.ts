@@ -1,4 +1,3 @@
-import { Request } from 'express';
 import fs from 'fs';
 import { v2 as Cloudinary, UploadApiResponse } from 'cloudinary';
 import { ConflictError } from '../errors/conflict';
@@ -6,13 +5,7 @@ import { UploadedFile } from 'express-fileupload';
 import { BadRequestError, NotFoundError } from '../errors';
 
 export class ImageService {
-  req: Request;
-
-  constructor(req: Request) {
-    this.req = req;
-  }
-
-  async cloudinaryUpload(images: UploadedFile[]) {
+  public async cloudinaryUpload(images: UploadedFile[]) {
     try {
       const storeURLs: string[] = [];
 
@@ -34,7 +27,7 @@ export class ImageService {
     }
   }
 
-  async handleSingleImage(image: UploadedFile[]) {
+  public async handleSingleImage(image: UploadedFile[]) {
     if (!Array.isArray(image)) {
       image = [image];
     }
@@ -54,7 +47,7 @@ export class ImageService {
     return (await this.cloudinaryUpload(image)).join('');
   }
 
-  async deleteImages(images: string[]) {
+  public async deleteImages(images: string[]) {
     for (const image of images) {
       const publicId = image.split('/').slice(-1)[0].split('.')[0];
       const res: { result: string } = await Cloudinary.uploader.destroy(

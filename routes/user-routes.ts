@@ -1,19 +1,9 @@
-import express, { Router } from 'express';
+import express from 'express';
 import {
   authenticateUser,
   authorizePermissions,
 } from '../middlewares/auth-middlewares';
-import {
-  addToCompany,
-  changePassword,
-  changeUserRole,
-  deleteUser,
-  getCurrentUser,
-  getSingleUser,
-  getUsers,
-  removeFromCompany,
-  updateUser,
-} from '../controllers/user-controller';
+import { UserController } from '../controllers/user-controller';
 import { validateQueryPage } from '../middlewares/validate-request-properties-middlewares';
 import {
   isUserExits,
@@ -25,35 +15,48 @@ import {
   verifyUserCompanyMembership,
 } from '../middlewares/company-middlewares';
 
-const router: Router = express.Router();
+const userController = new UserController();
+const router = express.Router();
 
-router.get('/get-current-user', authenticateUser, getCurrentUser);
-router.get('/get-users', validateQueryPage, getUsers);
-router.get('/:userId/get-single-user', isUserExits, getSingleUser);
+router.get(
+  '/get-current-user',
+  authenticateUser,
+  userController.getCurrentUser.bind(userController)
+);
+router.get(
+  '/get-users',
+  validateQueryPage,
+  userController.getUsers.bind(userController)
+);
+router.get(
+  '/:userId/get-single-user',
+  isUserExits,
+  userController.getSingleUser.bind(userController)
+);
 router.delete(
   '/:userId/delete-user',
   authenticateUser,
   verifyAccountOwnership,
-  deleteUser
+  userController.deleteUser.bind(userController)
 );
 router.patch(
   '/:userId/update-user',
   authenticateUser,
   verifyAccountOwnership,
-  updateUser
+  userController.updateUser.bind(userController)
 );
 router.patch(
   '/:userId/change-password',
   authenticateUser,
   verifyAccountOwnership,
-  changePassword
+  userController.changePassword.bind(userController)
 );
 router.patch(
   '/:userId/change-role',
   authenticateUser,
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   isUserExits,
-  changeUserRole
+  userController.changeUserRole.bind(userController)
 );
 router.patch(
   '/:userId/add-user-to-company',
@@ -62,14 +65,14 @@ router.patch(
   isUserExits,
   isCompanyExists,
   verifyUserCompanyMembership,
-  addToCompany
+  userController.addToCompany.bind(userController)
 );
 router.patch(
   '/:userId/remove-user-from-company',
   authenticateUser,
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   isUserExits,
-  removeFromCompany
+  userController.removeFromCompany.bind(userController)
 );
 
 export default router;

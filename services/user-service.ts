@@ -10,23 +10,19 @@ import { ForbiddenError } from '../errors/forbidden';
 import { createSearchQuery } from '../helpers/create-search-query';
 
 export class UserService {
-  private req: Request;
-  private res: Response;
   private imageService: ImageService;
 
-  constructor(req: Request, res: Response) {
-    this.req = req;
-    this.res = res;
-    this.imageService = new ImageService(req);
+  constructor() {
+    this.imageService = new ImageService();
   }
 
-  getCurrentUser() {
-    return this.req.currentUser as IUserWithID;
+  public getCurrentUser(req: Request) {
+    return req.currentUser as IUserWithID;
   }
 
-  async deleteUser() {
-    const { userId } = this.req.params;
-    const { role } = this.req.currentUser as IUserWithID;
+  public async deleteUser(req: Request, res: Response) {
+    const { userId } = req.params;
+    const { role } = req.currentUser as IUserWithID;
 
     if (role === Roles.OWNER) {
       throw new ForbiddenError(
@@ -40,7 +36,7 @@ export class UserService {
       await this.imageService.deleteImages([user.image as string]);
     }
 
-    this.res.cookie('token', 'logout', {
+    res.cookie('token', 'logout', {
       httpOnly: true,
       expires: new Date(Date.now() + 1000),
       secure: true,
@@ -51,11 +47,11 @@ export class UserService {
     return `The user ${user.firstName} ${user.lastName}, has been deleted.`;
   }
 
-  async updateUser() {
-    const { userId } = this.req.params;
-    const { firstName, lastName, email, postmanRequest } = this.req.body;
-    const { currentUser } = this.req;
-    const { files } = this.req;
+  public async updateUser(req: Request, res: Response) {
+    const { userId } = req.params;
+    const { firstName, lastName, email, postmanRequest } = req.body;
+    const { currentUser } = req;
+    const { files } = req;
 
     let updatedUser = await User.findByIdAndUpdate(
       userId,
@@ -85,7 +81,7 @@ export class UserService {
     }
 
     await reattachTokens(
-      this.res!,
+      res,
       currentUser?.userId.toString() as string,
       postmanRequest || false
     );
@@ -98,8 +94,8 @@ export class UserService {
       })) as IUser;
   }
 
-  async getUsers() {
-    const { page, searchString } = this.req.query;
+  public async getUsers(req: Request) {
+    const { page, searchString } = req.query;
 
     const limit = 10;
     const skip = (Number(page || 1) - 1) * limit;
@@ -119,8 +115,8 @@ export class UserService {
       })) as IUser[];
   }
 
-  async getSingleUser(): Promise<IUser> {
-    const { userId } = this.req.params;
+  public async getSingleUser(req: Request): Promise<IUser> {
+    const { userId } = req.params;
 
     return (await User.findById(userId)
       .select('-password -createdAt -updatedAt')
@@ -130,9 +126,9 @@ export class UserService {
       })) as IUser;
   }
 
-  async changePassword() {
-    const { userId } = this.req.params;
-    const { oldPassword, newPassword } = this.req.body;
+  async changePassword(req: Request) {
+    const { userId } = req.params;
+    const { oldPassword, newPassword } = req.body;
 
     const user = (await User.findById(userId)) as IUser;
 
@@ -149,12 +145,12 @@ export class UserService {
     return 'Password has been change!';
   }
 
-  async changeUserRole() {
-    const { userId } = this.req.params;
-    const { role } = this.req.body;
+  async changeUserRole(req: Request) {
+    const { userId } = req.params;
+    const { role } = req.body;
 
     const user = (await User.findById(userId)) as IUser;
-    const { company } = this.req.currentUser as IUserWithID;
+    const { company } = req.currentUser as IUserWithID;
     if (user.company.toString() !== company.toString()) {
       throw new UnauthorizedError("You can not change this user's role");
     }
@@ -168,9 +164,9 @@ export class UserService {
     return `Role change to ${user?.role}`;
   }
 
-  async addToCompany() {
-    const { userId } = this.req.params;
-    const { companyId, role } = this.req.body;
+  async addToCompany(req: Request) {
+    const { userId } = req.params;
+    const { companyId, role } = req.body;
 
     if (role && role === Roles.OWNER) {
       throw new BadRequestError('You can not make an employ owner!');
@@ -195,9 +191,9 @@ export class UserService {
     } has been add to the company with as ${role || Roles.EMPLOY}`;
   }
 
-  async removeFromCompany() {
-    const { userId } = this.req.params;
-    const { company } = this.req.currentUser as IUserWithID;
+  async removeFromCompany(req: Request) {
+    const { userId } = req.params;
+    const { company } = req.currentUser as IUserWithID;
 
     const user = (await User.findById(userId)) as IUser;
     if (!user.company) {
