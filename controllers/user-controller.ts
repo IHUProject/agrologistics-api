@@ -1,58 +1,56 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services/user-service';
 import { StatusCodes } from 'http-status-codes';
-import { IUser, IUserWithID } from '../interfaces/interfaces';
 
-export const getCurrentUser = (req: Request, res: Response) => {
-  const userService: UserService = new UserService(req, res);
-  const currentUser: IUserWithID = userService.getCurrentUser();
-  res.status(StatusCodes.OK).json({ userInfo: currentUser });
-};
+export class UserController {
+  private userService: UserService;
 
-export const updateUser = async (req: Request, res: Response) => {
-  const userService: UserService = new UserService(req, res);
-  const updateUser: IUser = await userService.updateUser();
-  res.status(StatusCodes.OK).json({ userInfo: updateUser });
-};
+  constructor() {
+    this.userService = new UserService();
+  }
 
-export const deleteUser = async (req: Request, res: Response) => {
-  const userService: UserService = new UserService(req, res);
-  const message: string = await userService.deleteUser();
-  res.status(StatusCodes.OK).json({ message });
-};
+  public getCurrentUser(req: Request, res: Response) {
+    const currentUser = this.userService.getCurrentUser(req);
+    res.status(StatusCodes.OK).json({ userInfo: currentUser });
+  }
 
-export const getUsers = async (req: Request, res: Response) => {
-  const userService: UserService = new UserService(req, res);
-  const users: IUser[] = await userService.getUsers();
-  res.status(StatusCodes.OK).json({ users, totalCount: users.length });
-};
+  public async updateUser(req: Request, res: Response) {
+    const updatedUser = await this.userService.updateUser(req, res);
+    res.status(StatusCodes.OK).json({ userInfo: updatedUser });
+  }
 
-export const getSingleUser = async (req: Request, res: Response) => {
-  const userService: UserService = new UserService(req, res);
-  const user: IUser = await userService.getSingleUser();
-  res.status(StatusCodes.OK).json({ userInfo: user });
-};
+  public async deleteUser(req: Request, res: Response) {
+    const result = await this.userService.deleteUser(req, res);
+    res.status(StatusCodes.OK).json({ result });
+  }
 
-export const changePassword = async (req: Request, res: Response) => {
-  const userService: UserService = new UserService(req, res);
-  const result: string = await userService.changePassword();
-  res.status(StatusCodes.OK).json({ msg: result });
-};
+  public async getUsers(req: Request, res: Response) {
+    const users = await this.userService.getUsers(req);
+    res.status(StatusCodes.OK).json({ users, totalCount: users.length });
+  }
 
-export const changeUserRole = async (req: Request, res: Response) => {
-  const userService = new UserService(req, res);
-  const result = await userService.changeUserRole();
-  res.status(StatusCodes.OK).json({ msg: result });
-};
+  public async getSingleUser(req: Request, res: Response) {
+    const user = await this.userService.getSingleUser(req);
+    res.status(StatusCodes.OK).json({ userInfo: user });
+  }
 
-export const addToCompany = async (req: Request, res: Response) => {
-  const userService = new UserService(req, res);
-  const result = await userService.addToCompany();
-  res.status(StatusCodes.OK).json({ result });
-};
+  public async changePassword(req: Request, res: Response) {
+    const result = await this.userService.changePassword(req);
+    res.status(StatusCodes.OK).json({ result });
+  }
 
-export const removeFromCompany = async (req: Request, res: Response) => {
-  const userService = new UserService(req, res);
-  const result = await userService.removeFromCompany();
-  res.status(StatusCodes.OK).json({ result });
-};
+  public async changeUserRole(req: Request, res: Response) {
+    const result = await this.userService.changeUserRole(req);
+    res.status(StatusCodes.OK).json({ result });
+  }
+
+  public async addToCompany(req: Request, res: Response) {
+    const result = await this.userService.addToCompany(req);
+    res.status(StatusCodes.OK).json({ result });
+  }
+
+  public async removeFromCompany(req: Request, res: Response) {
+    const result = await this.userService.removeFromCompany(req);
+    res.status(StatusCodes.OK).json({ result });
+  }
+}

@@ -1,16 +1,9 @@
-import express, { Router } from 'express';
+import express from 'express';
 import {
   authenticateUser,
   authorizePermissions,
 } from '../middlewares/auth-middlewares';
-import {
-  createCompany,
-  deleteCompany,
-  getCompanies,
-  getEmployees,
-  getSingleCompany,
-  updateCompany,
-} from '../controllers/companies-controller';
+import { CompanyController } from '../controllers/companies-controller';
 import { Roles } from '../interfaces/enums';
 import {
   validateCoordinates,
@@ -21,22 +14,31 @@ import {
   verifyUserCompanyMembership,
 } from '../middlewares/company-middlewares';
 
-const router: Router = express.Router();
+const companyController = new CompanyController();
+const router = express.Router();
 
-router.get('/get-companies', validateQueryPage, getCompanies);
-router.get('/:companyId/get-single-company', isCompanyExists, getSingleCompany);
+router.get(
+  '/get-companies',
+  validateQueryPage,
+  companyController.getCompanies.bind(companyController)
+);
+router.get(
+  '/:companyId/get-single-company',
+  isCompanyExists,
+  companyController.getSingleCompany.bind(companyController)
+);
 router.post(
   '/create-company',
   validateCoordinates,
   authenticateUser,
   authorizePermissions(Roles.UNCATEGORIZED),
-  createCompany
+  companyController.createCompany.bind(companyController)
 );
 router.delete(
   '/:companyId/delete-company',
   isCompanyExists,
   authenticateUser,
-  deleteCompany
+  companyController.deleteCompany.bind(companyController)
 );
 router.patch(
   '/:companyId/update-company',
@@ -45,14 +47,14 @@ router.patch(
   verifyUserCompanyMembership,
   validateCoordinates,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
-  updateCompany
+  companyController.updateCompany.bind(companyController)
 );
 router.get(
   '/:companyId/get-employees',
   authenticateUser,
   validateQueryPage,
   isCompanyExists,
-  getEmployees
+  companyController.getEmployees.bind(companyController)
 );
 
 export default router;

@@ -8,19 +8,15 @@ import { ImageService } from './image-service';
 import { IUser } from '../interfaces/interfaces';
 
 export class AuthService {
-  private req: Request;
-  private res: Response;
   private imageService: ImageService;
 
-  constructor(req: Request, res: Response) {
-    this.req = req;
-    this.res = res;
-    this.imageService = new ImageService(req);
+  constructor() {
+    this.imageService = new ImageService();
   }
 
-  async registerUser() {
-    const { firstName, lastName, email, password } = this.req.body;
-    const { files } = this.req;
+  public async registerUser(req: Request, res: Response) {
+    const { firstName, lastName, email, password } = req.body;
+    const { files } = req;
 
     let user = (await User.create({
       firstName,
@@ -42,12 +38,12 @@ export class AuthService {
     }
 
     const tokenUser = createTokenUser(user);
-    attachTokens(this.res, tokenUser, this.req.body.postmanRequest);
+    attachTokens(res, tokenUser, req.body.postmanRequest);
 
     return tokenUser;
   }
-  async loginUser() {
-    const { email, password } = this.req.body;
+  public async loginUser(req: Request, res: Response) {
+    const { email, password } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -60,8 +56,8 @@ export class AuthService {
     }
 
     const tokenUser = createTokenUser(user);
+    attachTokens(res, tokenUser, req.body.postmanRequest);
 
-    attachTokens(this.res, tokenUser, this.req.body.postmanRequest);
     return tokenUser;
   }
 }
