@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services/user-service';
 import { StatusCodes } from 'http-status-codes';
-import { IUserWithID } from '../interfaces/interfaces';
+import { IUser, IUserWithID } from '../interfaces/interfaces';
+import { constructPayload } from '../helpers/construct-payload';
 
 export class UserController {
   private userService: UserService;
@@ -18,12 +19,15 @@ export class UserController {
     const { body } = req;
     const { userId } = req.params;
     const { files } = req;
+
+    const payload = constructPayload<IUser>(req, body);
     const updatedUser = await this.userService.updateUser(
-      body,
+      payload,
       userId,
       files,
       res
     );
+
     res.status(StatusCodes.OK).json({ userInfo: updatedUser });
   }
 
@@ -45,14 +49,18 @@ export class UserController {
 
   public async getSingleUser(req: Request, res: Response) {
     const { userId } = req.params;
+
     const user = await this.userService.getSingleUser(userId);
+
     res.status(StatusCodes.OK).json({ userInfo: user });
   }
 
   public async changePassword(req: Request, res: Response) {
     const { userId } = req.params;
     const { body } = req;
+
     const result = await this.userService.changePassword(userId, body);
+
     res.status(StatusCodes.OK).json({ result });
   }
 
@@ -60,28 +68,39 @@ export class UserController {
     const { userId } = req.params;
     const { body } = req;
     const { currentUser } = req;
+
     const result = await this.userService.changeUserRole(
       userId,
       body,
       currentUser as IUserWithID
     );
+
     res.status(StatusCodes.OK).json({ result });
   }
 
   public async addToCompany(req: Request, res: Response) {
     const { userId } = req.params;
-    const { companyId, role } = req.body;
-    const result = await this.userService.addToCompany(userId, role, companyId);
+    const { role } = req.body;
+    const { company } = req.currentUser as IUserWithID;
+
+    const result = await this.userService.addToCompany(
+      userId,
+      role,
+      company.toString()
+    );
+
     res.status(StatusCodes.OK).json({ result });
   }
 
   public async removeFromCompany(req: Request, res: Response) {
     const { userId } = req.params;
     const { currentUser } = req;
+
     const result = await this.userService.removeFromCompany(
       userId,
       currentUser as IUserWithID
     );
+
     res.status(StatusCodes.OK).json({ result });
   }
 }

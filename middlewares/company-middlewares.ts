@@ -44,7 +44,7 @@ export const verifyUserCompanyMembership = async (
     throw new BadRequestError('Something went wrong!');
   }
 
-  if (companyId.toString() !== req.currentUser?.company?.toString()) {
+  if (companyId?.toString() !== req.currentUser?.company?.toString()) {
     throw new UnauthorizedError(
       'You can not change others company information!'
     );
