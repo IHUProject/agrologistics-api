@@ -31,6 +31,7 @@ export class ImageService {
     if (!Array.isArray(image)) {
       image = [image];
     }
+
     if (image.length > 1) {
       throw new BadRequestError('You allowed to upload only 1 image');
     }

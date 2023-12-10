@@ -8,6 +8,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import fileUpload from 'express-fileupload';
 import cors from 'cors';
 import { IUserWithID } from './interfaces/interfaces';
+import morgan from 'morgan';
 
 //middlewares
 import { notFoundMiddleware } from './middlewares/not-found';
@@ -55,6 +56,7 @@ server.use(
   })
 );
 server.use(validateFiles);
+server.use(morgan('dev'));
 
 server.use('/api/v1/al/auth', authRouter);
 server.use('/api/v1/al/user', userRouter);
