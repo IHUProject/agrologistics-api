@@ -26,7 +26,9 @@ export const verifyUserCompanyMembership = async (
   const companyId: string = req.body.companyId || req.params.companyId;
 
   if (companyId !== req.currentUser?.company?.toString()) {
-    throw new UnauthorizedError('You are not belong to this company!');
+    throw new UnauthorizedError(
+      'You can not change others company information!'
+    );
   }
 
   next();

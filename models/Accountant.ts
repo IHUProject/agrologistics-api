@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import { IAccountant } from '../interfaces/interfaces';
 import validator from 'validator';
 
-const accountSchema: mongoose.Schema<IAccountant> = new Schema<IAccountant>(
+const accountantSchema: mongoose.Schema<IAccountant> = new Schema<IAccountant>(
   {
     firstName: { type: String, default: null, minlength: 3, maxlength: 35 },
     lastName: { type: String, default: null, minlength: 3, maxlength: 35 },
@@ -14,7 +14,7 @@ const accountSchema: mongoose.Schema<IAccountant> = new Schema<IAccountant>(
         validator: function (value: string) {
           return /^[0-9]{10}$/.test(value);
         },
-        message: (props) => `The ${props.value} is not a valid phone number.`,
+        message: (props) => `${props.value} is not a valid phone number.`,
       },
     },
     email: {
@@ -27,6 +27,7 @@ const accountSchema: mongoose.Schema<IAccountant> = new Schema<IAccountant>(
     },
     address: { type: String, default: null, minlength: 5, maxlength: 35 },
     company: { type: Schema.Types.ObjectId, ref: 'Company' },
+    updatedBy: { type: Schema.Types.ObjectId, default: null, ref: 'User' },
     latitude: {
       type: String,
       default: null,
@@ -68,10 +69,10 @@ const accountSchema: mongoose.Schema<IAccountant> = new Schema<IAccountant>(
   }
 );
 
-const Account: mongoose.Model<IAccountant> = mongoose.model<IAccountant>(
+const Accountant: mongoose.Model<IAccountant> = mongoose.model<IAccountant>(
   'Accountant',
-  accountSchema,
+  accountantSchema,
   'Accountants'
 );
 
-export default Account;
+export default Accountant;

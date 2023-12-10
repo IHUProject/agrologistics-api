@@ -7,18 +7,19 @@ import cookieParser from 'cookie-parser';
 import { v2 as cloudinary } from 'cloudinary';
 import fileUpload from 'express-fileupload';
 import cors from 'cors';
+import { IUserWithID } from './interfaces/interfaces';
 
 //middlewares
 import { notFoundMiddleware } from './middlewares/not-found';
 import { headersMiddleware } from './middlewares/headers';
 import { errorHandlerMiddleware } from './middlewares/error-handler';
+import { validateFiles } from './middlewares/validate-request-properties-middlewares';
 
 //routes
 import authRouter from './routes/auth-routes';
 import userRouter from './routes/user-routes';
 import companyRouter from './routes/company-routes';
-import { IUserWithID } from './interfaces/interfaces';
-import { validateFiles } from './middlewares/validate-request-properties-middlewares';
+import accountantRouter from './routes/accountant-routes';
 
 const server = express();
 
@@ -58,6 +59,7 @@ server.use(validateFiles);
 server.use('/api/v1/al/auth', authRouter);
 server.use('/api/v1/al/user', userRouter);
 server.use('/api/v1/al/company', companyRouter);
+server.use('/api/v1/al/accountant', accountantRouter);
 
 server.use(notFoundMiddleware);
 server.use(headersMiddleware);

@@ -51,8 +51,7 @@ export class CompanyService {
     })) as ICompany;
 
     if (files?.image) {
-      const imageService = new ImageService();
-      const logo = await imageService.handleSingleImage(
+      const logo = await this.imageService.handleSingleImage(
         files?.image as UploadedFile[]
       );
 
@@ -61,7 +60,7 @@ export class CompanyService {
         {
           logo,
         },
-        { new: true }
+        { new: true, runValidators: true }
       ).populate({
         path: 'owner',
         select: 'firstName lastName email image _id role',
@@ -91,7 +90,7 @@ export class CompanyService {
     const { companyId } = req.params;
     const { files } = req;
 
-    let updateCompany = (await Company.findByIdAndUpdate(
+    let updatedCompany = (await Company.findByIdAndUpdate(
       companyId,
       {
         name,
@@ -109,13 +108,13 @@ export class CompanyService {
     })) as ICompany;
 
     if (files?.image) {
-      if (updateCompany?.logo !== DefaultImage.LOGO) {
-        await this.imageService.deleteImages([updateCompany?.logo as string]);
+      if (updatedCompany?.logo !== DefaultImage.LOGO) {
+        await this.imageService.deleteImages([updatedCompany?.logo as string]);
       }
       const logo = await this.imageService.handleSingleImage(
         files?.image as UploadedFile[]
       );
-      updateCompany = (await Company.findByIdAndUpdate(
+      updatedCompany = (await Company.findByIdAndUpdate(
         companyId,
         {
           logo,
@@ -127,7 +126,7 @@ export class CompanyService {
       })) as ICompany;
     }
 
-    return updateCompany;
+    return updatedCompany;
   }
 
   public async deleteCompany(req: Request, res: Response) {
@@ -153,6 +152,7 @@ export class CompanyService {
     const employees = (await User.find({
       company: companyId,
     })) as IUser[];
+    console.log(employees);
 
     employees.forEach(async (emp) => {
       await User.findByIdAndUpdate(emp._id, {

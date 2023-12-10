@@ -42,9 +42,9 @@ export const errorHandlerMiddleware = (
   }
 
   if (err.code && err.code === 11000) {
-    customError.msg = `${Object.keys(
+    customError.msg = `The ${Object.keys(
       err.keyValue
-    )} is already in use, please choose something else`;
+    )} you provide is already in use, please choose something else`;
     customError.statusCode = 400;
   }
 

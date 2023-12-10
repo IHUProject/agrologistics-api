@@ -65,5 +65,6 @@ export interface IAccountant {
   phone: string;
   latitude?: string;
   longitude?: string;
-  company?: mongoose.Types.ObjectId;
+  company: mongoose.Types.ObjectId;
+  updatedBy?: mongoose.Types.ObjectId;
 }
