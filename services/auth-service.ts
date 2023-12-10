@@ -1,11 +1,11 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { UnauthorizedError } from '../errors';
 import User from '../models/User';
 import { attachTokens } from '../helpers';
 import { createTokenUser } from '../helpers/create-token-user';
-import { UploadedFile } from 'express-fileupload';
+import { FileArray, UploadedFile } from 'express-fileupload';
 import { ImageService } from './image-service';
-import { IUser } from '../interfaces/interfaces';
+import { IPayload, IUser } from '../interfaces/interfaces';
 
 export class AuthService {
   private imageService: ImageService;
@@ -14,14 +14,20 @@ export class AuthService {
     this.imageService = new ImageService();
   }
 
-  public async registerUser(req: Request, res: Response) {
-    const { firstName, lastName, email, password } = req.body;
-    const { files } = req;
+  public async registerUser(
+    payload: IPayload<IUser>,
+    files: FileArray | null | undefined,
+    res: Response
+  ) {
+    const { firstName, lastName, email, password, phone } = payload.data;
+    const { postmanRequest } = payload;
+    console.log(postmanRequest);
 
     let user = (await User.create({
       firstName,
       lastName,
       email,
+      phone,
       password,
     })) as IUser;
 
@@ -38,12 +44,13 @@ export class AuthService {
     }
 
     const tokenUser = createTokenUser(user);
-    attachTokens(res, tokenUser, req.body.postmanRequest);
+    attachTokens(res, tokenUser, postmanRequest);
 
     return tokenUser;
   }
-  public async loginUser(req: Request, res: Response) {
-    const { email, password } = req.body;
+  public async loginUser(payload: IPayload<IUser>, res: Response) {
+    const { postmanRequest } = payload;
+    const { email, password } = payload.data;
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -56,7 +63,7 @@ export class AuthService {
     }
 
     const tokenUser = createTokenUser(user);
-    attachTokens(res, tokenUser, req.body.postmanRequest);
+    attachTokens(res, tokenUser, postmanRequest);
 
     return tokenUser;
   }

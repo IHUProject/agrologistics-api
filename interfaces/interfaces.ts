@@ -6,10 +6,6 @@ export interface ICustomError {
   msg: string;
 }
 
-export interface RequestBody<T> {
-  body: T;
-}
-
 export interface IErrorProperties {
   message: string;
   role: {
@@ -37,34 +33,55 @@ export interface IUser extends mongoose.Document {
   password: string;
   image: string;
   role: Roles;
+  phone: number;
   company: mongoose.Types.ObjectId;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 export interface ICompany extends mongoose.Document {
   name: string;
-  phone: string;
+  phone: number;
   address: string;
   owner: mongoose.Types.ObjectId;
-  afm: string;
+  afm: number;
   logo: string;
-  founded: string;
-  latitude?: number;
-  longitude?: number;
+  founded: Date;
+  latitude: number;
+  longitude: number;
 }
 
 export interface IUserWithID extends IUser {
   userId: mongoose.Types.ObjectId;
 }
 
-export interface IAccountant {
+export interface IAccountant extends mongoose.Document {
   firstName: string;
   lastName: string;
   email: string;
   address: string;
-  phone: string;
-  latitude?: string;
-  longitude?: string;
+  phone: number;
+  latitude?: number;
+  longitude?: number;
   company: mongoose.Types.ObjectId;
   updatedBy?: mongoose.Types.ObjectId;
+}
+
+export interface IProduct extends mongoose.Document {
+  name: string;
+  pricePerKilo: number;
+  category: string;
+  stockInKilo: number;
+  description: string;
+  images: string[];
+  company: mongoose.Types.ObjectId;
+}
+
+export interface IPayload<T> {
+  postmanRequest: boolean;
+  data: T;
+}
+
+export interface IPasswordPayload {
+  newPassword: string;
+  oldPassword: string;
 }

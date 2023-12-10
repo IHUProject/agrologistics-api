@@ -1,25 +1,26 @@
 import mongoose, { Schema } from 'mongoose';
 import { IAccountant } from '../interfaces/interfaces';
 import validator from 'validator';
+import {
+  validateLatitude,
+  validateLongitude,
+  validatePhoneNumber,
+} from '../helpers/validate-schema-properties';
 
 const accountantSchema: mongoose.Schema<IAccountant> = new Schema<IAccountant>(
   {
     firstName: { type: String, default: null, minlength: 3, maxlength: 35 },
     lastName: { type: String, default: null, minlength: 3, maxlength: 35 },
     phone: {
-      type: String,
-      unique: true,
+      type: Number,
       default: null,
       validate: {
-        validator: function (value: string) {
-          return /^[0-9]{10}$/.test(value);
-        },
-        message: (props) => `${props.value} is not a valid phone number.`,
+        validator: validatePhoneNumber,
+        message: 'Invalid phone number, must be 10 digits.',
       },
     },
     email: {
       type: String,
-      unique: true,
       required: [true, 'Please provide an email.'],
       minlength: 7,
       maxlength: 35,
@@ -29,35 +30,19 @@ const accountantSchema: mongoose.Schema<IAccountant> = new Schema<IAccountant>(
     company: { type: Schema.Types.ObjectId, ref: 'Company' },
     updatedBy: { type: Schema.Types.ObjectId, default: null, ref: 'User' },
     latitude: {
-      type: String,
+      type: Number,
       default: null,
       validate: {
-        validator: function (value: string) {
-          const numValue = parseFloat(value);
-          return (
-            !isNaN(numValue) &&
-            value === numValue.toString() &&
-            numValue >= -90 &&
-            numValue <= 90
-          );
-        },
+        validator: validateLatitude,
         message: (props) =>
           `${props.value} is not a valid latitude, latitude must be a number between -90 and 90.`,
       },
     },
     longitude: {
-      type: String,
+      type: Number,
       default: null,
       validate: {
-        validator: function (value: string) {
-          const numValue = parseFloat(value);
-          return (
-            !isNaN(numValue) &&
-            value === numValue.toString() &&
-            numValue >= -180 &&
-            numValue <= 180
-          );
-        },
+        validator: validateLongitude,
         message: (props) =>
           `${props.value} is not a valid longitude, longitude must be a number between -180 and 180.`,
       },

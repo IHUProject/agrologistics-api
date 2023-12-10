@@ -1,9 +1,13 @@
-import { Request, Response } from 'express';
-import { ICompany, IUser, IUserWithID } from '../interfaces/interfaces';
+import { Response } from 'express';
+import {
+  ICompany,
+  IPayload,
+  IUser,
+  IUserWithID,
+} from '../interfaces/interfaces';
 import Company from '../models/Company';
-import { UserService } from './user-service';
 import { FilterQuery } from 'mongoose';
-import { UploadedFile } from 'express-fileupload';
+import { FileArray, UploadedFile } from 'express-fileupload';
 import { ImageService } from './image-service';
 import { DefaultImage, Roles } from '../interfaces/enums';
 import { UnauthorizedError } from '../errors';
@@ -13,26 +17,20 @@ import { reattachTokens } from '../helpers/re-attack-tokens';
 
 export class CompanyService {
   private imageService: ImageService;
-  private userService: UserService;
-
   constructor() {
     this.imageService = new ImageService();
-    this.userService = new UserService();
   }
 
-  public async createCompany(req: Request, res: Response) {
-    const {
-      name,
-      phone,
-      afm,
-      address,
-      founded,
-      latitude,
-      longitude,
-      postmanRequest,
-    } = req.body;
-    const { files } = req;
-    const { userId } = req.currentUser as IUserWithID;
+  public async createCompany(
+    payload: IPayload<ICompany>,
+    files: FileArray | null | undefined,
+    currentUser: IUserWithID,
+    res: Response
+  ) {
+    const { name, phone, afm, address, founded, latitude, longitude } =
+      payload.data;
+    const { postmanRequest } = payload;
+    const { userId } = currentUser as IUserWithID;
 
     let newCompany = (await (
       await Company.create({
@@ -84,11 +82,13 @@ export class CompanyService {
     })) as ICompany;
   }
 
-  public async updateCompany(req: Request) {
+  public async updateCompany(
+    payload: IPayload<ICompany>,
+    files: FileArray | null | undefined,
+    companyId: string
+  ) {
     const { name, phone, afm, address, founded, latitude, longitude } =
-      req.body;
-    const { companyId } = req.params;
-    const { files } = req;
+      payload.data;
 
     let updatedCompany = (await Company.findByIdAndUpdate(
       companyId,
@@ -129,11 +129,13 @@ export class CompanyService {
     return updatedCompany;
   }
 
-  public async deleteCompany(req: Request, res: Response) {
-    const { companyId } = req.params;
-    const { postmanRequest } = req.body;
-    const { userId } = req.currentUser as IUserWithID;
-
+  public async deleteCompany(
+    companyId: string,
+    postmanRequest: boolean,
+    currentUser: IUserWithID,
+    res: Response
+  ) {
+    const { userId } = currentUser as IUserWithID;
     const company = (await Company.findById(companyId)) as ICompany;
     const isOwner = company.owner._id.toString() === userId.toString();
 
@@ -146,13 +148,12 @@ export class CompanyService {
     await Company.findByIdAndDelete(companyId);
 
     if (company.logo !== DefaultImage.LOGO) {
-      await this.imageService.deleteImages([company.logo as string]);
+      await this.imageService.deleteImages([company.logo]);
     }
 
     const employees = (await User.find({
       company: companyId,
     })) as IUser[];
-    console.log(employees);
 
     employees.forEach(async (emp) => {
       await User.findByIdAndUpdate(emp._id, {
@@ -170,24 +171,19 @@ export class CompanyService {
     return `The ${company.name} company, has been deleted!`;
   }
 
-  async getCompany(req: Request) {
-    const { companyId } = req.params;
-
+  async getCompany(companyId: string) {
     return await Company.findById(companyId).populate({
       path: 'owner',
       select: 'firstName lastName email image _id role',
     });
   }
 
-  async getCompanies(req: Request) {
-    const { page, searchString } = req.query;
-
+  async getCompanies(page: string, searchString: string) {
     const limit = 10;
     const skip = (Number(page || 1) - 1) * limit;
 
     const searchQuery = createSearchQuery<ICompany>(searchString as string, [
       'name',
-      'phone',
     ]);
 
     return await Company.find(searchQuery).skip(skip).limit(limit).populate({
@@ -196,10 +192,13 @@ export class CompanyService {
     });
   }
 
-  async getEmployees(req: Request) {
-    const { companyId } = req.params;
-    const { page, searchString } = req.query;
-
+  async getEmployees(
+    companyId: string,
+    page: string,
+    searchString: string,
+    currentUser: IUserWithID
+  ) {
+    const { company } = currentUser;
     const limit: number = 10;
     const skip: number = (Number(page || 1) - 1) * limit;
 
@@ -208,14 +207,16 @@ export class CompanyService {
       'lastName',
     ]);
 
+    let selectQuery = '-password -createdAt -updatedAt -company -phone';
+    if (company.toString() === companyId) {
+      selectQuery = '-password -createdAt -updatedAt -company';
+    }
+
     const query: FilterQuery<IUser> = {
       ...searchQuery,
       company: companyId,
     };
 
-    return await User.find(query)
-      .skip(skip)
-      .limit(limit)
-      .select('-password -createdAt -updatedAt -company');
+    return await User.find(query).skip(skip).limit(limit).select(selectQuery);
   }
 }

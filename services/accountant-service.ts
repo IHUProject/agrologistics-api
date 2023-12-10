@@ -1,31 +1,22 @@
-import { Request } from 'express';
 import Accountant from '../models/Accountant';
-import { IUserWithID } from '../interfaces/interfaces';
+import { IAccountant, IPayload } from '../interfaces/interfaces';
 import { BadRequestError } from '../errors';
+import { Types } from 'mongoose';
 
 export class AccountantService {
-  constructor() {}
-
-  public async deleteAccountant(req: Request) {
-    const { accId } = req.params;
+  public async deleteAccountant(accId: string) {
     await Accountant.findByIdAndDelete(accId);
-
     return 'The accountant has been deleted!';
   }
 
-  public async createAccountant(req: Request) {
-    const {
-      firstName,
-      lastName,
-      address,
-      email,
-      phone,
-      latitude,
-      longitude,
-      companyId,
-    } = req.body;
+  public async createAccountant(
+    payload: IPayload<IAccountant>,
+    usersCompanyId: Types.ObjectId
+  ) {
+    const { firstName, lastName, address, email, phone, latitude, longitude } =
+      payload.data;
 
-    const accountant = await Accountant.findById(companyId);
+    const accountant = await Accountant.findById(usersCompanyId);
     if (accountant) {
       throw new BadRequestError('The company has already an accountant!');
     }
@@ -38,17 +29,19 @@ export class AccountantService {
       phone,
       latitude,
       longitude,
-      company: companyId,
+      company: usersCompanyId,
     });
 
     return newAccountant;
   }
 
-  public async updateAccountant(req: Request) {
+  public async updateAccountant(
+    payload: IPayload<IAccountant>,
+    accId: string,
+    userId: Types.ObjectId
+  ) {
     const { firstName, lastName, address, email, phone, latitude, longitude } =
-      req.body;
-    const { accId } = req.params;
-    const { userId } = req.currentUser as IUserWithID;
+      payload.data;
 
     const updatedAccountant = await Accountant.findByIdAndUpdate(
       accId,
@@ -73,13 +66,12 @@ export class AccountantService {
     return updatedAccountant;
   }
 
-  public async getSingleAccountant(req: Request) {
-    const { company } = req.currentUser as IUserWithID;
-    const accountant = await Accountant.findOne({ company });
+  public async getSingleAccountant(companyId: Types.ObjectId) {
+    const accountant = await Accountant.findOne({ company: companyId });
 
     if (!accountant) {
       return { msg: `Your company does not have accountant` };
     }
-    return accountant;
+    return { accountantInfo: accountant };
   }
 }

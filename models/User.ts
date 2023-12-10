@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { DefaultImage, Roles } from '../interfaces/enums';
 import { IUser } from '../interfaces/interfaces';
 import validator from 'validator';
+import { validatePhoneNumber } from '../helpers/validate-schema-properties';
 
 const userSchema: mongoose.Schema<IUser> = new Schema<IUser>(
   {
@@ -44,6 +45,15 @@ const userSchema: mongoose.Schema<IUser> = new Schema<IUser>(
         message: '{VALUE} is not valid.',
       },
       default: Roles.UNCATEGORIZED,
+    },
+    phone: {
+      type: Number,
+      unique: true,
+      default: null,
+      validate: {
+        validator: validatePhoneNumber,
+        message: 'Invalid phone number, must be 10 digits.',
+      },
     },
     company: { type: Schema.Types.ObjectId, ref: 'Company', default: null },
   },
