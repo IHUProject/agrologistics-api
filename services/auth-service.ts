@@ -21,7 +21,6 @@ export class AuthService {
   ) {
     const { firstName, lastName, email, password, phone } = payload.data;
     const { postmanRequest } = payload;
-    console.log(postmanRequest);
 
     let user = (await User.create({
       firstName,

@@ -10,10 +10,7 @@ import {
   verifyAccountOwnership,
 } from '../middlewares/user-middlewares';
 import { Roles } from '../interfaces/enums';
-import {
-  isCompanyExists,
-  verifyUserCompanyMembership,
-} from '../middlewares/company-middlewares';
+import { verifyUserCompanyMembership } from '../middlewares/company-middlewares';
 
 const userController = new UserController();
 const router = express.Router();
@@ -63,14 +60,13 @@ router.patch(
   authenticateUser,
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   isUserExits,
-  isCompanyExists,
-  verifyUserCompanyMembership,
   userController.addToCompany.bind(userController)
 );
 router.patch(
   '/:userId/remove-user-from-company',
   authenticateUser,
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
+  verifyUserCompanyMembership,
   isUserExits,
   userController.removeFromCompany.bind(userController)
 );

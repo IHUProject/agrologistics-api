@@ -70,11 +70,7 @@ export class CompanyService {
       role: Roles.OWNER,
     });
 
-    await reattachTokens(
-      res,
-      userId.toString() as string,
-      postmanRequest || false
-    );
+    await reattachTokens(res, userId.toString() as string, postmanRequest);
 
     return (await Company.findById(newCompany._id).populate({
       path: 'owner',
@@ -83,12 +79,11 @@ export class CompanyService {
   }
 
   public async updateCompany(
-    payload: IPayload<ICompany>,
+    payload: ICompany,
     files: FileArray | null | undefined,
     companyId: string
   ) {
-    const { name, phone, afm, address, founded, latitude, longitude } =
-      payload.data;
+    const { name, phone, afm, address, founded, latitude, longitude } = payload;
 
     let updatedCompany = (await Company.findByIdAndUpdate(
       companyId,
@@ -162,11 +157,7 @@ export class CompanyService {
       });
     });
 
-    await reattachTokens(
-      res,
-      userId.toString() as string,
-      postmanRequest || false
-    );
+    await reattachTokens(res, userId.toString() as string, postmanRequest);
 
     return `The ${company.name} company, has been deleted!`;
   }

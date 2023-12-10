@@ -1,5 +1,5 @@
 import Accountant from '../models/Accountant';
-import { IAccountant, IPayload } from '../interfaces/interfaces';
+import { IAccountant } from '../interfaces/interfaces';
 import { BadRequestError } from '../errors';
 import { Types } from 'mongoose';
 
@@ -10,11 +10,11 @@ export class AccountantService {
   }
 
   public async createAccountant(
-    payload: IPayload<IAccountant>,
+    payload: IAccountant,
     usersCompanyId: Types.ObjectId
   ) {
     const { firstName, lastName, address, email, phone, latitude, longitude } =
-      payload.data;
+      payload;
 
     const accountant = await Accountant.findById(usersCompanyId);
     if (accountant) {
@@ -36,12 +36,12 @@ export class AccountantService {
   }
 
   public async updateAccountant(
-    payload: IPayload<IAccountant>,
+    payload: IAccountant,
     accId: string,
     userId: Types.ObjectId
   ) {
     const { firstName, lastName, address, email, phone, latitude, longitude } =
-      payload.data;
+      payload;
 
     const updatedAccountant = await Accountant.findByIdAndUpdate(
       accId,

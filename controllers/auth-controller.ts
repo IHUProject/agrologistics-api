@@ -1,6 +1,8 @@
 import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 import { AuthService } from '../services/auth-service';
+import { IUser } from '../interfaces/interfaces';
+import { constructPayload } from '../helpers/construct-payload';
 
 export class AuthController {
   private authService: AuthService;
@@ -10,13 +12,19 @@ export class AuthController {
 
   public async register(req: Request, res: Response) {
     const { files, body } = req;
-    const newUser = await this.authService.registerUser(body, files, res);
+
+    const payload = constructPayload<IUser>(req, body);
+    const newUser = await this.authService.registerUser(payload, files, res);
+
     res.status(StatusCodes.CREATED).json({ userInfo: newUser });
   }
 
   public async login(req: Request, res: Response) {
     const { body } = req;
-    const loggedInUser = await this.authService.loginUser(body, res);
+
+    const payload = constructPayload<IUser>(req, body);
+    const loggedInUser = await this.authService.loginUser(payload, res);
+
     res.status(StatusCodes.OK).json({ userInfo: loggedInUser });
   }
 

@@ -92,7 +92,7 @@ export class UserService {
         });
     }
 
-    await reattachTokens(res, userId, postmanRequest || false);
+    await reattachTokens(res, userId, postmanRequest);
 
     return updatedUser;
   }
@@ -145,10 +145,10 @@ export class UserService {
 
   async changeUserRole(
     userId: string,
-    payload: IPayload<IUser>,
+    payload: IUser,
     currentUser: IUserWithID
   ) {
-    const { role } = payload.data;
+    const { role } = payload;
 
     const user = (await User.findById(userId)) as IUser;
     const { company } = currentUser;
@@ -190,14 +190,15 @@ export class UserService {
   }
 
   async removeFromCompany(userId: string, currentUser: IUserWithID) {
-    const { company } = currentUser;
-
     const user = (await User.findById(userId)) as IUser;
     if (!user.company) {
       throw new BadRequestError('User does not work anywhere!');
     }
-    if (user.company.toString() !== company.toString()) {
-      throw new ForbiddenError('You don not belong at the same company');
+    if (user.role === Roles.OWNER) {
+      throw new BadRequestError('You can not remove the owner!');
+    }
+    if (user._id.toString() === currentUser.userId.toString()) {
+      throw new BadRequestError('Say what??');
     }
 
     await User.findByIdAndUpdate(userId, {

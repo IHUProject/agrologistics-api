@@ -12,36 +12,44 @@ export class AccountantController {
   public async createAccountant(req: Request, res: Response) {
     const { body, currentUser } = req;
     const { company } = currentUser as IUserWithID;
+
     const newAccountant = await this.accountantService.createAccountant(
       body,
       company
     );
+
     res.status(StatusCodes.CREATED).json({ accountantInfo: newAccountant });
   }
 
   public async getSingleAccountant(req: Request, res: Response) {
     const { company } = req.currentUser as IUserWithID;
+
     const accountant = await this.accountantService.getSingleAccountant(
       company
     );
+
     res.status(StatusCodes.OK).json(accountant);
   }
 
   public async updateAccountant(req: Request, res: Response) {
     const { body, currentUser } = req;
-    const { company } = currentUser as IUserWithID;
+    const { userId } = currentUser as IUserWithID;
     const { accId } = req.params;
+
     const updateAccountant = await this.accountantService.updateAccountant(
       body,
       accId,
-      company
+      userId
     );
+
     res.status(StatusCodes.OK).json({ accountantInfo: updateAccountant });
   }
 
   public async deleteAccountant(req: Request, res: Response) {
     const { accId } = req.params;
+
     const result = await this.accountantService.deleteAccountant(accId);
+
     res.status(StatusCodes.OK).json({ result });
   }
 }
