@@ -9,12 +9,14 @@ export class AuthController {
   }
 
   public async register(req: Request, res: Response) {
-    const newUser = await this.authService.registerUser(req, res);
+    const { files, body } = req;
+    const newUser = await this.authService.registerUser(body, files, res);
     res.status(StatusCodes.CREATED).json({ userInfo: newUser });
   }
 
   public async login(req: Request, res: Response) {
-    const loggedInUser = await this.authService.loginUser(req, res);
+    const { body } = req;
+    const loggedInUser = await this.authService.loginUser(body, res);
     res.status(StatusCodes.OK).json({ userInfo: loggedInUser });
   }
 

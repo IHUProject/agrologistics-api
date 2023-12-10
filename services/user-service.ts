@@ -1,9 +1,14 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { BadRequestError, UnauthorizedError } from '../errors';
 import User from '../models/User';
-import { IUser, IUserWithID } from '../interfaces/interfaces';
+import {
+  IPasswordPayload,
+  IPayload,
+  IUser,
+  IUserWithID,
+} from '../interfaces/interfaces';
 import { ImageService } from './image-service';
-import { UploadedFile } from 'express-fileupload';
+import fileUpload, { UploadedFile } from 'express-fileupload';
 import { DefaultImage, Roles } from '../interfaces/enums';
 import { reattachTokens } from '../helpers/re-attack-tokens';
 import { ForbiddenError } from '../errors/forbidden';
@@ -16,14 +21,7 @@ export class UserService {
     this.imageService = new ImageService();
   }
 
-  public getCurrentUser(req: Request) {
-    return req.currentUser as IUserWithID;
-  }
-
-  public async deleteUser(req: Request, res: Response) {
-    const { userId } = req.params;
-    const { role } = req.currentUser as IUserWithID;
-
+  public async deleteUser(userId: string, role: Roles, res: Response) {
     if (role === Roles.OWNER) {
       throw new ForbiddenError(
         'Please delete your company to proceed to this action!'
@@ -47,10 +45,14 @@ export class UserService {
     return `The user ${user.firstName} ${user.lastName}, has been deleted.`;
   }
 
-  public async updateUser(req: Request, res: Response) {
-    const { userId } = req.params;
-    const { firstName, lastName, email, postmanRequest } = req.body;
-    const { files } = req;
+  public async updateUser(
+    payload: IPayload<IUser>,
+    userId: string,
+    files: fileUpload.FileArray | null | undefined,
+    res: Response
+  ) {
+    const { firstName, lastName, email, phone } = payload.data;
+    const { postmanRequest } = payload;
 
     let updatedUser = await User.findByIdAndUpdate(
       userId,
@@ -58,6 +60,7 @@ export class UserService {
         firstName,
         lastName,
         email,
+        phone,
       },
       { new: true, runValidators: true }
     )
@@ -94,9 +97,7 @@ export class UserService {
     return updatedUser;
   }
 
-  public async getUsers(req: Request) {
-    const { page, searchString } = req.query;
-
+  public async getUsers(page: string, searchString: string) {
     const limit = 10;
     const skip = (Number(page || 1) - 1) * limit;
 
@@ -108,27 +109,24 @@ export class UserService {
     return (await User.find(searchQuery)
       .skip(skip)
       .limit(limit)
-      .select('-password -createdAt -updatedAt')
+      .select('-password -createdAt -updatedAt -phone')
       .populate({
         path: 'company',
         select: 'name',
       })) as IUser[];
   }
 
-  public async getSingleUser(req: Request): Promise<IUser> {
-    const { userId } = req.params;
-
+  public async getSingleUser(userId: string): Promise<IUser> {
     return (await User.findById(userId)
-      .select('-password -createdAt -updatedAt')
+      .select('-password -createdAt -updatedAt -phone')
       .populate({
         path: 'company',
         select: 'name',
       })) as IUser;
   }
 
-  async changePassword(req: Request) {
-    const { userId } = req.params;
-    const { oldPassword, newPassword } = req.body;
+  async changePassword(userId: string, payload: IPasswordPayload) {
+    const { oldPassword, newPassword } = payload;
 
     const user = (await User.findById(userId)) as IUser;
 
@@ -145,12 +143,15 @@ export class UserService {
     return 'Password has been change!';
   }
 
-  async changeUserRole(req: Request) {
-    const { userId } = req.params;
-    const { role } = req.body;
+  async changeUserRole(
+    userId: string,
+    payload: IPayload<IUser>,
+    currentUser: IUserWithID
+  ) {
+    const { role } = payload.data;
 
     const user = (await User.findById(userId)) as IUser;
-    const { company } = req.currentUser as IUserWithID;
+    const { company } = currentUser;
     if (user.company.toString() !== company.toString()) {
       throw new UnauthorizedError("You can not change this user's role");
     }
@@ -164,10 +165,7 @@ export class UserService {
     return `The role of employ ${user.firstName} ${user.lastName} has been changed to ${user?.role}`;
   }
 
-  async addToCompany(req: Request) {
-    const { userId } = req.params;
-    const { companyId, role } = req.body;
-
+  async addToCompany(userId: string, role: Roles, companyId: string) {
     if (role && role === Roles.OWNER) {
       throw new BadRequestError('You can not make an employ owner!');
     }
@@ -191,9 +189,8 @@ export class UserService {
     } has been add to the company with as ${role || Roles.EMPLOY}`;
   }
 
-  async removeFromCompany(req: Request) {
-    const { userId } = req.params;
-    const { company } = req.currentUser as IUserWithID;
+  async removeFromCompany(userId: string, currentUser: IUserWithID) {
+    const { company } = currentUser;
 
     const user = (await User.findById(userId)) as IUser;
     if (!user.company) {

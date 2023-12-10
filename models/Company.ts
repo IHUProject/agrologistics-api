@@ -1,7 +1,12 @@
 import mongoose, { Schema } from 'mongoose';
 import { ICompany } from '../interfaces/interfaces';
 import { DefaultImage } from '../interfaces/enums';
-import { validateDate } from '../helpers/validate-schema-properties';
+import {
+  validateDate,
+  validateLatitude,
+  validateLongitude,
+  validatePhoneNumber,
+} from '../helpers/validate-schema-properties';
 
 const companySchema: mongoose.Schema<ICompany> = new Schema<ICompany>(
   {
@@ -12,32 +17,30 @@ const companySchema: mongoose.Schema<ICompany> = new Schema<ICompany>(
       maxlength: 35,
     },
     phone: {
-      type: String,
+      type: Number,
       unique: true,
       default: null,
       validate: {
-        validator: function (value: string) {
-          return /^[0-9]{10}$/.test(value);
-        },
-        message: (props) => `${props.value} is not a valid phone number.`,
+        validator: validatePhoneNumber,
+        message: 'Invalid phone number, must be 10 digits.',
       },
     },
     address: { type: String, minlength: 5, maxlength: 35 },
     owner: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     afm: {
-      type: String,
+      type: Number,
       unique: true,
       required: [true, 'Please provide AFM.'],
       validate: {
-        validator: function (value: string) {
-          return /^[0-9]{9}$/.test(value);
+        validator: function (value: number) {
+          return /^[0-9]{9}$/.test(value.toString());
         },
         message: (props) => `${props.value} is not a valid AFM.`,
       },
     },
     logo: { type: String, default: DefaultImage.LOGO },
     founded: {
-      type: String,
+      type: Date,
       default: null,
       validate: {
         validator: validateDate,
@@ -46,35 +49,19 @@ const companySchema: mongoose.Schema<ICompany> = new Schema<ICompany>(
       },
     },
     latitude: {
-      type: String,
+      type: Number,
       default: null,
       validate: {
-        validator: function (value: string) {
-          const numValue = parseFloat(value);
-          return (
-            !isNaN(numValue) &&
-            value === numValue.toString() &&
-            numValue >= -90 &&
-            numValue <= 90
-          );
-        },
+        validator: validateLatitude,
         message: (props) =>
           `${props.value} is not a valid latitude, latitude must be a number between -90 and 90.`,
       },
     },
     longitude: {
-      type: String,
+      type: Number,
       default: null,
       validate: {
-        validator: function (value: string) {
-          const numValue = parseFloat(value);
-          return (
-            !isNaN(numValue) &&
-            value === numValue.toString() &&
-            numValue >= -180 &&
-            numValue <= 180
-          );
-        },
+        validator: validateLongitude,
         message: (props) =>
           `${props.value} is not a valid longitude, longitude must be a number between -180 and 180.`,
       },

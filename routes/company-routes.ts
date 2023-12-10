@@ -52,6 +52,7 @@ router.patch(
 router.get(
   '/:companyId/get-employees',
   validateQueryPage,
+  authenticateUser,
   isCompanyExists,
   companyController.getEmployees.bind(companyController)
 );
