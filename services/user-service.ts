@@ -50,7 +50,6 @@ export class UserService {
   public async updateUser(req: Request, res: Response) {
     const { userId } = req.params;
     const { firstName, lastName, email, postmanRequest } = req.body;
-    const { currentUser } = req;
     const { files } = req;
 
     let updatedUser = await User.findByIdAndUpdate(
@@ -61,7 +60,12 @@ export class UserService {
         email,
       },
       { new: true, runValidators: true }
-    );
+    )
+      .select('-password -createdAt -updatedAt')
+      .populate({
+        path: 'company',
+        select: '_id name',
+      });
 
     let image: string | undefined;
     if (files?.image) {
@@ -77,21 +81,17 @@ export class UserService {
           image,
         },
         { new: true, runValidators: true }
-      );
+      )
+        .select('-password -createdAt -updatedAt')
+        .populate({
+          path: 'company',
+          select: '_id name',
+        });
     }
 
-    await reattachTokens(
-      res,
-      currentUser?.userId.toString() as string,
-      postmanRequest || false
-    );
+    await reattachTokens(res, userId, postmanRequest || false);
 
-    return (await User.findById(userId)
-      .select('-createAt -updateAt -password')
-      .populate({
-        path: 'company',
-        select: 'name',
-      })) as IUser;
+    return updatedUser;
   }
 
   public async getUsers(req: Request) {
