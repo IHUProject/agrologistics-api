@@ -36,10 +36,10 @@ router.get(
 router.patch(
   '/:accId/update-accountant',
   authenticateUser,
+  authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY, Roles.EMPLOY),
   isAccountantExists,
   validateCoordinates,
   verifyUserCompanyMembership,
-  authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY, Roles.EMPLOY),
   accountantController.updateAccountant.bind(accountantController)
 );
 
