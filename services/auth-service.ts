@@ -3,7 +3,7 @@ import { UnauthorizedError } from '../errors';
 import User from '../models/User';
 import { attachTokens } from '../helpers';
 import { createTokenUser } from '../helpers/create-token-user';
-import { IDataImgur, IPayload, IUser } from '../interfaces/interfaces';
+import { IDataImgur, IUser } from '../interfaces/interfaces';
 import { ImageService } from './image-service';
 
 export class AuthService {
@@ -38,9 +38,8 @@ export class AuthService {
 
     return tokenUser;
   }
-  public async loginUser(payload: IPayload<IUser>, res: Response) {
-    const { postmanRequest } = payload;
-    const { email, password } = payload.data;
+  public async loginUser(payload: IUser, res: Response) {
+    const { email, password } = payload;
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -53,7 +52,7 @@ export class AuthService {
     }
 
     const tokenUser = createTokenUser(user);
-    attachTokens(res, tokenUser, postmanRequest);
+    attachTokens(res, tokenUser);
 
     return tokenUser;
   }

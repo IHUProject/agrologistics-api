@@ -75,11 +75,6 @@ export interface IProduct extends Document {
   company: Types.ObjectId;
 }
 
-export interface IPayload<T> {
-  postmanRequest: boolean;
-  data: T;
-}
-
 export interface IPasswordPayload {
   newPassword: string;
   oldPassword: string;

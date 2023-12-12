@@ -3,15 +3,11 @@ import { attachTokens } from './jwt';
 import { createTokenUser } from './create-token-user';
 import User from '../models/User';
 
-export const reattachTokens = async (
-  res: Response,
-  id: string,
-  postmanRequest: boolean = false
-) => {
+export const reattachTokens = async (res: Response, id: string) => {
   const updatedUser = await User.findById(id);
 
   if (updatedUser) {
     const tokenUser = createTokenUser(updatedUser);
-    attachTokens(res, tokenUser, postmanRequest);
+    attachTokens(res, tokenUser);
   }
 };

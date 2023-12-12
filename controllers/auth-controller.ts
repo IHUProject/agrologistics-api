@@ -1,8 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 import { AuthService } from '../services/auth-service';
-import { IUser } from '../interfaces/interfaces';
-import { constructPayload } from '../helpers/construct-payload';
 import { attachTokens } from '../helpers';
 
 export class AuthController {
@@ -15,7 +13,7 @@ export class AuthController {
     const { file, body } = req;
 
     const newUser = await this.authService.registerUser(body, file);
-    attachTokens(res, newUser, body.postmanRequest);
+    attachTokens(res, newUser);
 
     res.status(StatusCodes.CREATED).json({ userInfo: newUser });
   }
@@ -23,8 +21,7 @@ export class AuthController {
   public async login(req: Request, res: Response) {
     const { body } = req;
 
-    const payload = constructPayload<IUser>(req, body);
-    const loggedInUser = await this.authService.loginUser(payload, res);
+    const loggedInUser = await this.authService.loginUser(body, res);
 
     res.status(StatusCodes.OK).json({ userInfo: loggedInUser });
   }
