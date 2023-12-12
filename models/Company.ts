@@ -1,12 +1,13 @@
 import mongoose, { Schema } from 'mongoose';
 import { ICompany } from '../interfaces/interfaces';
-import { DefaultImage } from '../interfaces/enums';
 import {
+  validateAFM,
   validateDate,
   validateLatitude,
   validateLongitude,
   validatePhoneNumber,
 } from '../helpers/validate-schema-properties';
+import { DefaultImage } from '../interfaces/enums';
 
 const companySchema: mongoose.Schema<ICompany> = new Schema<ICompany>(
   {
@@ -32,13 +33,14 @@ const companySchema: mongoose.Schema<ICompany> = new Schema<ICompany>(
       unique: true,
       required: [true, 'Please provide AFM.'],
       validate: {
-        validator: function (value: number) {
-          return /^[0-9]{9}$/.test(value.toString());
-        },
+        validator: validateAFM,
         message: (props) => `${props.value} is not a valid AFM.`,
       },
     },
-    logo: { type: String, default: DefaultImage.LOGO },
+    logo: {
+      link: { type: String, default: DefaultImage.PROFILE_IMAGE },
+      deletehash: { type: String, default: '' },
+    },
     founded: {
       type: Date,
       default: null,

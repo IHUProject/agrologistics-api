@@ -32,7 +32,10 @@ const userSchema: mongoose.Schema<IUser> = new Schema<IUser>(
       required: [true, 'Please provide password.'],
       minlength: 5,
     },
-    image: { type: String, default: DefaultImage.PROFILE_IMAGE },
+    image: {
+      link: { type: String, default: DefaultImage.PROFILE_IMAGE },
+      deletehash: { type: String, default: '' },
+    },
     role: {
       type: String,
       enum: {
@@ -55,7 +58,6 @@ const userSchema: mongoose.Schema<IUser> = new Schema<IUser>(
         message: 'Invalid phone number, must be 10 digits.',
       },
     },
-    company: { type: Schema.Types.ObjectId, ref: 'Company', default: null },
   },
   { timestamps: true, versionKey: false }
 );

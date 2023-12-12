@@ -31,7 +31,7 @@ export interface IUser extends Document {
   lastName: string;
   email: string;
   password: string;
-  image: string;
+  image: IDataImgur;
   role: Roles;
   phone: number;
   company: Types.ObjectId;
@@ -44,7 +44,7 @@ export interface ICompany extends Document {
   address: string;
   owner: Types.ObjectId;
   afm: number;
-  logo: string;
+  logo: IDataImgur;
   founded: Date;
   latitude: number;
   longitude: number;
@@ -62,7 +62,6 @@ export interface IAccountant extends Document {
   phone: number;
   latitude?: number;
   longitude?: number;
-  company: Types.ObjectId;
   updatedBy?: Types.ObjectId;
 }
 
@@ -84,4 +83,19 @@ export interface IPayload<T> {
 export interface IPasswordPayload {
   newPassword: string;
   oldPassword: string;
+}
+
+export interface ImgurResponse {
+  data: ImgurBodyResponse;
+}
+
+export interface IDataImgur {
+  link: string;
+  deletehash: string;
+}
+
+interface ImgurBodyResponse {
+  data: IDataImgur;
+  success: boolean;
+  status: number;
 }

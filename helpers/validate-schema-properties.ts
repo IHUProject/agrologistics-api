@@ -18,3 +18,6 @@ export const validateLatitude = (value: number): boolean =>
 
 export const validateLongitude = (value: number): boolean =>
   !isNaN(value) && value >= -180 && value <= 180;
+
+export const validateAFM = (value: number) =>
+  /^[0-9]{9}$/.test(value.toString());

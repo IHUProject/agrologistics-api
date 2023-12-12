@@ -10,23 +10,15 @@ export class AccountantController {
   }
 
   public async createAccountant(req: Request, res: Response) {
-    const { body, currentUser } = req;
-    const { company } = currentUser as IUserWithID;
+    const { body } = req;
 
-    const newAccountant = await this.accountantService.createAccountant(
-      body,
-      company
-    );
+    const newAccountant = await this.accountantService.createAccountant(body);
 
     res.status(StatusCodes.CREATED).json({ accountantInfo: newAccountant });
   }
 
   public async getSingleAccountant(req: Request, res: Response) {
-    const { company } = req.currentUser as IUserWithID;
-
-    const accountant = await this.accountantService.getSingleAccountant(
-      company
-    );
+    const accountant = await this.accountantService.getSingleAccountant();
 
     res.status(StatusCodes.OK).json(accountant);
   }
