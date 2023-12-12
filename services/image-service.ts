@@ -1,62 +1,37 @@
-import fs from 'fs';
-import { v2 as Cloudinary, UploadApiResponse } from 'cloudinary';
-import { ConflictError } from '../errors/conflict';
-import { UploadedFile } from 'express-fileupload';
-import { BadRequestError, NotFoundError } from '../errors';
+import axios from 'axios';
+// import { getImgurToken } from '../helpers/imgur-token';
+import { ImgurResponse } from '../interfaces/interfaces';
 
 export class ImageService {
-  public async cloudinaryUpload(images: UploadedFile[]) {
-    try {
-      const storeURLs: string[] = [];
+  constructor() {}
 
-      for (const image of images) {
-        const result: UploadApiResponse = await Cloudinary.uploader.upload(
-          image.tempFilePath,
-          {
-            use_filename: true,
-          }
-        );
-        storeURLs.push(result.secure_url);
+  public async handleSingleImage(file: Express.Multer.File) {
+    // const token = await getImgurToken();
+
+    const encodedImage = file.buffer.toString('base64');
+    const imgurResponse: ImgurResponse = await axios.post(
+      'https://api.imgur.com/3/image',
+      {
+        image: encodedImage,
+        type: 'base64',
+      },
+      {
+        headers: {
+          Authorization: 'Client-ID b346aa38b14f95b',
+        },
       }
+    );
 
-      fs.rmSync('tmp', { recursive: true });
-      return storeURLs;
-    } catch (error) {
-      fs.rmSync('tmp', { recursive: true });
-      throw new ConflictError('Something went wrong, try again!');
-    }
+    return imgurResponse.data.data;
   }
 
-  public async handleSingleImage(image: UploadedFile[]) {
-    if (!Array.isArray(image)) {
-      image = [image];
-    }
+  public async deleteSingleImage(deletehash: string) {
+    // const token = await getImgurToken();
 
-    if (image.length > 1) {
-      throw new BadRequestError('You allowed to upload only 1 image');
-    }
-
-    if (
-      image[0].mimetype !== 'image/png' &&
-      image[0].mimetype !== 'image/jpeg' &&
-      image[0].mimetype !== 'image/jpg'
-    ) {
-      fs.rmSync('tmp', { recursive: true });
-      throw new ConflictError('This file type is not valid!');
-    }
-
-    return (await this.cloudinaryUpload(image)).join('');
-  }
-
-  public async deleteImages(images: string[]) {
-    for (const image of images) {
-      const publicId = image.split('/').slice(-1)[0].split('.')[0];
-      const res: { result: string } = await Cloudinary.uploader.destroy(
-        publicId
-      );
-      if (res.result === 'not found') {
-        throw new NotFoundError('Old image did not found in the cloud!');
-      }
-    }
+    await axios.delete(`https://api.imgur.com/3/image/${deletehash}`, {
+      headers: {
+        Authorization: 'Client-ID b346aa38b14f95b',
+      },
+    });
   }
 }

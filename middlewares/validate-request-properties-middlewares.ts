@@ -37,18 +37,3 @@ export const validateQueryPage = (
 
   next();
 };
-
-export const validateFiles = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const { files } = req;
-  if (files && !files.image) {
-    return next(
-      new BadRequestError('Something went wrong with the files, try again')
-    );
-  }
-
-  next();
-};

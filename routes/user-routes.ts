@@ -7,13 +7,18 @@ import { UserController } from '../controllers/user-controller';
 import { validateQueryPage } from '../middlewares/validate-request-properties-middlewares';
 import {
   isUserExits,
+  preventSelfModification,
   verifyAccountOwnership,
 } from '../middlewares/user-middlewares';
 import { Roles } from '../interfaces/enums';
-import { verifyUserCompanyMembership } from '../middlewares/company-middlewares';
+import multer, { memoryStorage } from 'multer';
+import { isCompanyExists } from '../middlewares/company-middlewares';
 
 const userController = new UserController();
 const router = express.Router();
+
+const storage = memoryStorage();
+const upload = multer({ storage: storage });
 
 router.get(
   '/get-current-user',
@@ -23,50 +28,53 @@ router.get(
 router.get(
   '/get-users',
   validateQueryPage,
+  authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
   userController.getUsers.bind(userController)
 );
 router.get(
   '/:userId/get-single-user',
+  authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
   isUserExits,
   userController.getSingleUser.bind(userController)
 );
 router.delete(
   '/:userId/delete-user',
-  authenticateUser,
   verifyAccountOwnership,
   userController.deleteUser.bind(userController)
 );
 router.patch(
   '/:userId/update-user',
-  authenticateUser,
   verifyAccountOwnership,
+  upload.single('image'),
   userController.updateUser.bind(userController)
 );
 router.patch(
   '/:userId/change-password',
-  authenticateUser,
   verifyAccountOwnership,
   userController.changePassword.bind(userController)
 );
 router.patch(
-  '/:userId/change-role',
-  authenticateUser,
+  '/:userId/change-role/:companyId',
+  isCompanyExists,
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
+  preventSelfModification,
+  isCompanyExists,
   isUserExits,
   userController.changeUserRole.bind(userController)
 );
 router.patch(
-  '/:userId/add-user-to-company',
-  authenticateUser,
+  '/:userId/add-user-to-company/:companyId',
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
+  preventSelfModification,
+  isCompanyExists,
   isUserExits,
   userController.addToCompany.bind(userController)
 );
 router.patch(
-  '/:userId/remove-user-from-company',
-  authenticateUser,
+  '/:userId/remove-user-from-company/:companyId',
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
-  verifyUserCompanyMembership,
+  preventSelfModification,
+  isCompanyExists,
   isUserExits,
   userController.removeFromCompany.bind(userController)
 );

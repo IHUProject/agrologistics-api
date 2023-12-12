@@ -27,7 +27,6 @@ const accountantSchema: mongoose.Schema<IAccountant> = new Schema<IAccountant>(
       validate: [validator.isEmail, 'Please provide a valid email address.'],
     },
     address: { type: String, default: null, minlength: 5, maxlength: 35 },
-    company: { type: Schema.Types.ObjectId, ref: 'Company' },
     updatedBy: { type: Schema.Types.ObjectId, default: null, ref: 'User' },
     latitude: {
       type: Number,

@@ -1,11 +1,11 @@
 import jwt from 'jsonwebtoken';
 import { InternalServerError } from '../errors';
 import { Response } from 'express';
-import { IUserWithID } from '../interfaces/interfaces';
+import { IUser, IUserWithID } from '../interfaces/interfaces';
 
 const { sign, verify } = jwt;
 
-export const createToken = (payload: IUserWithID) => {
+export const createToken = (payload: IUserWithID | IUser) => {
   if (process.env.JWT_SECRET) {
     const token = sign(payload, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_LIFETIME,
@@ -21,7 +21,7 @@ export const isValidToken = (token: string) =>
 
 export const attachTokens = (
   res: Response,
-  user: IUserWithID,
+  user: IUserWithID | IUser,
   postmanRequest?: boolean
 ) => {
   const token = createToken(user);

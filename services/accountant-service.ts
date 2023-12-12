@@ -1,7 +1,7 @@
 import Accountant from '../models/Accountant';
 import { IAccountant } from '../interfaces/interfaces';
-import { BadRequestError } from '../errors';
 import { Types } from 'mongoose';
+import { ForbiddenError } from '../errors/forbidden';
 
 export class AccountantService {
   public async deleteAccountant(accId: string) {
@@ -9,16 +9,15 @@ export class AccountantService {
     return 'The accountant has been deleted!';
   }
 
-  public async createAccountant(
-    payload: IAccountant,
-    usersCompanyId: Types.ObjectId
-  ) {
+  public async createAccountant(payload: IAccountant) {
     const { firstName, lastName, address, email, phone, latitude, longitude } =
       payload;
 
-    const accountant = await Accountant.findById(usersCompanyId);
-    if (accountant) {
-      throw new BadRequestError('The company has already an accountant!');
+    const isAccountantExists = (await Accountant.countDocuments({}))
+      ? true
+      : false;
+    if (isAccountantExists) {
+      throw new ForbiddenError('Accountant already exists!');
     }
 
     const newAccountant = await Accountant.create({
@@ -29,7 +28,6 @@ export class AccountantService {
       phone,
       latitude,
       longitude,
-      company: usersCompanyId,
     });
 
     return newAccountant;
@@ -66,8 +64,8 @@ export class AccountantService {
     return updatedAccountant;
   }
 
-  public async getSingleAccountant(companyId: Types.ObjectId) {
-    const accountant = await Accountant.findOne({ company: companyId });
+  public async getSingleAccountant() {
+    const accountant = await Accountant.findOne({});
 
     if (!accountant) {
       return { msg: `Your company does not have accountant` };

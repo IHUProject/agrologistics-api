@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import StatusCodes from 'http-status-codes';
 import { ICustomError, IUpdatedError } from '../interfaces/interfaces';
-import fs from 'fs';
 
 export const errorHandlerMiddleware = (
   err: IUpdatedError,
@@ -54,10 +53,6 @@ export const errorHandlerMiddleware = (
   if (err.path === '_id') {
     customError.msg = `Wrong database ID format (ID : ${err.value})`;
     customError.statusCode = 400;
-  }
-
-  if (fs.existsSync('tmp')) {
-    fs.rmSync('tmp', { recursive: true });
   }
 
   return res

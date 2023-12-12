@@ -3,9 +3,8 @@ import { UnauthorizedError } from '../errors';
 import User from '../models/User';
 import { attachTokens } from '../helpers';
 import { createTokenUser } from '../helpers/create-token-user';
-import { FileArray, UploadedFile } from 'express-fileupload';
+import { IDataImgur, IPayload, IUser } from '../interfaces/interfaces';
 import { ImageService } from './image-service';
-import { IPayload, IUser } from '../interfaces/interfaces';
 
 export class AuthService {
   private imageService: ImageService;
@@ -15,35 +14,27 @@ export class AuthService {
   }
 
   public async registerUser(
-    payload: IPayload<IUser>,
-    files: FileArray | null | undefined,
-    res: Response
+    payload: IUser,
+    file: Express.Multer.File | undefined
   ) {
-    const { firstName, lastName, email, password, phone } = payload.data;
-    const { postmanRequest } = payload;
+    const { firstName, lastName, email, password, phone } = payload;
 
-    let user = (await User.create({
+    let image: IDataImgur | undefined;
+
+    if (file) {
+      image = await this.imageService.handleSingleImage(file);
+    }
+
+    const user = (await User.create({
       firstName,
       lastName,
       email,
       phone,
+      image,
       password,
     })) as IUser;
 
-    if (files?.image) {
-      const image = await this.imageService.handleSingleImage(
-        files?.image as UploadedFile[]
-      );
-
-      user = (await User.findByIdAndUpdate(
-        user._id,
-        { image },
-        { new: true }
-      )) as IUser;
-    }
-
     const tokenUser = createTokenUser(user);
-    attachTokens(res, tokenUser, postmanRequest);
 
     return tokenUser;
   }

@@ -1,16 +1,8 @@
-import { Response } from 'express';
-import { BadRequestError, UnauthorizedError } from '../errors';
+import { BadRequestError } from '../errors';
 import User from '../models/User';
-import {
-  IPasswordPayload,
-  IPayload,
-  IUser,
-  IUserWithID,
-} from '../interfaces/interfaces';
+import { IDataImgur, IPasswordPayload, IUser } from '../interfaces/interfaces';
 import { ImageService } from './image-service';
-import fileUpload, { UploadedFile } from 'express-fileupload';
-import { DefaultImage, Roles } from '../interfaces/enums';
-import { reattachTokens } from '../helpers/re-attack-tokens';
+import { Roles } from '../interfaces/enums';
 import { ForbiddenError } from '../errors/forbidden';
 import { createSearchQuery } from '../helpers/create-search-query';
 
@@ -21,78 +13,54 @@ export class UserService {
     this.imageService = new ImageService();
   }
 
-  public async deleteUser(userId: string, role: Roles, res: Response) {
-    if (role === Roles.OWNER) {
+  public async deleteUser(userId: string, isExternalRequest: boolean = true) {
+    const user = (await User.findByIdAndDelete(userId)) as IUser;
+
+    const { role } = user;
+    if (role === Roles.OWNER && isExternalRequest) {
       throw new ForbiddenError(
         'Please delete your company to proceed to this action!'
       );
     }
 
-    const user = (await User.findByIdAndDelete(userId)) as IUser;
-
-    if (user.image !== DefaultImage.PROFILE_IMAGE) {
-      await this.imageService.deleteImages([user.image as string]);
+    const { deletehash } = user.image;
+    if (deletehash) {
+      await this.imageService.deleteSingleImage(deletehash);
     }
 
-    res.cookie('token', 'logout', {
-      httpOnly: true,
-      expires: new Date(Date.now() + 1000),
-      secure: true,
-      sameSite: 'none',
-      signed: true,
-    });
-
-    return `The user ${user.firstName} ${user.lastName}, has been deleted.`;
+    return `The user has been deleted.`;
   }
 
   public async updateUser(
-    payload: IPayload<IUser>,
+    payload: IUser,
     userId: string,
-    files: fileUpload.FileArray | null | undefined,
-    res: Response
+    file: Express.Multer.File | undefined
   ) {
-    const { firstName, lastName, email, phone } = payload.data;
-    const { postmanRequest } = payload;
+    const { firstName, lastName, email, phone } = payload;
 
-    let updatedUser = await User.findByIdAndUpdate(
+    const user = (await User.findById(userId)) as IUser;
+
+    let image: IDataImgur | undefined;
+
+    if (file) {
+      const { deletehash } = user.image;
+      if (deletehash) {
+        await this.imageService.deleteSingleImage(deletehash);
+      }
+      image = await this.imageService.handleSingleImage(file);
+    }
+
+    const updatedUser = (await User.findByIdAndUpdate(
       userId,
       {
         firstName,
         lastName,
+        image,
         email,
         phone,
       },
       { new: true, runValidators: true }
-    )
-      .select('-password -createdAt -updatedAt')
-      .populate({
-        path: 'company',
-        select: '_id name',
-      });
-
-    let image: string | undefined;
-    if (files?.image) {
-      if (updatedUser?.image !== DefaultImage.PROFILE_IMAGE) {
-        await this.imageService.deleteImages([updatedUser?.image as string]);
-      }
-      image = await this.imageService.handleSingleImage(
-        files?.image as UploadedFile[]
-      );
-      updatedUser = await User.findByIdAndUpdate(
-        updatedUser?._id,
-        {
-          image,
-        },
-        { new: true, runValidators: true }
-      )
-        .select('-password -createdAt -updatedAt')
-        .populate({
-          path: 'company',
-          select: '_id name',
-        });
-    }
-
-    await reattachTokens(res, userId, postmanRequest);
+    ).select('-password -createdAt -updatedAt')) as IUser;
 
     return updatedUser;
   }
@@ -104,25 +72,19 @@ export class UserService {
     const searchQuery = createSearchQuery<IUser>(searchString as string, [
       'firstName',
       'lastName',
+      'role',
     ]);
 
     return (await User.find(searchQuery)
       .skip(skip)
       .limit(limit)
-      .select('-password -createdAt -updatedAt -phone')
-      .populate({
-        path: 'company',
-        select: 'name',
-      })) as IUser[];
+      .select('-password -createdAt -updatedAt')) as IUser[];
   }
 
   public async getSingleUser(userId: string): Promise<IUser> {
-    return (await User.findById(userId)
-      .select('-password -createdAt -updatedAt -phone')
-      .populate({
-        path: 'company',
-        select: 'name',
-      })) as IUser;
+    return (await User.findById(userId).select(
+      '-password -createdAt -updatedAt'
+    )) as IUser;
   }
 
   async changePassword(userId: string, payload: IPasswordPayload) {
@@ -145,67 +107,62 @@ export class UserService {
 
   async changeUserRole(
     userId: string,
-    payload: IUser,
-    currentUser: IUserWithID
+    role: Roles,
+    isExternalRequest: boolean = false
   ) {
-    const { role } = payload;
+    if (role === Roles.OWNER) {
+      throw new BadRequestError('You can not make an employ owner!');
+    }
 
     const user = (await User.findById(userId)) as IUser;
-    const { company } = currentUser;
-    if (user.company.toString() !== company.toString()) {
-      throw new UnauthorizedError("You can not change this user's role");
-    }
     if (user.role === Roles.OWNER) {
       throw new BadRequestError('You can not change the owners role!');
+    }
+    if (user.role === Roles.UNCATEGORIZED && !isExternalRequest) {
+      throw new BadRequestError('User does not work to the company!');
+    }
+    if (user.role === role) {
+      throw new BadRequestError('User has already that role!');
     }
 
     user.role = role;
     await user.save();
 
-    return `The role of employ ${user.firstName} ${user.lastName} has been changed to ${user?.role}`;
+    return `The role of employ ${user.firstName} ${user.lastName} has been changed to ${user.role}`;
   }
 
-  async addToCompany(userId: string, role: Roles, companyId: string) {
+  async addToCompany(userId: string, role: Roles) {
     if (role && role === Roles.OWNER) {
       throw new BadRequestError('You can not make an employ owner!');
     }
 
     const user = (await User.findById(userId)) as IUser;
-    if (user.company) {
-      throw new BadRequestError('User working elsewhere!');
+    const isWorking = user.role !== Roles.UNCATEGORIZED;
+    if (isWorking) {
+      throw new BadRequestError('User is already working to the company!');
     }
 
-    await User.findByIdAndUpdate(
+    const result = await this.changeUserRole(
       userId,
-      {
-        company: companyId,
-        role: role || Roles.EMPLOY,
-      },
-      { runValidators: true }
+      role || Roles.EMPLOY,
+      true
     );
 
-    return `The user ${user.firstName} ${
-      user.lastName
-    } has been add to the company with as ${role || Roles.EMPLOY}`;
+    return result;
   }
 
-  async removeFromCompany(userId: string, currentUser: IUserWithID) {
+  async removeFromCompany(userId: string) {
     const user = (await User.findById(userId)) as IUser;
-    if (!user.company) {
-      throw new BadRequestError('User does not work anywhere!');
+
+    const { role } = user;
+    if (role === Roles.UNCATEGORIZED) {
+      throw new BadRequestError('User does not work to the company!');
     }
-    if (user.role === Roles.OWNER) {
-      throw new BadRequestError('You can not remove the owner!');
-    }
-    if (user._id.toString() === currentUser.userId.toString()) {
-      throw new BadRequestError('Say what??');
+    if (role === Roles.OWNER) {
+      throw new ForbiddenError('You can not remove the owner!');
     }
 
-    await User.findByIdAndUpdate(userId, {
-      company: null,
-      role: Roles.UNCATEGORIZED,
-    });
-
-    return `The employ ${user.firstName} ${user.lastName} has been removed for the company!`;
+    this.deleteUser(userId, false);
+    return `The employ has been removed for the company!`;
   }
 }

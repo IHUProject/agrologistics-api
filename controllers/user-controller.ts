@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services/user-service';
 import { StatusCodes } from 'http-status-codes';
-import { IUser, IUserWithID } from '../interfaces/interfaces';
-import { constructPayload } from '../helpers/construct-payload';
+import { reattachTokens } from '../helpers/re-attack-tokens';
+import { IUserWithID } from '../interfaces/interfaces';
 
 export class UserController {
   private userService: UserService;
@@ -18,32 +18,40 @@ export class UserController {
   public async updateUser(req: Request, res: Response) {
     const { body } = req;
     const { userId } = req.params;
-    const { files } = req;
+    const { file } = req;
+    const { currentUser } = req;
 
-    const payload = constructPayload<IUser>(req, body);
-    const updatedUser = await this.userService.updateUser(
-      payload,
-      userId,
-      files,
-      res
-    );
+    const updatedUser = await this.userService.updateUser(body, userId, file);
+
+    await reattachTokens(res, (currentUser as IUserWithID).userId.toString());
 
     res.status(StatusCodes.OK).json({ userInfo: updatedUser });
   }
 
   public async deleteUser(req: Request, res: Response) {
     const { userId } = req.params;
-    const { role } = req.currentUser as IUserWithID;
-    const result = await this.userService.deleteUser(userId, role, res);
+
+    const result = await this.userService.deleteUser(userId);
+
+    res.cookie('token', 'logout', {
+      httpOnly: true,
+      expires: new Date(Date.now() + 1000),
+      secure: true,
+      sameSite: 'none',
+      signed: true,
+    });
+
     res.status(StatusCodes.OK).json({ result });
   }
 
   public async getUsers(req: Request, res: Response) {
     const { page, searchString } = req.query;
+
     const users = await this.userService.getUsers(
       page as string,
       searchString as string
     );
+
     res.status(StatusCodes.OK).json({ users, totalCount: users.length });
   }
 
@@ -67,13 +75,9 @@ export class UserController {
   public async changeUserRole(req: Request, res: Response) {
     const { userId } = req.params;
     const { body } = req;
-    const { currentUser } = req;
+    const { role } = body;
 
-    const result = await this.userService.changeUserRole(
-      userId,
-      body,
-      currentUser as IUserWithID
-    );
+    const result = await this.userService.changeUserRole(userId, role);
 
     res.status(StatusCodes.OK).json({ result });
   }
@@ -81,25 +85,16 @@ export class UserController {
   public async addToCompany(req: Request, res: Response) {
     const { userId } = req.params;
     const { role } = req.body;
-    const { company } = req.currentUser as IUserWithID;
 
-    const result = await this.userService.addToCompany(
-      userId,
-      role,
-      company.toString()
-    );
+    const result = await this.userService.addToCompany(userId, role);
 
     res.status(StatusCodes.OK).json({ result });
   }
 
   public async removeFromCompany(req: Request, res: Response) {
     const { userId } = req.params;
-    const { currentUser } = req;
 
-    const result = await this.userService.removeFromCompany(
-      userId,
-      currentUser as IUserWithID
-    );
+    const result = await this.userService.removeFromCompany(userId);
 
     res.status(StatusCodes.OK).json({ result });
   }

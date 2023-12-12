@@ -6,7 +6,7 @@ import User from '../models/User';
 export const reattachTokens = async (
   res: Response,
   id: string,
-  postmanRequest: boolean
+  postmanRequest: boolean = false
 ) => {
   const updatedUser = await User.findById(id);
 

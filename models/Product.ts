@@ -1,8 +1,7 @@
-import mongoose, { Schema } from 'mongoose';
+import { Model, Schema, model } from 'mongoose';
 import { IProduct } from '../interfaces/interfaces';
-import { DefaultImage } from '../interfaces/enums';
 
-const productSchema: mongoose.Schema<IProduct> = new Schema<IProduct>(
+const productSchema: Schema<IProduct> = new Schema<IProduct>(
   {
     name: {
       type: String,
@@ -17,19 +16,11 @@ const productSchema: mongoose.Schema<IProduct> = new Schema<IProduct>(
     },
     stockInKilo: { type: Number, default: 0, min: 0 },
     description: { type: String, default: null },
-    images: {
-      type: [String],
-      default: [DefaultImage.PRODUCT],
-    },
-    company: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
   },
-  {
-    timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' },
-    versionKey: false,
-  }
+  { timestamps: true, versionKey: false }
 );
 
-const Product: mongoose.Model<IProduct> = mongoose.model<IProduct>(
+const Product: Model<IProduct> = model<IProduct>(
   'Product',
   productSchema,
   'Products'
