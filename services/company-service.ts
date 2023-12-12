@@ -1,9 +1,7 @@
-import { Response } from 'express';
 import {
   IAccountant,
   ICompany,
   IDataImgur,
-  IPayload,
   IUser,
   IUserWithID,
 } from '../interfaces/interfaces';
@@ -11,7 +9,7 @@ import Company from '../models/Company';
 import { ImageService } from './image-service';
 import { Roles } from '../interfaces/enums';
 import User from '../models/User';
-import { reattachTokens } from '../helpers/re-attack-tokens';
+
 import Accountant from '../models/Accountant';
 import { ForbiddenError } from '../errors/forbidden';
 
@@ -22,14 +20,11 @@ export class CompanyService {
   }
 
   public async createCompany(
-    payload: IPayload<ICompany>,
+    payload: ICompany,
     currentUser: IUserWithID,
-    file: Express.Multer.File | undefined,
-    res: Response
+    file: Express.Multer.File | undefined
   ) {
-    const { name, phone, afm, address, founded, latitude, longitude } =
-      payload.data;
-    const { postmanRequest } = payload;
+    const { name, phone, afm, address, founded, latitude, longitude } = payload;
     const { userId } = currentUser as IUserWithID;
 
     const isCompanyExists = (await Company.countDocuments({})) ? true : false;
@@ -62,8 +57,6 @@ export class CompanyService {
     await User.findByIdAndUpdate(userId, {
       role: Roles.OWNER,
     });
-
-    await reattachTokens(res, userId.toString() as string, postmanRequest);
 
     return (await Company.findById(newCompany._id).populate({
       path: 'owner',

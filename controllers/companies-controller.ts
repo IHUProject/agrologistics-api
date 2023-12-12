@@ -1,8 +1,7 @@
 import { Response, Request } from 'express';
 import { CompanyService } from '../services/company-service';
 import { StatusCodes } from 'http-status-codes';
-import { ICompany, IUserWithID } from '../interfaces/interfaces';
-import { constructPayload } from '../helpers/construct-payload';
+import { IUserWithID } from '../interfaces/interfaces';
 import { reattachTokens } from '../helpers/re-attack-tokens';
 export class CompanyController {
   private companyService: CompanyService;
@@ -15,14 +14,13 @@ export class CompanyController {
     const { body, currentUser } = req;
     const { file } = req;
 
-    const payload = constructPayload<ICompany>(req, body);
     const company = await this.companyService.createCompany(
-      payload,
+      body,
       currentUser as IUserWithID,
-      file,
-      res
+      file
     );
 
+    await reattachTokens(res, (currentUser as IUserWithID)?.userId.toString());
     res.status(StatusCodes.CREATED).json({ company });
   }
 
