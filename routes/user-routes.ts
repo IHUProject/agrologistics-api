@@ -54,8 +54,7 @@ router.patch(
   userController.changePassword.bind(userController)
 );
 router.patch(
-  '/:userId/change-role/:companyId',
-  isCompanyExists,
+  '/:userId/change-role',
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   preventSelfModification,
   isCompanyExists,
@@ -63,7 +62,7 @@ router.patch(
   userController.changeUserRole.bind(userController)
 );
 router.patch(
-  '/:userId/add-user-to-company/:companyId',
+  '/:userId/add-user-to-company',
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   preventSelfModification,
   isCompanyExists,
@@ -71,7 +70,7 @@ router.patch(
   userController.addToCompany.bind(userController)
 );
 router.patch(
-  '/:userId/remove-user-from-company/:companyId',
+  '/:userId/remove-user-from-company',
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   preventSelfModification,
   isCompanyExists,

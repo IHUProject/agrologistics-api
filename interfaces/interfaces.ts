@@ -72,7 +72,8 @@ export interface IProduct extends Document {
   stockInKilo: number;
   description: string;
   images: string[];
-  company: Types.ObjectId;
+  createBy: Types.ObjectId;
+  updateBy: Types.ObjectId;
 }
 
 export interface IPasswordPayload {

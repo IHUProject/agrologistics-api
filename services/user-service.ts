@@ -13,11 +13,11 @@ export class UserService {
     this.imageService = new ImageService();
   }
 
-  public async deleteUser(userId: string, isExternalRequest: boolean = true) {
+  public async deleteUser(userId: string, isExternalRequest: boolean = false) {
     const user = (await User.findByIdAndDelete(userId)) as IUser;
 
     const { role } = user;
-    if (role === Roles.OWNER && isExternalRequest) {
+    if (role === Roles.OWNER && !isExternalRequest) {
       throw new ForbiddenError(
         'Please delete your company to proceed to this action!'
       );
@@ -81,7 +81,7 @@ export class UserService {
       .select('-password -createdAt -updatedAt')) as IUser[];
   }
 
-  public async getSingleUser(userId: string): Promise<IUser> {
+  public async getSingleUser(userId: string) {
     return (await User.findById(userId).select(
       '-password -createdAt -updatedAt'
     )) as IUser;
@@ -162,7 +162,7 @@ export class UserService {
       throw new ForbiddenError('You can not remove the owner!');
     }
 
-    this.deleteUser(userId, false);
+    this.deleteUser(userId, true);
     return `The employ has been removed for the company!`;
   }
 }
