@@ -16,6 +16,8 @@ const productSchema: Schema<IProduct> = new Schema<IProduct>(
     },
     stockInKilo: { type: Number, default: 0, min: 0 },
     description: { type: String, default: null },
+    createBy: { type: Schema.Types.ObjectId, default: null, ref: 'User' },
+    updateBy: { type: Schema.Types.ObjectId, default: null, ref: 'User' },
   },
   { timestamps: true, versionKey: false }
 );
