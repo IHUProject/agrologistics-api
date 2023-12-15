@@ -11,11 +11,11 @@ export class AccountantController {
   public async createAccountant(req: Request, res: Response) {
     const { body } = req;
 
-    const newAccountant = await this.accountantService.createAccountant(body);
+    const accountant = await this.accountantService.createAccountant(body);
 
     res.status(StatusCodes.CREATED).json({
-      accountantInfo: newAccountant,
-      msg: 'Accountant had been successfully created',
+      accountant,
+      message: 'Accountant had been successfully created!',
     });
   }
 
@@ -28,20 +28,22 @@ export class AccountantController {
     const { body } = req;
     const { accId } = req.params;
 
-    const updateAccountant = await this.accountantService.updateAccountant(
+    const accountant = await this.accountantService.updateAccountant(
       body,
       accId
     );
 
     res.status(StatusCodes.OK).json({
-      accountantInfo: updateAccountant,
-      msg: 'Accountant had been successfully update',
+      accountant,
+      message: 'Accountant had been successfully update!',
     });
   }
 
   public async deleteAccountant(req: Request, res: Response) {
     const { accId } = req.params;
-    const result = await this.accountantService.deleteAccountant(accId);
-    res.status(StatusCodes.OK).json({ result });
+    const accountant = await this.accountantService.deleteAccountant(accId);
+    res
+      .status(StatusCodes.OK)
+      .json({ accountant, message: 'Accountant have been deleted!' });
   }
 }

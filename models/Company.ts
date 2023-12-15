@@ -84,6 +84,10 @@ const companySchema = new Schema<ICompany>(
       type: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
       default: [],
     },
+    suppliers: {
+      type: [{ type: Schema.Types.ObjectId, ref: 'Supplier' }],
+      default: [],
+    },
   },
   {
     timestamps: true,

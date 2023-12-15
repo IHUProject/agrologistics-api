@@ -9,12 +9,10 @@ const productSchema = new Schema<IProduct>(
       minlength: 3,
       maxlength: 50,
     },
-    pricePerKilo: {
-      type: Number,
-      required: [true, 'Please provide a price per kilogram.'],
-      min: 0.01,
+    price: {
+      type: String,
+      required: [true, 'Please provide a price'],
     },
-    stockInKilo: { type: Number, default: 0, min: 0 },
     description: { type: String, default: null },
   },
   { timestamps: true, versionKey: false }

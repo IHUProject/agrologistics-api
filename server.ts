@@ -12,13 +12,15 @@ import morgan from 'morgan';
 import { notFoundMiddleware } from './middlewares/not-found';
 import { headersMiddleware } from './middlewares/headers';
 import { errorHandlerMiddleware } from './middlewares/error-handler';
+import { authenticateUser } from './middlewares/auth-middlewares';
 
 //routes
 import authRouter from './routes/auth-routes';
 import userRouter from './routes/user-routes';
 import companyRouter from './routes/company-routes';
 import accountantRouter from './routes/accountant-routes';
-import { authenticateUser } from './middlewares/auth-middlewares';
+import productRouter from './routes/product-routes';
+import supplierRouter from './routes/supplier-routes';
 
 const server = express();
 const corsObject = {
@@ -46,6 +48,8 @@ server.use('/api/v1/al/auth', authRouter);
 server.use('/api/v1/al/user', authenticateUser, userRouter);
 server.use('/api/v1/al/company', authenticateUser, companyRouter);
 server.use('/api/v1/al/accountant', authenticateUser, accountantRouter);
+server.use('/api/v1/al/supplier', authenticateUser, supplierRouter);
+server.use('/api/v1/al/product', authenticateUser, productRouter);
 
 server.use(notFoundMiddleware);
 server.use(headersMiddleware);

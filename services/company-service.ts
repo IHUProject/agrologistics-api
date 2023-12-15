@@ -2,6 +2,7 @@ import {
   IAccountant,
   ICompany,
   IDataImgur,
+  IProduct,
   IUser,
   IUserWithID,
 } from '../interfaces/interfaces';
@@ -14,6 +15,7 @@ import Accountant from '../models/Accountant';
 import { ForbiddenError } from '../errors/forbidden';
 import { BadRequestError, NotFoundError } from '../errors';
 import { UserService } from './user-service';
+import Product from '../models/Product';
 
 export class CompanyService {
   private imageService: ImageService;
@@ -31,8 +33,8 @@ export class CompanyService {
     const { name, phone, afm, address, founded, latitude, longitude } = payload;
     const { userId } = currentUser as IUserWithID;
 
-    const isCompanyExists = (await Company.countDocuments({})) ? true : false;
-    if (isCompanyExists) {
+    const isFirstCompany = (await Company.countDocuments({})) === 0;
+    if (!isFirstCompany) {
       throw new ForbiddenError('Company already exists!');
     }
 
@@ -41,31 +43,28 @@ export class CompanyService {
       logo = await this.imageService.handleSingleImage(file);
     }
 
-    const newCompany = await (
-      await Company.create({
-        name,
-        phone,
-        owner: userId,
-        afm,
-        logo,
-        address,
-        founded,
-        latitude,
-        longitude,
-      })
-    ).populate({
-      path: 'owner',
-      select: 'firstName lastName email image _id role',
+    const company = await Company.create({
+      name,
+      phone,
+      owner: userId,
+      afm,
+      logo,
+      address,
+      founded,
+      latitude,
+      longitude,
     });
 
     await User.findByIdAndUpdate(userId, {
       role: Roles.OWNER,
     });
 
-    return (await Company.findById(newCompany._id).populate({
-      path: 'owner',
-      select: 'firstName lastName email image _id role',
-    })) as ICompany;
+    return (await Company.findById(company._id)
+      .select('-createdAt -updateAt')
+      .populate({
+        path: 'owner',
+        select: 'firstName lastName email image _id role',
+      })) as ICompany;
   }
 
   public async updateCompany(
@@ -75,7 +74,7 @@ export class CompanyService {
   ) {
     const { name, phone, afm, address, founded, latitude, longitude } = payload;
 
-    const company = (await Company.findById(companyId)) as ICompany;
+    let company = (await Company.findById(companyId)) as ICompany;
 
     let logo: IDataImgur | undefined;
     if (file) {
@@ -86,7 +85,7 @@ export class CompanyService {
       logo = await this.imageService.handleSingleImage(file);
     }
 
-    const updatedCompany = (await Company.findByIdAndUpdate(
+    company = (await Company.findByIdAndUpdate(
       companyId,
       {
         name,
@@ -99,17 +98,20 @@ export class CompanyService {
         longitude,
       },
       { new: true, runValidators: true }
-    ).populate({
-      path: 'owner',
-      select: 'firstName lastName email image _id role',
-    })) as ICompany;
+    )
+      .select('-createdAt -updateAt')
+      .populate({
+        path: 'owner',
+        select: 'firstName lastName image _id',
+      })) as ICompany;
 
-    return updatedCompany;
+    return company;
   }
 
   public async deleteCompany(companyId: string) {
     const employees = (await User.find({})) as IUser[];
     const accountants = (await Accountant.find({})) as IAccountant[];
+    const products = (await Product.find({})) as IProduct[];
 
     employees.forEach(async (emp) => {
       const { _id, role } = emp;
@@ -123,21 +125,26 @@ export class CompanyService {
       const { _id } = acc;
       await Accountant.findByIdAndDelete(_id);
     });
+    products.forEach(async (prod) => {
+      const { _id } = prod;
+      await Product.findByIdAndDelete(_id);
+    });
 
-    await Company.findByIdAndDelete(companyId);
-
-    return `The company has been deleted!`;
+    return await Company.findByIdAndDelete(companyId).select(
+      '-createdAt -updateAt'
+    );
   }
 
   async getCompany() {
     const company = await Company.findOne({})
+      .select('-createdAt -updateAt')
       .populate({
         path: 'owner',
-        select: 'firstName lastName email image _id',
+        select: 'firstName lastName image _id',
       })
       .populate({
         path: 'employees',
-        select: 'firstName lastName email image _id role',
+        select: 'firstName lastName image _id role',
       })
       .populate({
         path: 'accountant',
@@ -157,18 +164,22 @@ export class CompanyService {
     }
 
     const user = (await User.findById(userId)) as IUser;
+
     const isWorking = user.role !== Roles.UNCATEGORIZED;
     if (isWorking) {
       throw new BadRequestError('User is already working to the company!');
     }
 
     await Company.updateOne({}, { $push: { employees: userId } });
-
     await this.userService.changeUserRole(userId, role || Roles.EMPLOY, true);
 
-    return `The user ${user.firstName} ${
+    const message = `The user ${user.firstName} ${
       user.lastName
-    } has been added to the company with role: ${role || Roles.EMPLOY}`;
+    } has been added to the company with role: ${
+      role.replace('_', ' ') || Roles.EMPLOY
+    }`;
+
+    return message;
   }
 
   async removeFromCompany(userId: string) {

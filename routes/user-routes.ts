@@ -19,6 +19,11 @@ const router = express.Router();
 const storage = memoryStorage();
 const upload = multer({ storage: storage });
 
+router.post(
+  '/create-user',
+  authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
+  userController.createUser.bind(userController)
+);
 router.get(
   '/get-current-user',
   authenticateUser,

@@ -12,18 +12,22 @@ export class AuthController {
   public async register(req: Request, res: Response) {
     const { file, body } = req;
 
-    const newUser = await this.authService.registerUser(body, file);
-    attachTokens(res, newUser);
+    const user = await this.authService.registerUser(body, file);
+    attachTokens(res, user);
 
-    res.status(StatusCodes.CREATED).json({ userInfo: newUser });
+    res
+      .status(StatusCodes.CREATED)
+      .json({ user, message: 'User has been successfully created!' });
   }
 
   public async login(req: Request, res: Response) {
     const { body } = req;
 
-    const loggedInUser = await this.authService.loginUser(body, res);
+    const user = await this.authService.loginUser(body, res);
 
-    res.status(StatusCodes.OK).json({ userInfo: loggedInUser });
+    res
+      .status(StatusCodes.OK)
+      .json({ user, message: 'User has been successfully logged in!' });
   }
 
   logout(req: Request, res: Response) {
@@ -35,6 +39,6 @@ export class AuthController {
       signed: true,
     });
 
-    res.status(StatusCodes.OK).json({ result: 'User logged out!' });
+    res.status(StatusCodes.OK).json({ message: 'User logged out!' });
   }
 }
