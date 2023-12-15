@@ -9,7 +9,7 @@ import {
 } from '../helpers/validate-schema-properties';
 import { DefaultImage } from '../interfaces/enums';
 
-const companySchema: mongoose.Schema<ICompany> = new Schema<ICompany>(
+const companySchema = new Schema<ICompany>(
   {
     name: {
       type: String,
@@ -27,10 +27,8 @@ const companySchema: mongoose.Schema<ICompany> = new Schema<ICompany>(
       },
     },
     address: { type: String, minlength: 5, maxlength: 35 },
-    owner: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     afm: {
       type: Number,
-      unique: true,
       required: [true, 'Please provide AFM.'],
       validate: {
         validator: validateAFM,
@@ -68,6 +66,24 @@ const companySchema: mongoose.Schema<ICompany> = new Schema<ICompany>(
           `${props.value} is not a valid longitude, longitude must be a number between -180 and 180.`,
       },
     },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: [true, 'Please provide an owner.'],
+    },
+    employees: {
+      type: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+      default: [],
+    },
+    accountant: {
+      type: Schema.Types.ObjectId,
+      ref: 'Accountant',
+      default: null,
+    },
+    products: {
+      type: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
+      default: [],
+    },
   },
   {
     timestamps: true,
@@ -75,10 +91,6 @@ const companySchema: mongoose.Schema<ICompany> = new Schema<ICompany>(
   }
 );
 
-const Company: mongoose.Model<ICompany> = mongoose.model<ICompany>(
-  'Company',
-  companySchema,
-  'Companies'
-);
+const Company = mongoose.model<ICompany>('Company', companySchema, 'Companies');
 
 export default Company;

@@ -5,6 +5,7 @@ import { ImageService } from './image-service';
 import { Roles } from '../interfaces/enums';
 import { ForbiddenError } from '../errors/forbidden';
 import { createSearchQuery } from '../helpers/create-search-query';
+import Company from '../models/Company';
 
 export class UserService {
   private imageService: ImageService;
@@ -22,6 +23,8 @@ export class UserService {
         'Please delete your company to proceed to this action!'
       );
     }
+
+    await Company.updateOne({}, { $pull: { employees: userId } });
 
     const { deletehash } = user.image;
     if (deletehash) {
@@ -142,13 +145,13 @@ export class UserService {
       throw new BadRequestError('User is already working to the company!');
     }
 
-    const result = await this.changeUserRole(
-      userId,
-      role || Roles.EMPLOY,
-      true
-    );
+    await Company.updateOne({}, { $push: { employees: userId } });
 
-    return result;
+    await this.changeUserRole(userId, role || Roles.EMPLOY, true);
+
+    return `The user ${user.firstName} ${
+      user.lastName
+    } has been added to the company with role: ${role || Roles.EMPLOY}`;
   }
 
   async removeFromCompany(userId: string) {
@@ -163,6 +166,7 @@ export class UserService {
     }
 
     this.deleteUser(userId, true);
+
     return `The employ has been removed for the company!`;
   }
 }

@@ -12,7 +12,6 @@ import {
 } from '../middlewares/user-middlewares';
 import { Roles } from '../interfaces/enums';
 import multer, { memoryStorage } from 'multer';
-import { isCompanyExists } from '../middlewares/company-middlewares';
 
 const userController = new UserController();
 const router = express.Router();
@@ -57,7 +56,6 @@ router.patch(
   '/:userId/change-role',
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   preventSelfModification,
-  isCompanyExists,
   isUserExits,
   userController.changeUserRole.bind(userController)
 );
@@ -65,7 +63,6 @@ router.patch(
   '/:userId/add-user-to-company',
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   preventSelfModification,
-  isCompanyExists,
   isUserExits,
   userController.addToCompany.bind(userController)
 );
@@ -73,7 +70,6 @@ router.patch(
   '/:userId/remove-user-from-company',
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   preventSelfModification,
-  isCompanyExists,
   isUserExits,
   userController.removeFromCompany.bind(userController)
 );

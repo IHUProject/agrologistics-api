@@ -12,6 +12,7 @@ import User from '../models/User';
 
 import Accountant from '../models/Accountant';
 import { ForbiddenError } from '../errors/forbidden';
+import { NotFoundError } from '../errors';
 
 export class CompanyService {
   private imageService: ImageService;
@@ -108,10 +109,12 @@ export class CompanyService {
     const accountants = (await Accountant.find({})) as IAccountant[];
 
     employees.forEach(async (emp) => {
-      const { _id } = emp;
-      await User.findByIdAndUpdate(_id, {
-        role: Roles.UNCATEGORIZED,
-      });
+      const { _id, role } = emp;
+      if (role !== Roles.UNCATEGORIZED) {
+        await User.findByIdAndUpdate(_id, {
+          role: Roles.UNCATEGORIZED,
+        });
+      }
     });
     accountants.forEach(async (acc) => {
       const { _id } = acc;
@@ -124,9 +127,24 @@ export class CompanyService {
   }
 
   async getCompany() {
-    return await Company.findOne({}).populate({
-      path: 'owner',
-      select: 'firstName lastName email image _id',
-    });
+    const company = await Company.findOne({})
+      .populate({
+        path: 'owner',
+        select: 'firstName lastName email image _id',
+      })
+      .populate({
+        path: 'employees',
+        select: 'firstName lastName email image _id role',
+      })
+      .populate({
+        path: 'accountant',
+        select: 'firstName lastName email _id',
+      });
+
+    if (!company) {
+      throw new NotFoundError('No company exists!');
+    }
+
+    return company;
   }
 }

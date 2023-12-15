@@ -8,6 +8,5 @@ export const createTokenUser = (user: IUser) =>
     image: user.image,
     email: user.email,
     role: user.role,
-    company: user.company,
     phone: user.phone,
   } as IUserWithID);

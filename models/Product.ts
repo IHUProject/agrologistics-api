@@ -1,7 +1,7 @@
-import { Model, Schema, model } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { IProduct } from '../interfaces/interfaces';
 
-const productSchema: Schema<IProduct> = new Schema<IProduct>(
+const productSchema = new Schema<IProduct>(
   {
     name: {
       type: String,
@@ -16,16 +16,10 @@ const productSchema: Schema<IProduct> = new Schema<IProduct>(
     },
     stockInKilo: { type: Number, default: 0, min: 0 },
     description: { type: String, default: null },
-    createBy: { type: Schema.Types.ObjectId, default: null, ref: 'User' },
-    updateBy: { type: Schema.Types.ObjectId, default: null, ref: 'User' },
   },
   { timestamps: true, versionKey: false }
 );
 
-const Product: Model<IProduct> = model<IProduct>(
-  'Product',
-  productSchema,
-  'Products'
-);
+const Product = mongoose.model<IProduct>('Product', productSchema, 'Products');
 
 export default Product;

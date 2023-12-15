@@ -57,9 +57,7 @@ export class UserController {
 
   public async getSingleUser(req: Request, res: Response) {
     const { userId } = req.params;
-
     const user = await this.userService.getSingleUser(userId);
-
     res.status(StatusCodes.OK).json({ userInfo: user });
   }
 
@@ -93,9 +91,7 @@ export class UserController {
 
   public async removeFromCompany(req: Request, res: Response) {
     const { userId } = req.params;
-
     const result = await this.userService.removeFromCompany(userId);
-
     res.status(StatusCodes.OK).json({ result });
   }
 }

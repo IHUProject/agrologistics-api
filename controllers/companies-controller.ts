@@ -26,7 +26,6 @@ export class CompanyController {
 
   public async getCompany(req: Request, res: Response) {
     const company = await this.companyService.getCompany();
-
     res.status(StatusCodes.OK).json({ company });
   }
 

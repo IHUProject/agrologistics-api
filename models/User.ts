@@ -5,7 +5,7 @@ import { IUser } from '../interfaces/interfaces';
 import validator from 'validator';
 import { validatePhoneNumber } from '../helpers/validate-schema-properties';
 
-const userSchema: mongoose.Schema<IUser> = new Schema<IUser>(
+const userSchema = new Schema<IUser>(
   {
     firstName: {
       type: String,
@@ -76,10 +76,6 @@ userSchema.methods.comparePassword = async function (
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-const User: mongoose.Model<IUser> = mongoose.model<IUser>(
-  'User',
-  userSchema,
-  'Users'
-);
+const User = mongoose.model<IUser>('User', userSchema, 'Users');
 
 export default User;
