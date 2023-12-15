@@ -23,7 +23,7 @@ export class CompanyController {
     await reattachTokens(res, (currentUser as IUserWithID)?.userId.toString());
     res
       .status(StatusCodes.CREATED)
-      .json({ company, msg: 'Company had been successfully created' });
+      .json({ company, message: 'Company had been successfully created!' });
   }
 
   public async getCompany(req: Request, res: Response) {
@@ -43,33 +43,35 @@ export class CompanyController {
 
     res
       .status(StatusCodes.OK)
-      .json({ company, msg: 'Company had been successfully updated' });
+      .json({ company, message: 'Company had been successfully updated!' });
   }
 
   public async deleteCompany(req: Request, res: Response) {
     const { companyId } = req.params;
-
-    const result = await this.companyService.deleteCompany(companyId);
-
     const { currentUser } = req;
     const { userId } = currentUser as IUserWithID;
+
+    const company = await this.companyService.deleteCompany(companyId);
+
     await reattachTokens(res, userId.toString());
 
-    res.status(StatusCodes.OK).json({ result });
+    res
+      .status(StatusCodes.OK)
+      .json({ company, message: 'Company have been deleted!' });
   }
 
   public async addToCompany(req: Request, res: Response) {
     const { userId } = req.params;
     const { role } = req.body;
 
-    const result = await this.companyService.addToCompany(userId, role);
+    const message = await this.companyService.addToCompany(userId, role);
 
-    res.status(StatusCodes.OK).json({ result });
+    res.status(StatusCodes.OK).json({ message });
   }
 
   public async removeFromCompany(req: Request, res: Response) {
     const { userId } = req.params;
-    const result = await this.companyService.removeFromCompany(userId);
-    res.status(StatusCodes.OK).json({ result });
+    const message = await this.companyService.removeFromCompany(userId);
+    res.status(StatusCodes.OK).json({ message });
   }
 }

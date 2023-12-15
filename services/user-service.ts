@@ -41,10 +41,9 @@ export class UserService {
   ) {
     const { firstName, lastName, email, phone } = payload;
 
-    const user = (await User.findById(userId)) as IUser;
+    let user = (await User.findById(userId)) as IUser;
 
     let image: IDataImgur | undefined;
-
     if (file) {
       const { deletehash } = user.image;
       if (deletehash) {
@@ -53,7 +52,7 @@ export class UserService {
       image = await this.imageService.handleSingleImage(file);
     }
 
-    const updatedUser = (await User.findByIdAndUpdate(
+    user = (await User.findByIdAndUpdate(
       userId,
       {
         firstName,
@@ -65,7 +64,7 @@ export class UserService {
       { new: true, runValidators: true }
     ).select('-password -createdAt -updatedAt')) as IUser;
 
-    return updatedUser;
+    return user;
   }
 
   public async getUsers(page: string, searchString: string) {
@@ -114,22 +113,32 @@ export class UserService {
   ) {
     const { firstName, lastName, role, password, email, phone } = payload;
 
+    if (role === Roles.OWNER) {
+      throw new BadRequestError('You can not make the new user owner!');
+    }
+
     let image: IDataImgur | undefined;
     if (file) {
       image = await this.imageService.handleSingleImage(file);
     }
 
-    const newUser = await User.create({
+    const userRole = role || Roles.EMPLOY;
+
+    const user = await User.create({
       firstName,
       lastName,
-      role,
+      role: userRole,
       password,
       email,
       image,
       phone,
     });
 
-    return newUser;
+    await Company.updateOne({}, { $push: { employees: user._id } });
+
+    return await User.findOne({ email }).select(
+      '-password -createdAt -updatedAt'
+    );
   }
 
   public async changeUserRole(
@@ -137,8 +146,10 @@ export class UserService {
     role: Roles,
     isExternalRequest: boolean = false
   ) {
-    if (role === Roles.OWNER) {
-      throw new BadRequestError('You can not make an employ owner!');
+    if (role === Roles.OWNER || role === Roles.UNCATEGORIZED) {
+      throw new BadRequestError(
+        'You can not make an employ owner or uncategorized!'
+      );
     }
 
     const user = (await User.findById(userId)) as IUser;
@@ -155,6 +166,8 @@ export class UserService {
     user.role = role;
     await user.save();
 
-    return `The role of employ ${user.firstName} ${user.lastName} has been changed to ${user.role}`;
+    return `The role of employ ${user.firstName} ${
+      user.lastName
+    } has been changed to ${user.role.replace('_', ' ')}`;
   }
 }

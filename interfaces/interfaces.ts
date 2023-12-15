@@ -50,6 +50,7 @@ export interface ICompany extends Document {
   employees: Types.ObjectId[];
   accountant: Types.ObjectId;
   products: Types.ObjectId[];
+  suppliers: Types.ObjectId[];
 }
 
 export interface IUserWithID extends IUser {
@@ -68,11 +69,9 @@ export interface IAccountant extends Document {
 
 export interface IProduct extends Document {
   name: string;
-  pricePerKilo: number;
+  price: string;
   category: string;
-  stockInKilo: number;
   description: string;
-  images: string[];
 }
 
 export interface IPasswordPayload {
@@ -87,6 +86,14 @@ export interface ImgurResponse {
 export interface IDataImgur {
   link: string;
   deletehash: string;
+}
+
+export interface ISupplier {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  products: Types.ObjectId[];
 }
 
 interface ImgurBodyResponse {

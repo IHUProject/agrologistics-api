@@ -10,22 +10,19 @@ export class AccountantService {
       { $set: { accountant: null } }
     );
 
-    await Accountant.findByIdAndDelete(accId);
-    return 'The accountant has been deleted!';
+    return await Accountant.findByIdAndDelete(accId).select('-createdAt');
   }
 
   public async createAccountant(payload: IAccountant) {
     const { firstName, lastName, address, email, phone, latitude, longitude } =
       payload;
 
-    const isAccountantExists = (await Accountant.countDocuments({}))
-      ? true
-      : false;
-    if (isAccountantExists) {
+    const isFirstAccountant = (await Accountant.countDocuments({})) === 0;
+    if (!isFirstAccountant) {
       throw new ForbiddenError('Accountant already exists!');
     }
 
-    const newAccountant = await Accountant.create({
+    const accountant = await Accountant.create({
       firstName,
       lastName,
       address,
@@ -35,16 +32,16 @@ export class AccountantService {
       longitude,
     });
 
-    await Company.updateOne({}, { $set: { accountant: newAccountant._id } });
+    await Company.updateOne({}, { $set: { accountant: accountant._id } });
 
-    return newAccountant;
+    return await Accountant.findById(accountant._id).select('-createdAt');
   }
 
   public async updateAccountant(payload: IAccountant, accId: string) {
     const { firstName, lastName, address, email, phone, latitude, longitude } =
       payload;
 
-    const updatedAccountant = await Accountant.findByIdAndUpdate(
+    const accountant = await Accountant.findByIdAndUpdate(
       accId,
       {
         firstName,
@@ -58,16 +55,10 @@ export class AccountantService {
       { new: true, runValidators: true }
     ).select('-createdAt');
 
-    return updatedAccountant;
+    return accountant;
   }
 
   public async getSingleAccountant() {
-    const accountant = await Accountant.findOne({});
-
-    if (!accountant) {
-      return { msg: `Your company does not have accountant` };
-    }
-
-    return { accountantInfo: accountant };
+    return await Accountant.findOne({}).select('-createdAt');
   }
 }

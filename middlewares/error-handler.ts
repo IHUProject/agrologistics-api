@@ -15,31 +15,29 @@ export const errorHandlerMiddleware = (
   };
 
   if (err.name === 'CastError') {
-    console.log(err);
-
     customError.msg = `Error: the value ${err.value} is wrong format or type for property ${err.path}`;
     customError.statusCode = 404;
   }
 
   if (err.name === 'ValidationError') {
-    customError.msg = Object.values(err.errors)
-      .map((item) => {
-        if (item.name === 'CastError') {
-          return `Error: the value ${item.value} is wrong format or type for property ${item.path}`;
-        }
-        if (item.kind === 'minlength') {
-          return `The ${item.path} must be more than ${
-            item.properties.minlength - 1
-          } characters.`;
-        }
-        if (item.kind === 'maxlength') {
-          return `The ${item.path} must be less than ${
-            item.properties.maxlength + 1
-          } characters.`;
-        }
-        return item;
-      })
-      .join(' ');
+    const errors = Object.values(err.errors).map((item) => {
+      if (item.name === 'CastError') {
+        return `Error: the value ${item.value} is wrong format or type for property ${item.path}`;
+      }
+      if (item.kind === 'minlength') {
+        return `The ${item.path} must be more than ${
+          item.properties.minlength - 1
+        } characters.`;
+      }
+      if (item.kind === 'maxlength') {
+        return `The ${item.path} must be less than ${
+          item.properties.maxlength + 1
+        } characters.`;
+      }
+      return item;
+    });
+
+    customError.msg = errors[0].message;
     customError.statusCode = 400;
   }
 
@@ -57,5 +55,5 @@ export const errorHandlerMiddleware = (
 
   return res
     .status(Number(customError.statusCode))
-    .json({ msg: customError.msg });
+    .json({ message: customError.msg });
 };

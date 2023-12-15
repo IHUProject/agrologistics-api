@@ -21,13 +21,13 @@ export class UserController {
     const { file } = req;
     const { currentUser } = req;
 
-    const updatedUser = await this.userService.updateUser(body, userId, file);
+    const user = await this.userService.updateUser(body, userId, file);
 
     await reattachTokens(res, (currentUser as IUserWithID).userId.toString());
 
     res.status(StatusCodes.OK).json({
-      userInfo: updatedUser,
-      msg: 'User had been successfully updated',
+      user,
+      msg: 'User had been successfully updated!',
     });
   }
 
@@ -38,13 +38,13 @@ export class UserController {
 
     res
       .status(StatusCodes.OK)
-      .json({ userInfo: user, msg: 'User had been successfully created' });
+      .json({ user, msg: 'User had been successfully created!' });
   }
 
   public async deleteUser(req: Request, res: Response) {
     const { userId } = req.params;
 
-    const result = await this.userService.deleteUser(userId);
+    const user = await this.userService.deleteUser(userId);
 
     res.cookie('token', 'logout', {
       httpOnly: true,
@@ -54,7 +54,9 @@ export class UserController {
       signed: true,
     });
 
-    res.status(StatusCodes.OK).json({ result });
+    res
+      .status(StatusCodes.OK)
+      .json({ user, message: 'User has been deleted!' });
   }
 
   public async getUsers(req: Request, res: Response) {
@@ -71,16 +73,16 @@ export class UserController {
   public async getSingleUser(req: Request, res: Response) {
     const { userId } = req.params;
     const user = await this.userService.getSingleUser(userId);
-    res.status(StatusCodes.OK).json({ userInfo: user });
+    res.status(StatusCodes.OK).json({ user });
   }
 
   public async changePassword(req: Request, res: Response) {
     const { userId } = req.params;
     const { body } = req;
 
-    const result = await this.userService.changePassword(userId, body);
+    const message = await this.userService.changePassword(userId, body);
 
-    res.status(StatusCodes.OK).json({ result });
+    res.status(StatusCodes.OK).json({ message });
   }
 
   public async changeUserRole(req: Request, res: Response) {
@@ -88,8 +90,8 @@ export class UserController {
     const { body } = req;
     const { role } = body;
 
-    const result = await this.userService.changeUserRole(userId, role);
+    const message = await this.userService.changeUserRole(userId, role);
 
-    res.status(StatusCodes.OK).json({ result });
+    res.status(StatusCodes.OK).json({ message });
   }
 }
