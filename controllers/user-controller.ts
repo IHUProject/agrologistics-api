@@ -25,7 +25,20 @@ export class UserController {
 
     await reattachTokens(res, (currentUser as IUserWithID).userId.toString());
 
-    res.status(StatusCodes.OK).json({ userInfo: updatedUser });
+    res.status(StatusCodes.OK).json({
+      userInfo: updatedUser,
+      msg: 'User had been successfully updated',
+    });
+  }
+
+  public async createUser(req: Request, res: Response) {
+    const { body, file } = req;
+
+    const user = await this.userService.createUser(body, file);
+
+    res
+      .status(StatusCodes.OK)
+      .json({ userInfo: user, msg: 'User had been successfully created' });
   }
 
   public async deleteUser(req: Request, res: Response) {
@@ -77,21 +90,6 @@ export class UserController {
 
     const result = await this.userService.changeUserRole(userId, role);
 
-    res.status(StatusCodes.OK).json({ result });
-  }
-
-  public async addToCompany(req: Request, res: Response) {
-    const { userId } = req.params;
-    const { role } = req.body;
-
-    const result = await this.userService.addToCompany(userId, role);
-
-    res.status(StatusCodes.OK).json({ result });
-  }
-
-  public async removeFromCompany(req: Request, res: Response) {
-    const { userId } = req.params;
-    const result = await this.userService.removeFromCompany(userId);
     res.status(StatusCodes.OK).json({ result });
   }
 }

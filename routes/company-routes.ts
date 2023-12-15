@@ -5,6 +5,10 @@ import { Roles } from '../interfaces/enums';
 import { validateCoordinates } from '../middlewares/validate-request-properties-middlewares';
 import { isCompanyExists } from '../middlewares/company-middlewares';
 import multer, { memoryStorage } from 'multer';
+import {
+  isUserExits,
+  preventSelfModification,
+} from '../middlewares/user-middlewares';
 
 const companyController = new CompanyController();
 const router = express.Router();
@@ -37,6 +41,20 @@ router.patch(
   upload.single('logo'),
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
   companyController.updateCompany.bind(companyController)
+);
+router.patch(
+  '/:userId/add-user',
+  authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
+  preventSelfModification,
+  isUserExits,
+  companyController.addToCompany.bind(companyController)
+);
+router.patch(
+  '/:userId/remove-user',
+  authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
+  preventSelfModification,
+  isUserExits,
+  companyController.removeFromCompany.bind(companyController)
 );
 
 export default router;

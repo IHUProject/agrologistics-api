@@ -59,19 +59,5 @@ router.patch(
   isUserExits,
   userController.changeUserRole.bind(userController)
 );
-router.patch(
-  '/:userId/add-user-to-company',
-  authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
-  preventSelfModification,
-  isUserExits,
-  userController.addToCompany.bind(userController)
-);
-router.patch(
-  '/:userId/remove-user-from-company',
-  authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
-  preventSelfModification,
-  isUserExits,
-  userController.removeFromCompany.bind(userController)
-);
 
 export default router;

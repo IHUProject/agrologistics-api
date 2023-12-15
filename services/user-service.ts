@@ -90,7 +90,7 @@ export class UserService {
     )) as IUser;
   }
 
-  async changePassword(userId: string, payload: IPasswordPayload) {
+  public async changePassword(userId: string, payload: IPasswordPayload) {
     const { oldPassword, newPassword } = payload;
 
     const user = (await User.findById(userId)) as IUser;
@@ -108,7 +108,31 @@ export class UserService {
     return 'Password has been change!';
   }
 
-  async changeUserRole(
+  public async createUser(
+    payload: IUser,
+    file: Express.Multer.File | undefined
+  ) {
+    const { firstName, lastName, role, password, email, phone } = payload;
+
+    let image: IDataImgur | undefined;
+    if (file) {
+      image = await this.imageService.handleSingleImage(file);
+    }
+
+    const newUser = await User.create({
+      firstName,
+      lastName,
+      role,
+      password,
+      email,
+      image,
+      phone,
+    });
+
+    return newUser;
+  }
+
+  public async changeUserRole(
     userId: string,
     role: Roles,
     isExternalRequest: boolean = false
@@ -132,41 +156,5 @@ export class UserService {
     await user.save();
 
     return `The role of employ ${user.firstName} ${user.lastName} has been changed to ${user.role}`;
-  }
-
-  async addToCompany(userId: string, role: Roles) {
-    if (role && role === Roles.OWNER) {
-      throw new BadRequestError('You can not make an employ owner!');
-    }
-
-    const user = (await User.findById(userId)) as IUser;
-    const isWorking = user.role !== Roles.UNCATEGORIZED;
-    if (isWorking) {
-      throw new BadRequestError('User is already working to the company!');
-    }
-
-    await Company.updateOne({}, { $push: { employees: userId } });
-
-    await this.changeUserRole(userId, role || Roles.EMPLOY, true);
-
-    return `The user ${user.firstName} ${
-      user.lastName
-    } has been added to the company with role: ${role || Roles.EMPLOY}`;
-  }
-
-  async removeFromCompany(userId: string) {
-    const user = (await User.findById(userId)) as IUser;
-
-    const { role } = user;
-    if (role === Roles.UNCATEGORIZED) {
-      throw new BadRequestError('User does not work to the company!');
-    }
-    if (role === Roles.OWNER) {
-      throw new ForbiddenError('You can not remove the owner!');
-    }
-
-    this.deleteUser(userId, true);
-
-    return `The employ has been removed for the company!`;
   }
 }

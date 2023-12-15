@@ -12,12 +12,15 @@ import User from '../models/User';
 
 import Accountant from '../models/Accountant';
 import { ForbiddenError } from '../errors/forbidden';
-import { NotFoundError } from '../errors';
+import { BadRequestError, NotFoundError } from '../errors';
+import { UserService } from './user-service';
 
 export class CompanyService {
   private imageService: ImageService;
+  private userService: UserService;
   constructor() {
     this.imageService = new ImageService();
+    this.userService = new UserService();
   }
 
   public async createCompany(
@@ -146,5 +149,41 @@ export class CompanyService {
     }
 
     return company;
+  }
+
+  async addToCompany(userId: string, role: Roles) {
+    if (role && role === Roles.OWNER) {
+      throw new BadRequestError('You can not make an employ owner!');
+    }
+
+    const user = (await User.findById(userId)) as IUser;
+    const isWorking = user.role !== Roles.UNCATEGORIZED;
+    if (isWorking) {
+      throw new BadRequestError('User is already working to the company!');
+    }
+
+    await Company.updateOne({}, { $push: { employees: userId } });
+
+    await this.userService.changeUserRole(userId, role || Roles.EMPLOY, true);
+
+    return `The user ${user.firstName} ${
+      user.lastName
+    } has been added to the company with role: ${role || Roles.EMPLOY}`;
+  }
+
+  async removeFromCompany(userId: string) {
+    const user = (await User.findById(userId)) as IUser;
+
+    const { role } = user;
+    if (role === Roles.UNCATEGORIZED) {
+      throw new BadRequestError('User does not work to the company!');
+    }
+    if (role === Roles.OWNER) {
+      throw new ForbiddenError('You can not remove the owner!');
+    }
+
+    this.userService.deleteUser(userId, true);
+
+    return `The employ has been removed for the company!`;
   }
 }
