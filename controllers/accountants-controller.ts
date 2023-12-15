@@ -13,7 +13,10 @@ export class AccountantController {
 
     const newAccountant = await this.accountantService.createAccountant(body);
 
-    res.status(StatusCodes.CREATED).json({ accountantInfo: newAccountant });
+    res.status(StatusCodes.CREATED).json({
+      accountantInfo: newAccountant,
+      msg: 'Accountant had been successfully created',
+    });
   }
 
   public async getSingleAccountant(req: Request, res: Response) {
@@ -30,7 +33,10 @@ export class AccountantController {
       accId
     );
 
-    res.status(StatusCodes.OK).json({ accountantInfo: updateAccountant });
+    res.status(StatusCodes.OK).json({
+      accountantInfo: updateAccountant,
+      msg: 'Accountant had been successfully update',
+    });
   }
 
   public async deleteAccountant(req: Request, res: Response) {

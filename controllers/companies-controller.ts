@@ -21,7 +21,9 @@ export class CompanyController {
     );
 
     await reattachTokens(res, (currentUser as IUserWithID)?.userId.toString());
-    res.status(StatusCodes.CREATED).json({ company });
+    res
+      .status(StatusCodes.CREATED)
+      .json({ company, msg: 'Company had been successfully created' });
   }
 
   public async getCompany(req: Request, res: Response) {
@@ -39,7 +41,9 @@ export class CompanyController {
       file
     );
 
-    res.status(StatusCodes.OK).json({ company });
+    res
+      .status(StatusCodes.OK)
+      .json({ company, msg: 'Company had been successfully updated' });
   }
 
   public async deleteCompany(req: Request, res: Response) {
@@ -51,6 +55,21 @@ export class CompanyController {
     const { userId } = currentUser as IUserWithID;
     await reattachTokens(res, userId.toString());
 
+    res.status(StatusCodes.OK).json({ result });
+  }
+
+  public async addToCompany(req: Request, res: Response) {
+    const { userId } = req.params;
+    const { role } = req.body;
+
+    const result = await this.companyService.addToCompany(userId, role);
+
+    res.status(StatusCodes.OK).json({ result });
+  }
+
+  public async removeFromCompany(req: Request, res: Response) {
+    const { userId } = req.params;
+    const result = await this.companyService.removeFromCompany(userId);
     res.status(StatusCodes.OK).json({ result });
   }
 }
