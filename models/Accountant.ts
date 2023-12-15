@@ -7,7 +7,7 @@ import {
   validatePhoneNumber,
 } from '../helpers/validate-schema-properties';
 
-const accountantSchema: mongoose.Schema<IAccountant> = new Schema<IAccountant>(
+const accountantSchema = new Schema<IAccountant>(
   {
     firstName: { type: String, default: null, minlength: 3, maxlength: 35 },
     lastName: { type: String, default: null, minlength: 3, maxlength: 35 },
@@ -27,7 +27,6 @@ const accountantSchema: mongoose.Schema<IAccountant> = new Schema<IAccountant>(
       validate: [validator.isEmail, 'Please provide a valid email address.'],
     },
     address: { type: String, default: null, minlength: 5, maxlength: 35 },
-    updatedBy: { type: Schema.Types.ObjectId, default: null, ref: 'User' },
     latitude: {
       type: Number,
       default: null,
@@ -53,7 +52,7 @@ const accountantSchema: mongoose.Schema<IAccountant> = new Schema<IAccountant>(
   }
 );
 
-const Accountant: mongoose.Model<IAccountant> = mongoose.model<IAccountant>(
+const Accountant = mongoose.model<IAccountant>(
   'Accountant',
   accountantSchema,
   'Accountants'

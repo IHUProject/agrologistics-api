@@ -1,10 +1,15 @@
 import Accountant from '../models/Accountant';
 import { IAccountant } from '../interfaces/interfaces';
-import { Types } from 'mongoose';
 import { ForbiddenError } from '../errors/forbidden';
+import Company from '../models/Company';
 
 export class AccountantService {
   public async deleteAccountant(accId: string) {
+    await Company.updateOne(
+      { accountant: accId },
+      { $set: { accountant: null } }
+    );
+
     await Accountant.findByIdAndDelete(accId);
     return 'The accountant has been deleted!';
   }
@@ -30,14 +35,12 @@ export class AccountantService {
       longitude,
     });
 
+    await Company.updateOne({}, { $set: { accountant: newAccountant._id } });
+
     return newAccountant;
   }
 
-  public async updateAccountant(
-    payload: IAccountant,
-    accId: string,
-    userId: Types.ObjectId
-  ) {
+  public async updateAccountant(payload: IAccountant, accId: string) {
     const { firstName, lastName, address, email, phone, latitude, longitude } =
       payload;
 
@@ -51,15 +54,9 @@ export class AccountantService {
         phone,
         latitude,
         longitude,
-        updatedBy: userId,
       },
       { new: true, runValidators: true }
-    )
-      .select('-createdAt')
-      .populate({
-        path: 'updatedBy',
-        select: 'firstName lastName _id role',
-      });
+    ).select('-createdAt');
 
     return updatedAccountant;
   }
@@ -70,6 +67,7 @@ export class AccountantService {
     if (!accountant) {
       return { msg: `Your company does not have accountant` };
     }
+
     return { accountantInfo: accountant };
   }
 }

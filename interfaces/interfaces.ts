@@ -31,10 +31,9 @@ export interface IUser extends Document {
   lastName: string;
   email: string;
   password: string;
-  image: IDataImgur;
   role: Roles;
   phone: number;
-  company: Types.ObjectId;
+  image: IDataImgur;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -42,12 +41,15 @@ export interface ICompany extends Document {
   name: string;
   phone: number;
   address: string;
-  owner: Types.ObjectId;
   afm: number;
   logo: IDataImgur;
   founded: Date;
   latitude: number;
   longitude: number;
+  owner: Types.ObjectId;
+  employees: Types.ObjectId[];
+  accountant: Types.ObjectId;
+  products: Types.ObjectId[];
 }
 
 export interface IUserWithID extends IUser {
@@ -62,7 +64,6 @@ export interface IAccountant extends Document {
   phone: number;
   latitude?: number;
   longitude?: number;
-  updatedBy?: Types.ObjectId;
 }
 
 export interface IProduct extends Document {
@@ -72,8 +73,6 @@ export interface IProduct extends Document {
   stockInKilo: number;
   description: string;
   images: string[];
-  createBy: Types.ObjectId;
-  updateBy: Types.ObjectId;
 }
 
 export interface IPasswordPayload {
