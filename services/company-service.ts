@@ -1,5 +1,6 @@
 import {
   IAccountant,
+  IClient,
   ICompany,
   IDataImgur,
   IProduct,
@@ -16,6 +17,8 @@ import { ForbiddenError } from '../errors/forbidden';
 import { BadRequestError, NotFoundError } from '../errors';
 import { UserService } from './user-service';
 import Product from '../models/Product';
+import Client from '../models/Client';
+import { deleteDocuments } from '../helpers/delete-docs';
 
 export class CompanyService {
   private imageService: ImageService;
@@ -109,9 +112,10 @@ export class CompanyService {
   }
 
   public async deleteCompany(companyId: string) {
-    const employees = (await User.find({})) as IUser[];
-    const accountants = (await Accountant.find({})) as IAccountant[];
-    const products = (await Product.find({})) as IProduct[];
+    const employees = (await User.find()) as IUser[];
+    const accountants = (await Accountant.find()) as IAccountant[];
+    const products = (await Product.find()) as IProduct[];
+    const clients = (await Client.find()) as IClient[];
 
     employees.forEach(async (emp) => {
       const { _id, role } = emp;
@@ -121,14 +125,10 @@ export class CompanyService {
         });
       }
     });
-    accountants.forEach(async (acc) => {
-      const { _id } = acc;
-      await Accountant.findByIdAndDelete(_id);
-    });
-    products.forEach(async (prod) => {
-      const { _id } = prod;
-      await Product.findByIdAndDelete(_id);
-    });
+
+    await deleteDocuments(accountants, Accountant);
+    await deleteDocuments(products, Product);
+    await deleteDocuments(clients, Client);
 
     return await Company.findByIdAndDelete(companyId).select(
       '-createdAt -updateAt'
@@ -149,6 +149,14 @@ export class CompanyService {
       .populate({
         path: 'accountant',
         select: 'firstName lastName email _id',
+      })
+      .populate({
+        path: 'products',
+        select: 'name price _id',
+      })
+      .populate({
+        path: 'clients',
+        select: 'fullName phone _id',
       });
 
     if (!company) {

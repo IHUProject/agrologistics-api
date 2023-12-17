@@ -94,9 +94,7 @@ export class UserService {
 
     const user = (await User.findById(userId)) as IUser;
 
-    const isMatch: boolean | undefined = await user?.comparePassword(
-      oldPassword
-    );
+    const isMatch = await user.comparePassword(oldPassword);
     if (!isMatch) {
       throw new BadRequestError('Passwords does not match!');
     }

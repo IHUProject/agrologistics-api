@@ -10,8 +10,14 @@ export const validateDate = (date: Date): boolean => {
   return regex.test(dateString);
 };
 
-export const validatePhoneNumber = (value: number): boolean =>
-  /^[0-9]{10}$/.test(value.toString());
+export const validatePhoneNumber = (value: number | string): boolean => {
+  if (!value) {
+    return true;
+  }
+  return /^[0-9]{10}$/.test(
+    typeof value === 'number' ? value.toString() : value
+  );
+};
 
 export const validateLatitude = (value: number): boolean =>
   !isNaN(value) && value >= -90 && value <= 90;

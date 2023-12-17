@@ -37,7 +37,7 @@ export const errorHandlerMiddleware = (
       return item;
     });
 
-    customError.msg = errors[0].message;
+    customError.msg = errors[0].message ?? errors[0];
     customError.statusCode = 400;
   }
 

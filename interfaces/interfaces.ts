@@ -1,4 +1,4 @@
-import { Roles } from './enums';
+import { PaymentMethod, PurchaseStatus, Roles } from './enums';
 import { Document, Types } from 'mongoose';
 
 export interface ICustomError {
@@ -51,6 +51,8 @@ export interface ICompany extends Document {
   accountant: Types.ObjectId;
   products: Types.ObjectId[];
   suppliers: Types.ObjectId[];
+  purchases: Types.ObjectId[];
+  clients: Types.ObjectId[];
 }
 
 export interface IUserWithID extends IUser {
@@ -72,6 +74,7 @@ export interface IProduct extends Document {
   price: string;
   category: string;
   description: string;
+  purchases: Types.ObjectId[];
 }
 
 export interface IPasswordPayload {
@@ -94,6 +97,23 @@ export interface ISupplier {
   phone: string;
   address: string;
   products: Types.ObjectId[];
+}
+
+export interface IPurchase extends Document {
+  totalAmount: number;
+  status: PurchaseStatus;
+  paymentMethod: PaymentMethod;
+  date: Date;
+  client: Types.ObjectId;
+  products: Types.ObjectId[];
+}
+
+export interface IClient extends Document {
+  fullName: string;
+  company: string;
+  address: string;
+  phone: number;
+  purchases: Types.ObjectId[];
 }
 
 interface ImgurBodyResponse {

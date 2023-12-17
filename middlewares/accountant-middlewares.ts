@@ -7,7 +7,7 @@ export const isAccountantExists = async (
   res: Response,
   next: NextFunction
 ) => {
-  const accId: string = req.params.accId;
+  const { accId } = req.params;
   const accountant = await Accountant.findById(accId);
 
   if (!accountant) {
