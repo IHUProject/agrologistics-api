@@ -10,3 +10,17 @@ export enum DefaultImage {
   LOGO = 'https://suesys.com/assets/website/images/company-logo-default.png',
   PRODUCT = 'https://www.kcnpnm.org/global_graphics/default-store-350x350.jpg',
 }
+
+export enum PaymentMethod {
+  CREDIT_CARD = 'credit card',
+  PAYPAL = 'paypal',
+  CASH = 'cash',
+  BANK_TRANSFER = 'bank transfer',
+  OTHER = 'other',
+}
+
+export enum PurchaseStatus {
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
+}

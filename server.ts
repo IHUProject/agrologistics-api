@@ -21,6 +21,7 @@ import companyRouter from './routes/company-routes';
 import accountantRouter from './routes/accountant-routes';
 import productRouter from './routes/product-routes';
 import supplierRouter from './routes/supplier-routes';
+import clientRouter from './routes/client-routes';
 
 const server = express();
 const corsObject = {
@@ -44,18 +45,27 @@ server.use(cookieParser(process.env.JWT_SECRET));
 server.use(cors(corsObject));
 server.use(morgan('dev'));
 
-server.use('/api/v1/al/auth', authRouter);
-server.use('/api/v1/al/user', authenticateUser, userRouter);
-server.use('/api/v1/al/company', authenticateUser, companyRouter);
-server.use('/api/v1/al/accountant', authenticateUser, accountantRouter);
-server.use('/api/v1/al/supplier', authenticateUser, supplierRouter);
-server.use('/api/v1/al/product', authenticateUser, productRouter);
+server.use(`${process.env.BASE_URL}/auth`, authRouter);
+server.use(`${process.env.BASE_URL}/user`, authenticateUser, userRouter);
+server.use(`${process.env.BASE_URL}/company`, authenticateUser, companyRouter);
+server.use(
+  `${process.env.BASE_URL}/accountant`,
+  authenticateUser,
+  accountantRouter
+);
+server.use(
+  `${process.env.BASE_URL}/supplier`,
+  authenticateUser,
+  supplierRouter
+);
+server.use(`${process.env.BASE_URL}/product`, authenticateUser, productRouter);
+server.use(`${process.env.BASE_URL}/client`, authenticateUser, clientRouter);
 
 server.use(notFoundMiddleware);
 server.use(headersMiddleware);
 server.use(errorHandlerMiddleware);
 
-const port = 4500;
+const port = process.env.PORT || 4500;
 
 const startServer = async () => {
   try {

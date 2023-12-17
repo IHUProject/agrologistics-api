@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 import { IProduct } from '../interfaces/interfaces';
 
 const productSchema = new Schema<IProduct>(
@@ -14,6 +14,12 @@ const productSchema = new Schema<IProduct>(
       required: [true, 'Please provide a price'],
     },
     description: { type: String, default: null },
+    purchases: [
+      {
+        type: Types.ObjectId,
+        ref: 'Purchase',
+      },
+    ],
   },
   { timestamps: true, versionKey: false }
 );

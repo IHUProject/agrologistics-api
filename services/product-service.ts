@@ -13,7 +13,7 @@ export class ProductService {
       description,
     });
 
-    await Company.updateOne({}, { $set: { products: product._id } });
+    await Company.updateOne({}, { $push: { products: product._id } });
 
     return await Product.findById(product._id).select('-createdAt');
   }

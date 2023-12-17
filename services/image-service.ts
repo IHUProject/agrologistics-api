@@ -6,14 +6,14 @@ export class ImageService {
   public async handleSingleImage(file: Express.Multer.File) {
     const encodedImage = file.buffer.toString('base64');
     const imgurResponse: ImgurResponse = await axios.post(
-      'https://api.imgur.com/3/image',
+      process.env.IMGUR_URL as string,
       {
         image: encodedImage,
         type: 'base64',
       },
       {
         headers: {
-          Authorization: 'Client-ID b346aa38b14f95b',
+          Authorization: `Client-ID ${process.env.CLIENT_ID}`,
         },
       }
     );
@@ -22,9 +22,9 @@ export class ImageService {
   }
 
   public async deleteSingleImage(deletehash: string) {
-    await axios.delete(`https://api.imgur.com/3/image/${deletehash}`, {
+    await axios.delete(`${process.env.IMGUR_URL}/${deletehash}`, {
       headers: {
-        Authorization: 'Client-ID b346aa38b14f95b',
+        Authorization: `Client-ID ${process.env.CLIENT_ID}`,
       },
     });
   }
