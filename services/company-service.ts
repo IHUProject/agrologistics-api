@@ -45,6 +45,7 @@ export class CompanyService {
     if (file) {
       logo = await this.imageService.handleSingleImage(file);
     }
+    console.log(logo);
 
     const company = await Company.create({
       name,
@@ -101,12 +102,7 @@ export class CompanyService {
         longitude,
       },
       { new: true, runValidators: true }
-    )
-      .select('-createdAt -updateAt')
-      .populate({
-        path: 'owner',
-        select: 'firstName lastName image _id',
-      })) as ICompany;
+    ).select('-createdAt -updateAt')) as ICompany;
 
     return company;
   }
@@ -117,14 +113,17 @@ export class CompanyService {
     const products = (await Product.find()) as IProduct[];
     const clients = (await Client.find()) as IClient[];
 
-    employees.forEach(async (emp) => {
-      const { _id, role } = emp;
-      if (role !== Roles.UNCATEGORIZED) {
-        await User.findByIdAndUpdate(_id, {
-          role: Roles.UNCATEGORIZED,
-        });
-      }
-    });
+    await Promise.all(
+      employees.map((emp) => {
+        const { _id, role } = emp;
+        if (role !== Roles.UNCATEGORIZED) {
+          return User.findByIdAndUpdate(_id, {
+            role: Roles.UNCATEGORIZED,
+          });
+        }
+        return Promise.resolve();
+      })
+    );
 
     await deleteDocuments(accountants, Accountant);
     await deleteDocuments(products, Product);

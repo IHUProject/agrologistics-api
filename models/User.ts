@@ -52,7 +52,7 @@ const userSchema = new Schema<IUser>(
     phone: {
       type: Number,
       unique: true,
-      default: null,
+      sparse: true,
       validate: {
         validator: validatePhoneNumber,
         message: 'Invalid phone number, must be 10 digits.',

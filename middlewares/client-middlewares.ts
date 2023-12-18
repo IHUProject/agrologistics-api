@@ -7,7 +7,7 @@ export const isClientExists = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { clientId } = req.params;
+  const clientId = req.params.clientId || req.body.clientId;
   const client = await Client.findById(clientId);
 
   if (!client) {
