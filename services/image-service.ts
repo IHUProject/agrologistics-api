@@ -1,10 +1,10 @@
 import axios from 'axios';
-// import { getImgurToken } from '../helpers/imgur-token';
 import { ImgurResponse } from '../interfaces/interfaces';
 
 export class ImageService {
   public async handleSingleImage(file: Express.Multer.File) {
     const encodedImage = file.buffer.toString('base64');
+
     const imgurResponse: ImgurResponse = await axios.post(
       process.env.IMGUR_URL as string,
       {

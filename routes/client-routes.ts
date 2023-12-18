@@ -3,6 +3,7 @@ import { authorizePermissions } from '../middlewares/auth-middlewares';
 import { Roles } from '../interfaces/enums';
 import { ClientController } from '../controllers/client-controller';
 import { isClientExists } from '../middlewares/client-middlewares';
+import { validateQueryPage } from '../middlewares/validate-request-properties-middlewares';
 
 const clientController = new ClientController();
 const router = express.Router();
@@ -20,6 +21,7 @@ router.get(
 );
 router.get(
   '/get-clients',
+  validateQueryPage,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
   clientController.getClients.bind(clientController)
 );
