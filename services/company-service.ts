@@ -180,7 +180,7 @@ export class CompanyService extends DataLayerService<ICompany> {
       throw new ForbiddenError('You can not remove the owner!');
     }
 
-    this.userService.deleteUser(userId, true);
+    await this.userService.deleteUser(userId, true);
     return `The employ has been removed for the company!`;
   }
 }

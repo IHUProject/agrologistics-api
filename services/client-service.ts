@@ -28,7 +28,6 @@ export class ClientService extends DataLayerService<IClient> {
       throw new BadRequestError('The phone number is already in use!');
     }
 
-    await this.validateData(payload);
     const client = await super.create(payload);
     await Company.updateOne({}, { $push: { clients: client._id } });
 
@@ -50,10 +49,11 @@ export class ClientService extends DataLayerService<IClient> {
   }
 
   public async deleteClient(clientId: string) {
+    const deleteClient = await this.delete(clientId);
     await Purchase.updateMany({ client: clientId }, { $unset: { client: '' } });
     await Company.updateOne({}, { $pull: { clients: clientId } });
 
-    return await this.delete(clientId);
+    return deleteClient;
   }
 
   public async updateClient(payload: IClient, clientId: string) {

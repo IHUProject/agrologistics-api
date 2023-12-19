@@ -1,6 +1,7 @@
 import { IPopulate, IProduct } from '../interfaces/interfaces';
 import Company from '../models/Company';
 import Product from '../models/Product';
+import Purchase from '../models/Purchase';
 import { DataLayerService } from './general-services/data-layer-service';
 
 export class ProductService extends DataLayerService<IProduct> {
@@ -27,11 +28,11 @@ export class ProductService extends DataLayerService<IProduct> {
   }
 
   public async getSingleProduct(productId: string) {
-    return this.getOne(productId, this.select, this.populateOptions);
+    return await this.getOne(productId, this.select, this.populateOptions);
   }
 
   public async getProducts(page: string, searchString: string) {
-    return this.getMany(
+    return await this.getMany(
       page,
       this.select,
       searchString,
@@ -41,12 +42,13 @@ export class ProductService extends DataLayerService<IProduct> {
   }
 
   public async updateProduct(payload: IProduct, productId: string) {
-    return this.update(productId, payload, this.select);
+    return await this.update(productId, payload, this.select);
   }
 
   public async deleteProduct(productId: string) {
     const deletedProduct = await this.delete(productId);
     await Company.updateOne({}, { $pull: { products: productId } });
+    await Purchase.updateOne({}, { $pull: { products: productId } });
     return deletedProduct;
   }
 }
