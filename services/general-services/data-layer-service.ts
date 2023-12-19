@@ -65,9 +65,13 @@ export class DataLayerService<T> {
   public async validateData(data: Partial<T>): Promise<void> {
     const schemaPaths = Object.keys(this.model.schema.paths);
 
-    const invalidKeys = Object.keys(data).filter(
-      (key) => !schemaPaths.includes(key)
-    );
+    const invalidKeys = Object.keys(data).filter((key) => {
+      if (key === 'image' || key === 'logo') {
+        key = `${key}.link`;
+      }
+
+      return !schemaPaths.includes(key);
+    });
 
     if (invalidKeys.length) {
       throw new BadRequestError(
