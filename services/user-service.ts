@@ -45,6 +45,8 @@ export class UserService extends DataLayerService<IUser> {
     userId: string,
     file: Express.Multer.File | undefined
   ) {
+    console.log(payload);
+
     await this.validateData(payload);
 
     let user = (await this.getOne(userId)) as IUser;
