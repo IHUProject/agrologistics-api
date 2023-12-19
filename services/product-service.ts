@@ -21,11 +21,8 @@ export class ProductService extends DataLayerService<IProduct> {
   }
 
   public async createProduct(payload: IProduct) {
-    await this.validateData(payload);
     const product = await super.create(payload);
-
     await Company.updateOne({}, { $push: { products: product._id } });
-
     return product;
   }
 

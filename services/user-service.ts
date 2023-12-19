@@ -45,10 +45,6 @@ export class UserService extends DataLayerService<IUser> {
     userId: string,
     file: Express.Multer.File | undefined
   ) {
-    console.log(payload);
-
-    await this.validateData(payload);
-
     let user = (await this.getOne(userId)) as IUser;
 
     let image: IDataImgur | undefined;
@@ -66,9 +62,7 @@ export class UserService extends DataLayerService<IUser> {
       this.select
     )) as IUser;
 
-    const tokenUser = createTokenUser(user);
-
-    return tokenUser;
+    return createTokenUser(user);
   }
 
   public async getUsers(page: string, searchString: string) {
@@ -87,7 +81,7 @@ export class UserService extends DataLayerService<IUser> {
   public async changePassword(userId: string, payload: IPasswordPayload) {
     const { oldPassword, newPassword } = payload;
 
-    const user = (await User.findById(userId)) as IUser;
+    const user = (await this.getOne(userId)) as IUser;
 
     const isMatch = await user.comparePassword(oldPassword);
     if (!isMatch) {
@@ -105,25 +99,17 @@ export class UserService extends DataLayerService<IUser> {
     file: Express.Multer.File | undefined
   ) {
     const { role } = payload;
-
     if (role === Roles.OWNER) {
       throw new BadRequestError('You can not make the new user owner!');
     }
 
-    await this.validateData(payload);
-
-    let image: IDataImgur | undefined;
-    if (file) {
-      image = await this.imageService.handleSingleImage(file);
-    }
-
+    const image = await this.imageService.handleSingleImage(file);
     const user = await super.create({
       ...payload,
       image,
     });
 
     await Company.updateOne({}, { $push: { employees: user._id } });
-
     return await this.getOne(user._id, this.select);
   }
 
@@ -138,7 +124,7 @@ export class UserService extends DataLayerService<IUser> {
       );
     }
 
-    const user = (await User.findById(userId)) as IUser;
+    const user = (await this.getOne(userId)) as IUser;
     if (user.role === Roles.OWNER) {
       throw new BadRequestError('You can not change the owners role!');
     }

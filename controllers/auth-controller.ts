@@ -11,7 +11,6 @@ export class AuthController {
 
   public async register(req: Request, res: Response) {
     const { file, body } = req;
-
     const user = await this.authService.registerUser(body, file);
     attachTokens(res, user);
 
@@ -22,8 +21,8 @@ export class AuthController {
 
   public async login(req: Request, res: Response) {
     const { body } = req;
-
-    const user = await this.authService.loginUser(body, res);
+    const user = await this.authService.loginUser(body);
+    attachTokens(res, user);
 
     res
       .status(StatusCodes.OK)

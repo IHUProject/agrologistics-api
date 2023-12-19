@@ -50,7 +50,6 @@ export class CompanyController {
     const { companyId } = req.params;
     const { currentUser } = req;
     const { userId } = currentUser as IUserWithID;
-
     const company = await this.companyService.deleteCompany(companyId);
 
     await reattachTokens(res, userId.toString());
@@ -63,9 +62,7 @@ export class CompanyController {
   public async addToCompany(req: Request, res: Response) {
     const { userId } = req.params;
     const { role } = req.body;
-
     const message = await this.companyService.addToCompany(userId, role);
-
     res.status(StatusCodes.OK).json({ message });
   }
 

@@ -22,7 +22,6 @@ export class UserController {
     const { currentUser } = req;
 
     const user = await this.userService.updateUser(body, userId, file);
-
     await reattachTokens(res, (currentUser as IUserWithID).userId.toString());
 
     res.status(StatusCodes.OK).json({
@@ -33,7 +32,6 @@ export class UserController {
 
   public async createUser(req: Request, res: Response) {
     const { body, file } = req;
-
     const user = await this.userService.createUser(body, file);
 
     res
@@ -43,7 +41,6 @@ export class UserController {
 
   public async deleteUser(req: Request, res: Response) {
     const { userId } = req.params;
-
     const user = await this.userService.deleteUser(userId);
 
     res.cookie('token', 'logout', {
@@ -79,9 +76,7 @@ export class UserController {
   public async changePassword(req: Request, res: Response) {
     const { userId } = req.params;
     const { body } = req;
-
     const message = await this.userService.changePassword(userId, body);
-
     res.status(StatusCodes.OK).json({ message });
   }
 
@@ -89,9 +84,7 @@ export class UserController {
     const { userId } = req.params;
     const { body } = req;
     const { role } = body;
-
     const message = await this.userService.changeUserRole(userId, role);
-
     res.status(StatusCodes.OK).json({ message });
   }
 }
