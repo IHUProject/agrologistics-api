@@ -63,23 +63,23 @@ export class CompanyService extends DataLayerService<ICompany> {
   ) {
     const { userId } = currentUser as IUserWithID;
 
-    this.validateData(payload);
+    await this.validateData(payload);
 
     const isFirstCompany = (await Company.countDocuments({})) === 0;
     if (!isFirstCompany) {
       throw new ForbiddenError('Company already exists!');
     }
 
-    let logo: IDataImgur | undefined;
-    if (file) {
-      logo = await this.imageService.handleSingleImage(file);
-    }
-
+    const logo = await this.imageService.handleSingleImage(file);
     const company = await super.create({ ...payload, logo, owner: userId });
 
-    await User.findByIdAndUpdate(userId, {
-      role: Roles.OWNER,
-    });
+    await this.userService.update(
+      userId.toString(),
+      {
+        role: Roles.OWNER,
+      },
+      ''
+    );
 
     return await this.getOne(company._id, this.select, this.populateOptions);
   }
@@ -152,7 +152,7 @@ export class CompanyService extends DataLayerService<ICompany> {
       throw new BadRequestError('You can not make an employ owner!');
     }
 
-    const user = (await User.findById(userId)) as IUser;
+    const user = (await this.userService.getSingleUser(userId)) as IUser;
 
     const isWorking = user.role !== Roles.UNCATEGORIZED;
     if (isWorking) {
@@ -172,7 +172,7 @@ export class CompanyService extends DataLayerService<ICompany> {
   }
 
   async removeFromCompany(userId: string) {
-    const user = (await User.findById(userId)) as IUser;
+    const user = (await this.userService.getSingleUser(userId)) as IUser;
 
     const { role } = user;
     if (role === Roles.UNCATEGORIZED) {
@@ -183,7 +183,6 @@ export class CompanyService extends DataLayerService<ICompany> {
     }
 
     this.userService.deleteUser(userId, true);
-
     return `The employ has been removed for the company!`;
   }
 }
