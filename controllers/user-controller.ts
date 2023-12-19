@@ -27,7 +27,7 @@ export class UserController {
 
     res.status(StatusCodes.OK).json({
       user,
-      msg: 'User had been successfully updated!',
+      message: 'User had been successfully updated!',
     });
   }
 
@@ -38,7 +38,7 @@ export class UserController {
 
     res
       .status(StatusCodes.OK)
-      .json({ user, msg: 'User had been successfully created!' });
+      .json({ user, message: 'User had been successfully created!' });
   }
 
   public async deleteUser(req: Request, res: Response) {

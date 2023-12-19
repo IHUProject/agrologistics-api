@@ -2,63 +2,43 @@ import Accountant from '../models/Accountant';
 import { IAccountant } from '../interfaces/interfaces';
 import { ForbiddenError } from '../errors/forbidden';
 import Company from '../models/Company';
+import { DataLayerService } from './general-services/data-layer-service';
 
-export class AccountantService {
-  public async deleteAccountant(accId: string) {
-    await Company.updateOne(
-      { accountant: accId },
-      { $set: { accountant: null } }
-    );
+export class AccountantService extends DataLayerService<IAccountant> {
+  select: string;
 
-    return await Accountant.findByIdAndDelete(accId).select('-createdAt');
+  constructor() {
+    super(Accountant);
+    this.select = '-createdAt';
   }
 
   public async createAccountant(payload: IAccountant) {
-    const { firstName, lastName, address, email, phone, latitude, longitude } =
-      payload;
-
     const isFirstAccountant = (await Accountant.countDocuments({})) === 0;
     if (!isFirstAccountant) {
       throw new ForbiddenError('Accountant already exists!');
     }
 
-    const accountant = await Accountant.create({
-      firstName,
-      lastName,
-      address,
-      email,
-      phone,
-      latitude,
-      longitude,
-    });
-
+    const accountant = await super.create(payload);
     await Company.updateOne({}, { $set: { accountant: accountant._id } });
 
-    return await Accountant.findById(accountant._id).select('-createdAt');
+    return await this.getOne(accountant._id, this.select);
   }
 
   public async updateAccountant(payload: IAccountant, accId: string) {
-    const { firstName, lastName, address, email, phone, latitude, longitude } =
-      payload;
+    return this.update(accId, payload, this.select);
+  }
 
-    const accountant = await Accountant.findByIdAndUpdate(
-      accId,
-      {
-        firstName,
-        lastName,
-        address,
-        email,
-        phone,
-        latitude,
-        longitude,
-      },
-      { new: true, runValidators: true }
-    ).select('-createdAt');
+  public async deleteAccountant(accId: string) {
+    const deletedAccountant = await this.delete(accId);
+    await Company.updateOne(
+      { accountant: accId },
+      { $set: { accountant: null } }
+    );
 
-    return accountant;
+    return deletedAccountant;
   }
 
   public async getSingleAccountant() {
-    return await Accountant.findOne({}).select('-createdAt');
+    return await Accountant.findOne({}).select(this.select);
   }
 }

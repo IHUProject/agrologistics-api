@@ -116,6 +116,11 @@ export interface IClient extends Document {
   purchases: Types.ObjectId[];
 }
 
+export interface IPopulate {
+  path: string;
+  select?: string;
+}
+
 interface ImgurBodyResponse {
   data: IDataImgur;
   success: boolean;

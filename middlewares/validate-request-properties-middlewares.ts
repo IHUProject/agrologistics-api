@@ -7,6 +7,7 @@ export const validateCoordinates = (
   next: NextFunction
 ) => {
   const { latitude, longitude } = req.body;
+
   if (latitude && !longitude) {
     throw new BadRequestError('Add longitude!');
   }

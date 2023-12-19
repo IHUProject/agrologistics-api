@@ -10,9 +10,7 @@ export class AccountantController {
 
   public async createAccountant(req: Request, res: Response) {
     const { body } = req;
-
     const accountant = await this.accountantService.createAccountant(body);
-
     res.status(StatusCodes.CREATED).json({
       accountant,
       message: 'Accountant had been successfully created!',
@@ -21,7 +19,7 @@ export class AccountantController {
 
   public async getSingleAccountant(req: Request, res: Response) {
     const accountant = await this.accountantService.getSingleAccountant();
-    res.status(StatusCodes.OK).json(accountant);
+    res.status(StatusCodes.OK).json({ accountant });
   }
 
   public async updateAccountant(req: Request, res: Response) {

@@ -1,21 +1,27 @@
 import { BadRequestError } from '../errors';
 import User from '../models/User';
 import { IDataImgur, IPasswordPayload, IUser } from '../interfaces/interfaces';
-import { ImageService } from './image-service';
+import { ImageService } from './general-services/image-service';
 import { Roles } from '../interfaces/enums';
 import { ForbiddenError } from '../errors/forbidden';
-import { createSearchQuery } from '../helpers/create-search-query';
 import Company from '../models/Company';
+import { createTokenUser } from '../helpers/create-token-user';
+import { DataLayerService } from './general-services/data-layer-service';
 
-export class UserService {
+export class UserService extends DataLayerService<IUser> {
   private imageService: ImageService;
+  private select: string;
+  private searchFields: string[];
 
   constructor() {
+    super(User);
+    this.select = '-password -createdAt -updatedAt';
     this.imageService = new ImageService();
+    this.searchFields = ['firstName', 'lastName', 'role'];
   }
 
   public async deleteUser(userId: string, isExternalRequest: boolean = false) {
-    const user = (await User.findByIdAndDelete(userId)) as IUser;
+    const user = (await this.getOne(userId)) as IUser;
 
     const { role } = user;
     if (role === Roles.OWNER && !isExternalRequest) {
@@ -31,7 +37,7 @@ export class UserService {
       await this.imageService.deleteSingleImage(deletehash);
     }
 
-    return `The user has been deleted.`;
+    return await this.delete(userId);
   }
 
   public async updateUser(
@@ -39,9 +45,7 @@ export class UserService {
     userId: string,
     file: Express.Multer.File | undefined
   ) {
-    const { firstName, lastName, email, phone } = payload;
-
-    let user = (await User.findById(userId)) as IUser;
+    let user = (await this.getOne(userId)) as IUser;
 
     let image: IDataImgur | undefined;
     if (file) {
@@ -52,41 +56,28 @@ export class UserService {
       image = await this.imageService.handleSingleImage(file);
     }
 
-    user = (await User.findByIdAndUpdate(
+    user = (await this.update(
       userId,
-      {
-        firstName,
-        lastName,
-        image,
-        email,
-        phone,
-      },
-      { new: true, runValidators: true }
-    ).select('-password -createdAt -updatedAt')) as IUser;
+      { ...payload, image },
+      this.select
+    )) as IUser;
 
-    return user;
+    const tokenUser = createTokenUser(user);
+
+    return tokenUser;
   }
 
   public async getUsers(page: string, searchString: string) {
-    const limit = 10;
-    const skip = (Number(page || 1) - 1) * limit;
-
-    const searchQuery = createSearchQuery<IUser>(searchString as string, [
-      'firstName',
-      'lastName',
-      'role',
-    ]);
-
-    return (await User.find(searchQuery)
-      .skip(skip)
-      .limit(limit)
-      .select('-password -createdAt -updatedAt')) as IUser[];
+    return (await this.getMany(
+      page,
+      this.select,
+      searchString,
+      this.searchFields
+    )) as IUser[];
   }
 
   public async getSingleUser(userId: string) {
-    return (await User.findById(userId).select(
-      '-password -createdAt -updatedAt'
-    )) as IUser;
+    return (await this.getOne(userId, this.select)) as IUser;
   }
 
   public async changePassword(userId: string, payload: IPasswordPayload) {
@@ -109,7 +100,7 @@ export class UserService {
     payload: IUser,
     file: Express.Multer.File | undefined
   ) {
-    const { firstName, lastName, role, password, email, phone } = payload;
+    const { role } = payload;
 
     if (role === Roles.OWNER) {
       throw new BadRequestError('You can not make the new user owner!');
@@ -120,23 +111,14 @@ export class UserService {
       image = await this.imageService.handleSingleImage(file);
     }
 
-    const userRole = role || Roles.EMPLOY;
-
-    const user = await User.create({
-      firstName,
-      lastName,
-      role: userRole,
-      password,
-      email,
+    const user = await this.create({
+      ...payload,
       image,
-      phone,
     });
 
     await Company.updateOne({}, { $push: { employees: user._id } });
 
-    return await User.findOne({ email }).select(
-      '-password -createdAt -updatedAt'
-    );
+    return await this.getOne(user._id, this.select);
   }
 
   public async changeUserRole(

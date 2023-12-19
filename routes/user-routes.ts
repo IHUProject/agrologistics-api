@@ -1,8 +1,5 @@
 import express from 'express';
-import {
-  authenticateUser,
-  authorizePermissions,
-} from '../middlewares/auth-middlewares';
+import { authorizePermissions } from '../middlewares/auth-middlewares';
 import { UserController } from '../controllers/user-controller';
 import { validateQueryPage } from '../middlewares/validate-request-properties-middlewares';
 import {
@@ -26,7 +23,6 @@ router.post(
 );
 router.get(
   '/get-current-user',
-  authenticateUser,
   userController.getCurrentUser.bind(userController)
 );
 router.get(

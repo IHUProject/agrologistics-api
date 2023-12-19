@@ -19,7 +19,7 @@ export class ClientController {
 
   public async getSingleClient(req: Request, res: Response) {
     const { clientId } = req.params;
-    const client = await this.clientService.getOneClient(clientId);
+    const client = await this.clientService.getSingleClient(clientId);
     res.status(StatusCodes.CREATED).json({ client });
   }
 
