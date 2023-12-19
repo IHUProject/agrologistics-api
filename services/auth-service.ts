@@ -24,7 +24,8 @@ export class AuthService extends DataLayerService<IUser> {
       image = await this.imageService.handleSingleImage(file);
     }
 
-    const user = await this.create({ ...payload, image });
+    this.validateData(payload);
+    const user = await super.create({ ...payload, image });
     const tokenUser = createTokenUser(user);
 
     return tokenUser;
