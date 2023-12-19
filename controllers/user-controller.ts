@@ -12,7 +12,7 @@ export class UserController {
   }
 
   public getCurrentUser(req: Request, res: Response) {
-    res.status(StatusCodes.OK).json({ userInfo: req.currentUser });
+    res.status(StatusCodes.OK).json({ user: req.currentUser });
   }
 
   public async updateUser(req: Request, res: Response) {
