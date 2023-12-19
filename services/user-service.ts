@@ -45,7 +45,7 @@ export class UserService extends DataLayerService<IUser> {
     userId: string,
     file: Express.Multer.File | undefined
   ) {
-    this.validateData(payload);
+    await this.validateData(payload);
 
     let user = (await this.getOne(userId)) as IUser;
 
@@ -108,7 +108,7 @@ export class UserService extends DataLayerService<IUser> {
       throw new BadRequestError('You can not make the new user owner!');
     }
 
-    this.validateData(payload);
+    await this.validateData(payload);
 
     let image: IDataImgur | undefined;
     if (file) {
