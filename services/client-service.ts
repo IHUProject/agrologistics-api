@@ -28,6 +28,7 @@ export class ClientService extends DataLayerService<IClient> {
       throw new BadRequestError('The phone number is already in use!');
     }
 
+    this.validateData(payload);
     const client = await super.create(payload);
     await Company.updateOne({}, { $push: { clients: client._id } });
 

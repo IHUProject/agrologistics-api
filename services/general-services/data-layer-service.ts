@@ -1,15 +1,16 @@
 import { Model } from 'mongoose';
 import { createSearchQuery } from '../../helpers/create-search-query';
 import { IPopulate } from '../../interfaces/interfaces';
+import { BadRequestError } from '../../errors';
 
 export class DataLayerService<T> {
-  model: Model<T>;
+  public model: Model<T>;
 
   constructor(model: Model<T>) {
     this.model = model;
   }
 
-  async getMany(
+  public async getMany(
     page: string,
     select: string,
     searchString = '',
@@ -28,7 +29,7 @@ export class DataLayerService<T> {
       .populate(populateOptions);
   }
 
-  async getOne(
+  public async getOne(
     id: string,
     selectOptions = '',
     populateOptions: Array<IPopulate> = []
@@ -39,24 +40,39 @@ export class DataLayerService<T> {
       .populate(populateOptions);
   }
 
-  async create(data: Partial<T>) {
+  public async create(data: Partial<T>) {
     return await this.model.create(data);
   }
 
-  async update(
+  public async update(
     id: string,
     data: Partial<T>,
     select: string,
     populateOptions: Array<IPopulate> = []
   ) {
     const options = { new: true, runValidators: true };
+    await this.validateData(data);
     return await this.model
       .findByIdAndUpdate(id, data, options)
       .select(select)
       .populate(populateOptions);
   }
 
-  async delete(id: string) {
+  public async delete(id: string) {
     return await this.model.findByIdAndDelete(id).select('-createdAt');
+  }
+
+  public async validateData(data: Partial<T>): Promise<void> {
+    const schemaPaths = Object.keys(this.model.schema.paths);
+
+    const invalidKeys = Object.keys(data).filter(
+      (key) => !schemaPaths.includes(key)
+    );
+
+    if (invalidKeys.length) {
+      throw new BadRequestError(
+        `Invalid properties in data: ${invalidKeys.join(', ')}`
+      );
+    }
   }
 }

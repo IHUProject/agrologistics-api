@@ -63,6 +63,8 @@ export class CompanyService extends DataLayerService<ICompany> {
   ) {
     const { userId } = currentUser as IUserWithID;
 
+    this.validateData(payload);
+
     const isFirstCompany = (await Company.countDocuments({})) === 0;
     if (!isFirstCompany) {
       throw new ForbiddenError('Company already exists!');
