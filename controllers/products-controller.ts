@@ -11,6 +11,7 @@ export class ProductController {
   public async createProduct(req: Request, res: Response) {
     const { body } = req;
     const product = await this.productService.createProduct(body);
+
     res
       .status(StatusCodes.CREATED)
       .json({ product, message: 'Product has been created!' });
@@ -25,7 +26,6 @@ export class ProductController {
   public async updateProduct(req: Request, res: Response) {
     const { body } = req;
     const { productId } = req.params;
-
     const product = await this.productService.updateProduct(body, productId);
 
     res
@@ -35,8 +35,8 @@ export class ProductController {
 
   public async deleteProduct(req: Request, res: Response) {
     const { productId } = req.params;
-
     const product = await this.productService.deleteProduct(productId);
+
     res
       .status(StatusCodes.OK)
       .json({ product, message: 'Product has been deleted!' });

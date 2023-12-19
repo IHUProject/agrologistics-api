@@ -41,6 +41,7 @@ export class DataLayerService<T> {
   }
 
   public async create(data: Partial<T>) {
+    await this.validateData(data);
     return await this.model.create(data);
   }
 

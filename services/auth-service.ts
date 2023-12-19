@@ -1,7 +1,5 @@
-import { Response } from 'express';
 import { UnauthorizedError } from '../errors';
 import User from '../models/User';
-import { attachTokens } from '../helpers';
 import { createTokenUser } from '../helpers/create-token-user';
 import { IUser } from '../interfaces/interfaces';
 import { ImageService } from './general-services/image-service';
@@ -19,15 +17,12 @@ export class AuthService extends DataLayerService<IUser> {
     payload: IUser,
     file: Express.Multer.File | undefined
   ) {
-    await this.validateData(payload);
-
     const image = await this.imageService.handleSingleImage(file);
     const user = await super.create({ ...payload, image });
-
     return createTokenUser(user);
   }
 
-  public async loginUser(payload: IUser, res: Response) {
+  public async loginUser(payload: IUser) {
     const { email, password } = payload;
 
     const user = await User.findOne({ email });
@@ -40,9 +35,6 @@ export class AuthService extends DataLayerService<IUser> {
       throw new UnauthorizedError('The e-mail or password are not correct!');
     }
 
-    const tokenUser = createTokenUser(user);
-    attachTokens(res, tokenUser);
-
-    return tokenUser;
+    return createTokenUser(user);
   }
 }
