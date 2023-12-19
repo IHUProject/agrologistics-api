@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ImgurResponse } from '../interfaces/interfaces';
+import { ImgurResponse } from '../../interfaces/interfaces';
 
 export class ImageService {
   public async handleSingleImage(file: Express.Multer.File) {

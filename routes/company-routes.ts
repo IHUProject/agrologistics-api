@@ -2,13 +2,13 @@ import express from 'express';
 import { authorizePermissions } from '../middlewares/auth-middlewares';
 import { CompanyController } from '../controllers/companies-controller';
 import { Roles } from '../interfaces/enums';
-import { validateCoordinates } from '../middlewares/validate-request-properties-middlewares';
 import { isCompanyExists } from '../middlewares/company-middlewares';
 import multer, { memoryStorage } from 'multer';
 import {
   isUserExits,
   preventSelfModification,
 } from '../middlewares/user-middlewares';
+import { validateCoordinates } from '../middlewares/validate-request-properties-middlewares';
 
 const companyController = new CompanyController();
 const router = express.Router();
@@ -24,8 +24,8 @@ router.get(
 router.post(
   '/create-company',
   authorizePermissions(Roles.UNCATEGORIZED),
-  validateCoordinates,
   upload.single('logo'),
+  validateCoordinates,
   companyController.createCompany.bind(companyController)
 );
 router.delete(
@@ -36,10 +36,10 @@ router.delete(
 );
 router.patch(
   '/:companyId/update-company',
-  isCompanyExists,
-  validateCoordinates,
-  upload.single('logo'),
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
+  isCompanyExists,
+  upload.single('logo'),
+  validateCoordinates,
   companyController.updateCompany.bind(companyController)
 );
 router.patch(

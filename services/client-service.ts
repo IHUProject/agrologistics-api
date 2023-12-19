@@ -1,73 +1,66 @@
 import { BadRequestError } from '../errors';
-import { createSearchQuery } from '../helpers/create-search-query';
-import { IClient } from '../interfaces/interfaces';
+import { IClient, IPopulate } from '../interfaces/interfaces';
 import Client from '../models/Client';
 import Company from '../models/Company';
 import Purchase from '../models/Purchase';
+import { DataLayerService } from './general-services/data-layer-service';
 
-export class ClientService {
+export class ClientService extends DataLayerService<IClient> {
+  select: string;
+  populateOptions: IPopulate[];
+  searchFields: string[];
+
+  constructor() {
+    super(Client);
+    this.populateOptions = [
+      {
+        path: 'purchases',
+        select: 'date totalAmount status',
+      },
+    ];
+    this.searchFields = ['fullName', 'company'];
+    this.select = '-createdAt';
+  }
+
   public async createClient(payload: IClient) {
-    const { fullName, phone, company, address } = payload;
-
-    const isPhoneUnique = await Client.findOne({ phone: phone });
+    const isPhoneUnique = await Client.findOne({ phone: payload.phone });
     if (isPhoneUnique) {
       throw new BadRequestError('The phone number is already in use!');
     }
 
-    const client = await Client.create({
-      fullName,
-      phone,
-      company,
-      address,
-    });
-
+    const client = await super.create(payload);
     await Company.updateOne({}, { $push: { clients: client._id } });
 
-    return await Client.findById(client._id).select('-createAt');
+    return await this.getOne(client._id, this.select, this.populateOptions);
   }
 
-  public async getOneClient(clientId: string) {
-    return await Client.findById(clientId).select('-createdAt').populate({
-      path: 'purchases',
-      select: 'date totalAmount status _id',
-    });
+  public async getSingleClient(clientId: string) {
+    return await this.getOne(clientId, this.select, this.populateOptions);
   }
 
   public async getClients(page: string, searchString: string) {
-    const limit = 10;
-    const skip = (Number(page || 1) - 1) * limit;
-
-    const searchQuery = createSearchQuery<IClient>(searchString, [
-      'fullName',
-      'company',
-    ]);
-
-    return (await Client.find(searchQuery)
-      .skip(skip)
-      .limit(limit)
-      .select('-createdAt')) as IClient[];
+    return await this.getMany(
+      page,
+      this.select,
+      searchString,
+      this.searchFields,
+      this.populateOptions
+    );
   }
 
   public async deleteClient(clientId: string) {
-    await Purchase.updateOne({ client: clientId }, { $unset: { client: '' } });
+    await Purchase.updateMany({ client: clientId }, { $unset: { client: '' } });
     await Company.updateOne({}, { $pull: { clients: clientId } });
-    return await Client.findByIdAndDelete(clientId).select('-createdAt');
+
+    return await this.delete(clientId);
   }
 
   public async updateClient(payload: IClient, clientId: string) {
-    const { fullName, company, address, phone } = payload;
-
-    const client = await Client.findByIdAndUpdate(
+    return await this.update(
       clientId,
-      {
-        fullName,
-        company,
-        address,
-        phone,
-      },
-      { new: true, runValidators: true }
-    ).select('-createdAt');
-
-    return client;
+      payload,
+      this.select,
+      this.populateOptions
+    );
   }
 }

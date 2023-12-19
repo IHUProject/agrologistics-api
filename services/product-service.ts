@@ -1,61 +1,52 @@
-import { createSearchQuery } from '../helpers/create-search-query';
-import { IProduct } from '../interfaces/interfaces';
+import { IPopulate, IProduct } from '../interfaces/interfaces';
 import Company from '../models/Company';
 import Product from '../models/Product';
+import { DataLayerService } from './general-services/data-layer-service';
 
-export class ProductService {
-  public async createProduct(payload: IProduct) {
-    const { name, price, description } = payload;
+export class ProductService extends DataLayerService<IProduct> {
+  select: string;
+  populateOptions: IPopulate[];
+  searchFields: string[];
 
-    const product = await Product.create({
-      name,
-      price,
-      description,
-    });
-
-    await Company.updateOne({}, { $push: { products: product._id } });
-
-    return await Product.findById(product._id).select('-createdAt');
-  }
-
-  public async getSingleProduct(productId: string) {
-    return await Product.findById(productId).select('-createdAt');
-  }
-
-  public async getProducts(page: string, searchString: string) {
-    const limit = 10;
-    const skip = (Number(page || 1) - 1) * limit;
-
-    const searchQuery = createSearchQuery<IProduct>(searchString, [
-      'name',
-      'price',
-      'description',
-    ]);
-
-    return (await Product.find(searchQuery)
-      .skip(skip)
-      .limit(limit)
-      .select('-createdAt')) as IProduct[];
-  }
-
-  public async updateProduct(payload: IProduct, productId: string) {
-    const { name, price, description } = payload;
-
-    const product = await Product.findByIdAndUpdate(
-      productId,
+  constructor() {
+    super(Product);
+    this.populateOptions = [
       {
-        name,
-        price,
-        description,
+        path: 'purchases',
+        select: 'date totalAmount status',
       },
-      { new: true, runValidators: true }
-    ).select('-createdAt');
+    ];
+    this.searchFields = ['name', 'price', 'description'];
+    this.select = '-createdAt';
+  }
 
+  public async createProduct(payload: IProduct) {
+    const product = await this.create(payload);
+    await Company.updateOne({}, { $push: { products: product._id } });
     return product;
   }
 
+  public async getSingleProduct(productId: string) {
+    return this.getOne(productId, this.select, this.populateOptions);
+  }
+
+  public async getProducts(page: string, searchString: string) {
+    return this.getMany(
+      page,
+      this.select,
+      searchString,
+      this.searchFields,
+      this.populateOptions
+    );
+  }
+
+  public async updateProduct(payload: IProduct, productId: string) {
+    return this.update(productId, payload, this.select);
+  }
+
   public async deleteProduct(productId: string) {
+    const deletedProduct = await this.delete(productId);
     await Company.updateOne({}, { $pull: { products: productId } });
-    return await Product.findByIdAndDelete(productId).select('-createdAt');
+    return deletedProduct;
   }
 }

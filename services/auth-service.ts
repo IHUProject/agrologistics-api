@@ -4,12 +4,14 @@ import User from '../models/User';
 import { attachTokens } from '../helpers';
 import { createTokenUser } from '../helpers/create-token-user';
 import { IDataImgur, IUser } from '../interfaces/interfaces';
-import { ImageService } from './image-service';
+import { ImageService } from './general-services/image-service';
+import { DataLayerService } from './general-services/data-layer-service';
 
-export class AuthService {
+export class AuthService extends DataLayerService<IUser> {
   private imageService: ImageService;
 
   constructor() {
+    super(User);
     this.imageService = new ImageService();
   }
 
@@ -17,23 +19,12 @@ export class AuthService {
     payload: IUser,
     file: Express.Multer.File | undefined
   ) {
-    const { firstName, lastName, email, password, phone } = payload;
-
     let image: IDataImgur | undefined;
-
     if (file) {
       image = await this.imageService.handleSingleImage(file);
     }
 
-    const user = (await User.create({
-      firstName,
-      lastName,
-      email,
-      phone,
-      image,
-      password,
-    })) as IUser;
-
+    const user = await this.create({ ...payload, image });
     const tokenUser = createTokenUser(user);
 
     return tokenUser;

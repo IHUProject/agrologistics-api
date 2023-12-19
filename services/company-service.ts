@@ -3,15 +3,15 @@ import {
   IClient,
   ICompany,
   IDataImgur,
+  IPopulate,
   IProduct,
   IUser,
   IUserWithID,
 } from '../interfaces/interfaces';
 import Company from '../models/Company';
-import { ImageService } from './image-service';
+import { ImageService } from './general-services/image-service';
 import { Roles } from '../interfaces/enums';
 import User from '../models/User';
-
 import Accountant from '../models/Accountant';
 import { ForbiddenError } from '../errors/forbidden';
 import { BadRequestError, NotFoundError } from '../errors';
@@ -19,11 +19,39 @@ import { UserService } from './user-service';
 import Product from '../models/Product';
 import Client from '../models/Client';
 import { deleteDocuments } from '../helpers/delete-docs';
+import { DataLayerService } from './general-services/data-layer-service';
 
-export class CompanyService {
+export class CompanyService extends DataLayerService<ICompany> {
   private imageService: ImageService;
   private userService: UserService;
+  private populateOptions: IPopulate[];
+  private select: string;
+
   constructor() {
+    super(Company);
+    this.populateOptions = [
+      {
+        path: 'owner',
+        select: 'firstName lastName image _id',
+      },
+      {
+        path: 'employees',
+        select: 'firstName lastName image _id role',
+      },
+      {
+        path: 'accountant',
+        select: 'firstName lastName email _id',
+      },
+      {
+        path: 'products',
+        select: 'name price _id',
+      },
+      {
+        path: 'clients',
+        select: 'fullName phone _id',
+      },
+    ];
+    this.select = '-createdAt -updateAt';
     this.imageService = new ImageService();
     this.userService = new UserService();
   }
@@ -33,7 +61,6 @@ export class CompanyService {
     currentUser: IUserWithID,
     file: Express.Multer.File | undefined
   ) {
-    const { name, phone, afm, address, founded, latitude, longitude } = payload;
     const { userId } = currentUser as IUserWithID;
 
     const isFirstCompany = (await Company.countDocuments({})) === 0;
@@ -45,30 +72,14 @@ export class CompanyService {
     if (file) {
       logo = await this.imageService.handleSingleImage(file);
     }
-    console.log(logo);
 
-    const company = await Company.create({
-      name,
-      phone,
-      owner: userId,
-      afm,
-      logo,
-      address,
-      founded,
-      latitude,
-      longitude,
-    });
+    const company = await super.create({ ...payload, logo, owner: userId });
 
     await User.findByIdAndUpdate(userId, {
       role: Roles.OWNER,
     });
 
-    return (await Company.findById(company._id)
-      .select('-createdAt -updateAt')
-      .populate({
-        path: 'owner',
-        select: 'firstName lastName email image _id role',
-      })) as ICompany;
+    return await this.getOne(company._id, this.select, this.populateOptions);
   }
 
   public async updateCompany(
@@ -76,33 +87,23 @@ export class CompanyService {
     companyId: string,
     file: Express.Multer.File | undefined
   ) {
-    const { name, phone, afm, address, founded, latitude, longitude } = payload;
-
-    let company = (await Company.findById(companyId)) as ICompany;
+    let company = await this.getOne(companyId);
 
     let logo: IDataImgur | undefined;
     if (file) {
-      const { deletehash } = company.logo;
+      const { deletehash } = company!.logo;
       if (deletehash) {
         await this.imageService.deleteSingleImage(deletehash);
       }
       logo = await this.imageService.handleSingleImage(file);
     }
 
-    company = (await Company.findByIdAndUpdate(
+    company = await this.update(
       companyId,
-      {
-        name,
-        phone,
-        afm,
-        logo,
-        address,
-        founded,
-        latitude,
-        longitude,
-      },
-      { new: true, runValidators: true }
-    ).select('-createdAt -updateAt')) as ICompany;
+      { ...payload, logo },
+      this.select,
+      this.populateOptions
+    );
 
     return company;
   }
@@ -129,34 +130,13 @@ export class CompanyService {
     await deleteDocuments(products, Product);
     await deleteDocuments(clients, Client);
 
-    return await Company.findByIdAndDelete(companyId).select(
-      '-createdAt -updateAt'
-    );
+    return await this.delete(companyId);
   }
 
   async getCompany() {
     const company = await Company.findOne({})
       .select('-createdAt -updateAt')
-      .populate({
-        path: 'owner',
-        select: 'firstName lastName image _id',
-      })
-      .populate({
-        path: 'employees',
-        select: 'firstName lastName image _id role',
-      })
-      .populate({
-        path: 'accountant',
-        select: 'firstName lastName email _id',
-      })
-      .populate({
-        path: 'products',
-        select: 'name price _id',
-      })
-      .populate({
-        path: 'clients',
-        select: 'fullName phone _id',
-      });
+      .populate(this.populateOptions);
 
     if (!company) {
       throw new NotFoundError('No company exists!');
