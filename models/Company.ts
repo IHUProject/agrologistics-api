@@ -40,7 +40,7 @@ const companySchema = new Schema<ICompany>(
       deletehash: { type: String, default: '' },
     },
     founded: {
-      type: Date,
+      type: String,
       default: null,
       validate: {
         validator: validateDate,

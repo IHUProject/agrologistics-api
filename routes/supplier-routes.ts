@@ -1,7 +1,7 @@
 import express from 'express';
 import { authorizePermissions } from '../middlewares/auth-middlewares';
 import { Roles } from '../interfaces/enums';
-import { SupplierController } from '../controllers/suppliers-controller';
+import { SupplierController } from '../controllers/supplier-controller';
 
 const supplierController = new SupplierController();
 const router = express.Router();

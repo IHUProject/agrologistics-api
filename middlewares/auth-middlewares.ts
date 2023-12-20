@@ -1,9 +1,9 @@
 import { ForbiddenError } from '../errors/forbidden';
 import { IUserWithID } from '../interfaces/interfaces';
-import { isValidToken } from '../helpers';
 import { Request, Response, NextFunction } from 'express';
 import { BadRequestError } from '../errors';
 import { Roles } from '../interfaces/enums';
+import { isValidToken } from '../helpers/jwt';
 
 export const authenticateUser = async (
   req: Request,

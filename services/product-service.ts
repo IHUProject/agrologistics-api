@@ -42,7 +42,12 @@ export class ProductService extends DataLayerService<IProduct> {
   }
 
   public async updateProduct(payload: IProduct, productId: string) {
-    return await this.update(productId, payload, this.select);
+    return await this.update(
+      productId,
+      payload,
+      this.select,
+      this.populateOptions
+    );
   }
 
   public async deleteProduct(productId: string) {

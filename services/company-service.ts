@@ -5,6 +5,7 @@ import {
   IDataImgur,
   IPopulate,
   IProduct,
+  IPurchase,
   IUser,
   IUserWithID,
 } from '../interfaces/interfaces';
@@ -20,6 +21,7 @@ import Product from '../models/Product';
 import Client from '../models/Client';
 import { deleteDocuments } from '../helpers/delete-docs';
 import { DataLayerService } from './general-services/data-layer-service';
+import Purchase from '../models/Purchase';
 
 export class CompanyService extends DataLayerService<ICompany> {
   private imageService: ImageService;
@@ -37,6 +39,7 @@ export class CompanyService extends DataLayerService<ICompany> {
       {
         path: 'employees',
         select: 'firstName lastName image _id role',
+        options: { limit: 4 },
       },
       {
         path: 'accountant',
@@ -45,10 +48,27 @@ export class CompanyService extends DataLayerService<ICompany> {
       {
         path: 'products',
         select: 'name price _id',
+        options: { limit: 4 },
       },
       {
         path: 'clients',
         select: 'fullName phone _id',
+        options: { limit: 4 },
+      },
+      {
+        path: 'purchases',
+        select: 'totalAmount status client',
+        options: { limit: 4 },
+        populate: [
+          {
+            path: 'client',
+            select: 'fullName _id',
+          },
+          {
+            path: 'products',
+            select: 'name price',
+          },
+        ],
       },
     ];
     this.select = '-createdAt -updateAt';
@@ -113,6 +133,7 @@ export class CompanyService extends DataLayerService<ICompany> {
     const accountants = (await Accountant.find()) as IAccountant[];
     const products = (await Product.find()) as IProduct[];
     const clients = (await Client.find()) as IClient[];
+    const purchases = (await Purchase.find()) as IPurchase[];
 
     await Promise.all(
       employees.map((emp) => {
@@ -129,6 +150,7 @@ export class CompanyService extends DataLayerService<ICompany> {
     await deleteDocuments(accountants, Accountant);
     await deleteDocuments(products, Product);
     await deleteDocuments(clients, Client);
+    await deleteDocuments(purchases, Purchase);
 
     return await this.delete(companyId);
   }

@@ -1,7 +1,7 @@
 import express from 'express';
 import { authorizePermissions } from '../middlewares/auth-middlewares';
 import { Roles } from '../interfaces/enums';
-import { ProductController } from '../controllers/products-controller';
+import { ProductController } from '../controllers/product-controller';
 import { isProductExists } from '../middlewares/product-middlewares';
 import { validateQueryPage } from '../middlewares/validate-request-properties-middlewares';
 

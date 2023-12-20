@@ -1,7 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 import { AuthService } from '../services/auth-service';
-import { attachTokens } from '../helpers';
+import { attachTokens } from '../helpers/jwt';
 
 export class AuthController {
   private authService: AuthService;
