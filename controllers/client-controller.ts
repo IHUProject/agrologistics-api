@@ -26,7 +26,6 @@ export class ClientController {
   public async updateClient(req: Request, res: Response) {
     const { clientId } = req.params;
     const { body } = req;
-
     const client = await this.clientService.updateClient(body, clientId);
 
     res

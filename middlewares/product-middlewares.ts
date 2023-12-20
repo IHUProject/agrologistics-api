@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { NotFoundError } from '../errors';
+import { BadRequestError, NotFoundError } from '../errors';
 import Product from '../models/Product';
 import { IPurchase } from '../interfaces/interfaces';
 
@@ -10,6 +10,10 @@ export const isProductExists = async (
 ) => {
   const { productId } = req.params;
   const { products } = req.body as IPurchase;
+
+  if (productId && products?.length) {
+    throw new BadRequestError('Something went wrong, please try again');
+  }
 
   if (productId) {
     const product = await Product.findById(productId);
@@ -23,7 +27,7 @@ export const isProductExists = async (
       products.map(async (id) => {
         const product = await Product.findById(id);
         if (!product) {
-          throw new NotFoundError('No product found!');
+          throw new NotFoundError(`No product found with ID: ${id}!`);
         }
       })
     );

@@ -15,7 +15,7 @@ router.post(
 );
 router.get(
   '/:clientId/get-client',
-  isClientExists,
+  isClientExists(false),
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
   clientController.getSingleClient.bind(clientController)
 );
@@ -27,13 +27,13 @@ router.get(
 );
 router.delete(
   '/:clientId/delete-client',
-  isClientExists,
+  isClientExists(false),
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   clientController.deleteClient.bind(clientController)
 );
 router.patch(
   '/:clientId/update-client',
-  isClientExists,
+  isClientExists(false),
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
   clientController.updateClient.bind(clientController)
 );

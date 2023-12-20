@@ -12,15 +12,15 @@ export enum DefaultImage {
 }
 
 export enum PaymentMethod {
-  CREDIT_CARD = 'credit card',
-  PAYPAL = 'paypal',
-  CASH = 'cash',
-  BANK_TRANSFER = 'bank transfer',
-  OTHER = 'other',
+  CREDIT_CARD = 'Credit card',
+  PAYPAL = 'Paypal',
+  CASH = 'Cash',
+  BANK_TRANSFER = 'Bank transfer',
+  OTHER = 'Other',
 }
 
 export enum PurchaseStatus {
-  PENDING = 'pending',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
+  PENDING = 'Pending',
+  COMPLETED = 'Completed',
+  CANCELLED = 'Cancelled',
 }

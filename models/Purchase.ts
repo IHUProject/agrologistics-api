@@ -13,7 +13,7 @@ const purchaseSchema = new Schema<IPurchase>(
     status: {
       type: String,
       enum: {
-        values: Object.values(PaymentMethod),
+        values: Object.values(PurchaseStatus),
         message: '{VALUE} is not a valid status',
       },
       default: PurchaseStatus.PENDING,
@@ -27,7 +27,7 @@ const purchaseSchema = new Schema<IPurchase>(
       required: [true, 'Please provide a payment method!'],
     },
     date: {
-      type: Date,
+      type: String,
       default: null,
       validate: {
         validator: validateDate,

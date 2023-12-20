@@ -13,8 +13,8 @@ export class DataLayerService<T> {
   public async getMany(
     page: string,
     select: string,
-    searchString = '',
-    searchFields = [''],
+    searchString: string,
+    searchFields: string[],
     populateOptions: Array<IPopulate> = [],
     limit = 5
   ) {

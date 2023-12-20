@@ -43,7 +43,7 @@ export interface ICompany extends Document {
   address: string;
   afm: number;
   logo: IDataImgur;
-  founded: Date;
+  founded: string;
   latitude: number;
   longitude: number;
   owner: Types.ObjectId;
@@ -103,7 +103,7 @@ export interface IPurchase extends Document {
   totalAmount: number;
   status: PurchaseStatus;
   paymentMethod: PaymentMethod;
-  date: Date;
+  date: string;
   client: Types.ObjectId;
   products: Types.ObjectId[];
 }
@@ -118,7 +118,11 @@ export interface IClient extends Document {
 
 export interface IPopulate {
   path: string;
-  select?: string;
+  select: string;
+  options?: {
+    limit: number;
+  };
+  populate?: IPopulate[];
 }
 
 interface ImgurBodyResponse {

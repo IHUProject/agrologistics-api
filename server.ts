@@ -7,12 +7,16 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { IUserWithID } from './interfaces/interfaces';
 import morgan from 'morgan';
+import { Roles } from './interfaces/enums';
 
 //middlewares
 import { notFoundMiddleware } from './middlewares/not-found';
 import { headersMiddleware } from './middlewares/headers';
 import { errorHandlerMiddleware } from './middlewares/error-handler';
-import { authenticateUser } from './middlewares/auth-middlewares';
+import {
+  authenticateUser,
+  authorizePermissions,
+} from './middlewares/auth-middlewares';
 
 //routes
 import authRouter from './routes/auth-routes';
@@ -22,6 +26,7 @@ import accountantRouter from './routes/accountant-routes';
 import productRouter from './routes/product-routes';
 import supplierRouter from './routes/supplier-routes';
 import clientRouter from './routes/client-routes';
+import purchaseRouter from './routes/purchase-routes';
 
 const server = express();
 const corsObject = {
@@ -60,6 +65,12 @@ server.use(
 );
 server.use(`${process.env.BASE_URL}/product`, authenticateUser, productRouter);
 server.use(`${process.env.BASE_URL}/client`, authenticateUser, clientRouter);
+server.use(
+  `${process.env.BASE_URL}/purchase`,
+  authenticateUser,
+  authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
+  purchaseRouter
+);
 
 server.use(notFoundMiddleware);
 server.use(headersMiddleware);

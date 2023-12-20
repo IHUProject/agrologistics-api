@@ -1,6 +1,6 @@
 import express from 'express';
 import { authorizePermissions } from '../middlewares/auth-middlewares';
-import { CompanyController } from '../controllers/companies-controller';
+import { CompanyController } from '../controllers/company-controller';
 import { Roles } from '../interfaces/enums';
 import { isCompanyExists } from '../middlewares/company-middlewares';
 import multer, { memoryStorage } from 'multer';
