@@ -31,8 +31,12 @@ export class UserController {
   }
 
   public async createUser(req: Request, res: Response) {
-    const { body, file } = req;
-    const user = await this.userService.createUser(body, file);
+    const { body, file, currentUser } = req;
+
+    const user = await this.userService.createUser(
+      { ...body, company: currentUser?.company },
+      file
+    );
 
     res
       .status(StatusCodes.OK)
@@ -85,6 +89,26 @@ export class UserController {
     const { body } = req;
     const { role } = body;
     const message = await this.userService.changeUserRole(userId, role);
+    res.status(StatusCodes.OK).json({ message });
+  }
+
+  public async addToCompany(req: Request, res: Response) {
+    const { userId } = req.params;
+    const { role } = req.body;
+    const { currentUser } = req;
+
+    const message = await this.userService.addToCompany(
+      userId,
+      role,
+      (currentUser as IUserWithID).company
+    );
+
+    res.status(StatusCodes.OK).json({ message });
+  }
+
+  public async removeFromCompany(req: Request, res: Response) {
+    const { userId } = req.params;
+    const message = await this.userService.removeFromCompany(userId);
     res.status(StatusCodes.OK).json({ message });
   }
 }

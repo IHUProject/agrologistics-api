@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 import { ClientService } from '../services/client-service';
+import { IUserWithID } from '../interfaces/interfaces';
 
 export class ClientController {
   private clientService: ClientService;
@@ -9,8 +10,12 @@ export class ClientController {
   }
 
   public async createClient(req: Request, res: Response) {
-    const { body } = req;
-    const client = await this.clientService.createClient(body);
+    const { body, currentUser } = req;
+
+    const client = await this.clientService.createClient(
+      body,
+      currentUser as IUserWithID
+    );
 
     res
       .status(StatusCodes.CREATED)

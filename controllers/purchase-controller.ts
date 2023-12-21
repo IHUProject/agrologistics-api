@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 import { PurchaseService } from '../services/purchase-service';
+import { IUserWithID } from '../interfaces/interfaces';
 
 export class PurchaseController {
   private purchaseService: PurchaseService;
@@ -10,8 +11,12 @@ export class PurchaseController {
   }
 
   public async createPurchase(req: Request, res: Response) {
-    const { body } = req;
-    const purchase = await this.purchaseService.createPurchase(body);
+    const { body, currentUser } = req;
+
+    const purchase = await this.purchaseService.createPurchase(
+      body,
+      currentUser as IUserWithID
+    );
 
     res
       .status(StatusCodes.CREATED)
@@ -21,7 +26,6 @@ export class PurchaseController {
   public async getSinglePurchase(req: Request, res: Response) {
     const { purchaseId } = req.params;
     const purchase = await this.purchaseService.getSinglePurchase(purchaseId);
-
     res.status(StatusCodes.OK).json({ purchase });
   }
 

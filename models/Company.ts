@@ -40,7 +40,7 @@ const companySchema = new Schema<ICompany>(
       deletehash: { type: String, default: '' },
     },
     founded: {
-      type: String,
+      type: Date,
       default: null,
       validate: {
         validator: validateDate,
@@ -103,6 +103,6 @@ const companySchema = new Schema<ICompany>(
   }
 );
 
-const Company = mongoose.model<ICompany>('Company', companySchema, 'Companies');
+const Company = mongoose.model<ICompany>('Company', companySchema);
 
 export default Company;

@@ -8,8 +8,8 @@ export const isAccountantExists = async (
   next: NextFunction
 ) => {
   const { accId } = req.params;
-  const accountant = await Accountant.findById(accId);
 
+  const accountant = await Accountant.findById(accId);
   if (!accountant) {
     throw new NotFoundError('No accountant found!');
   }

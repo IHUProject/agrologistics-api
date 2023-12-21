@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { BadRequestError } from '../errors';
+import { BadRequestError, ConflictError } from '../errors';
 
 export const validateCoordinates = (
   req: Request,
@@ -34,6 +34,34 @@ export const validateQueryPage = (
 
   if (!Number.isSafeInteger(pageNumber) || pageNumber < 1) {
     throw new BadRequestError('Page number must be a positive safe integer');
+  }
+
+  next();
+};
+
+export const hasPurchasesProperty = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { purchases } = req.body;
+
+  if (purchases?.length) {
+    throw new ConflictError('You can not add purchases!');
+  }
+
+  next();
+};
+
+export const hasCompanyOrUserId = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { createdBy, company } = req.body;
+
+  if (createdBy || company) {
+    throw new ConflictError('You can not add company or user to the entity!');
   }
 
   next();

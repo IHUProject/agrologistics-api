@@ -34,6 +34,7 @@ export interface IUser extends Document {
   role: Roles;
   phone: number;
   image: IDataImgur;
+  company: Types.ObjectId;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -43,7 +44,7 @@ export interface ICompany extends Document {
   address: string;
   afm: number;
   logo: IDataImgur;
-  founded: string;
+  founded: Date;
   latitude: number;
   longitude: number;
   owner: Types.ObjectId;
@@ -67,14 +68,16 @@ export interface IAccountant extends Document {
   phone: number;
   latitude?: number;
   longitude?: number;
+  createdBy: Types.ObjectId;
 }
 
 export interface IProduct extends Document {
   name: string;
   price: string;
-  category: string;
   description: string;
   purchases: Types.ObjectId[];
+  company: Types.ObjectId;
+  createdBy: Types.ObjectId;
 }
 
 export interface IPasswordPayload {
@@ -91,29 +94,36 @@ export interface IDataImgur {
   deletehash: string;
 }
 
-export interface ISupplier {
-  name: string;
+export interface ISupplier extends Document {
+  firstName: string;
+  lastName: string;
   email: string;
-  phone: string;
+  phone: number;
   address: string;
-  products: Types.ObjectId[];
+  expenses: Types.ObjectId[];
+  createdBy: Types.ObjectId;
+  company: Types.ObjectId;
 }
 
 export interface IPurchase extends Document {
   totalAmount: number;
   status: PurchaseStatus;
   paymentMethod: PaymentMethod;
-  date: string;
+  date: Date;
   client: Types.ObjectId;
   products: Types.ObjectId[];
+  createdBy: Types.ObjectId;
+  company: Types.ObjectId;
 }
 
 export interface IClient extends Document {
-  fullName: string;
-  company: string;
+  firstName: string;
+  lastName: string;
   address: string;
   phone: number;
   purchases: Types.ObjectId[];
+  createdBy: Types.ObjectId;
+  company: Types.ObjectId;
 }
 
 export interface IPopulate {

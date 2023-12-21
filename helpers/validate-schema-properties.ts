@@ -1,7 +1,5 @@
-export const validateDate = (date: string) => {
-  const regex = /^\d{2}\/\d{2}\/\d{4}$/;
-  return regex.test(date);
-};
+export const validateDate = (date: Date): boolean =>
+  date instanceof Date && !isNaN(date.getTime());
 
 export const validatePhoneNumber = (value: number | string): boolean => {
   if (!value) {

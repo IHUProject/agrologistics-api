@@ -15,7 +15,7 @@ import { Roles } from '../interfaces/enums';
 import User from '../models/User';
 import Accountant from '../models/Accountant';
 import { ForbiddenError } from '../errors/forbidden';
-import { BadRequestError, NotFoundError } from '../errors';
+import { NotFoundError } from '../errors';
 import { UserService } from './user-service';
 import Product from '../models/Product';
 import Client from '../models/Client';
@@ -38,7 +38,7 @@ export class CompanyService extends DataLayerService<ICompany> {
       },
       {
         path: 'employees',
-        select: 'firstName lastName image _id role',
+        select: 'firstName lastName image role _id',
         options: { limit: 4 },
       },
       {
@@ -52,21 +52,21 @@ export class CompanyService extends DataLayerService<ICompany> {
       },
       {
         path: 'clients',
-        select: 'fullName phone _id',
+        select: 'firstName lastName phone _id',
         options: { limit: 4 },
       },
       {
         path: 'purchases',
-        select: 'totalAmount status client',
+        select: 'totalAmount status client _id',
         options: { limit: 4 },
         populate: [
           {
             path: 'client',
-            select: 'fullName _id',
+            select: 'firstName lastName _id',
           },
           {
             path: 'products',
-            select: 'name price',
+            select: 'name price _id',
           },
         ],
       },
@@ -91,13 +91,10 @@ export class CompanyService extends DataLayerService<ICompany> {
     const logo = await this.imageService.handleSingleImage(file);
     const company = await super.create({ ...payload, logo, owner: userId });
 
-    await this.userService.update(
-      userId.toString(),
-      {
-        role: Roles.OWNER,
-      },
-      ''
-    );
+    await this.userService.update(userId.toString(), {
+      role: Roles.OWNER,
+      company: company._id,
+    });
 
     return await this.getOne(company._id, this.select, this.populateOptions);
   }
@@ -165,44 +162,5 @@ export class CompanyService extends DataLayerService<ICompany> {
     }
 
     return company;
-  }
-
-  async addToCompany(userId: string, role: Roles) {
-    if (role && role === Roles.OWNER) {
-      throw new BadRequestError('You can not make an employ owner!');
-    }
-
-    const user = (await this.userService.getSingleUser(userId)) as IUser;
-
-    const isWorking = user.role !== Roles.UNCATEGORIZED;
-    if (isWorking) {
-      throw new BadRequestError('User is already working to the company!');
-    }
-
-    await Company.updateOne({}, { $push: { employees: userId } });
-    await this.userService.changeUserRole(userId, role || Roles.EMPLOY, true);
-
-    const message = `The user ${user.firstName} ${
-      user.lastName
-    } has been added to the company with role: ${
-      role.replace('_', ' ') || Roles.EMPLOY
-    }`;
-
-    return message;
-  }
-
-  async removeFromCompany(userId: string) {
-    const user = (await this.userService.getSingleUser(userId)) as IUser;
-
-    const { role } = user;
-    if (role === Roles.UNCATEGORIZED) {
-      throw new BadRequestError('User does not work to the company!');
-    }
-    if (role === Roles.OWNER) {
-      throw new ForbiddenError('You can not remove the owner!');
-    }
-
-    await this.userService.deleteUser(userId, true);
-    return `The employ has been removed for the company!`;
   }
 }

@@ -1,13 +1,15 @@
 import express from 'express';
 import * as dotenv from 'dotenv';
-import { connectDB } from './db/connect';
-import { InternalServerError } from './errors';
+
 import 'express-async-errors';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import { IUserWithID } from './interfaces/interfaces';
 import morgan from 'morgan';
+
 import { Roles } from './interfaces/enums';
+import { IUserWithID } from './interfaces/interfaces';
+import { InternalServerError } from './errors';
+import { connectDB } from './db/connect';
 
 //middlewares
 import { notFoundMiddleware } from './middlewares/not-found';
@@ -46,6 +48,7 @@ declare global {
 dotenv.config();
 
 server.use(express.json());
+server.use(express.urlencoded({ extended: true }));
 server.use(cookieParser(process.env.JWT_SECRET));
 server.use(cors(corsObject));
 server.use(morgan('dev'));

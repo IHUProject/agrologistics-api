@@ -1,31 +1,59 @@
 import Accountant from '../models/Accountant';
-import { IAccountant } from '../interfaces/interfaces';
+import { IAccountant, IPopulate, IUserWithID } from '../interfaces/interfaces';
 import { ForbiddenError } from '../errors/forbidden';
 import Company from '../models/Company';
 import { DataLayerService } from './general-services/data-layer-service';
 
 export class AccountantService extends DataLayerService<IAccountant> {
-  select: string;
+  private select: string;
+  private populationOptions: IPopulate[];
 
   constructor() {
     super(Accountant);
     this.select = '-createdAt';
+    this.populationOptions = [
+      {
+        path: 'createdBy',
+        select: 'firstName lastName _id',
+      },
+    ];
   }
 
-  public async createAccountant(payload: IAccountant) {
+  public async createAccountant(
+    payload: IAccountant,
+    currentUser: IUserWithID
+  ) {
+    const { userId, company } = currentUser;
+
     const isFirstAccountant = (await Accountant.countDocuments({})) === 0;
     if (!isFirstAccountant) {
       throw new ForbiddenError('Accountant already exists!');
     }
 
-    const accountant = await super.create(payload);
-    await Company.updateOne({}, { $set: { accountant: accountant._id } });
+    const accountant = await super.create({
+      ...payload,
+      createdBy: userId,
+    });
 
-    return await this.getOne(accountant._id, this.select);
+    await Company.updateOne(
+      { _id: company },
+      { $set: { accountant: accountant._id } }
+    );
+
+    return await this.getOne(
+      accountant._id,
+      this.select,
+      this.populationOptions
+    );
   }
 
   public async updateAccountant(payload: IAccountant, accId: string) {
-    return await this.update(accId, payload, this.select);
+    return await this.update(
+      accId,
+      payload,
+      this.select,
+      this.populationOptions
+    );
   }
 
   public async deleteAccountant(accId: string) {
@@ -39,6 +67,8 @@ export class AccountantService extends DataLayerService<IAccountant> {
   }
 
   public async getSingleAccountant() {
-    return await Accountant.findOne({}).select(this.select);
+    return await Accountant.findOne()
+      .select(this.select)
+      .populate(this.populationOptions);
   }
 }
