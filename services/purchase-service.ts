@@ -1,3 +1,4 @@
+import { populatePurchaseOpt } from '../config/populate';
 import { BadRequestError } from '../errors';
 import { IPopulate, IPurchase, IUserWithID } from '../interfaces/interfaces';
 import Client from '../models/Client';
@@ -13,20 +14,7 @@ export class PurchaseService extends DataLayerService<IPurchase> {
 
   constructor() {
     super(Purchase);
-    this.populateOptions = [
-      {
-        path: 'client',
-        select: 'firstName lastName _id',
-      },
-      {
-        path: 'products',
-        select: 'name price _id',
-      },
-      {
-        path: 'createdBy',
-        select: 'firstName lastName _id',
-      },
-    ];
+    this.populateOptions = populatePurchaseOpt;
     this.searchFields = ['status', 'paymentMethod'];
     this.select = '-createdAt';
   }

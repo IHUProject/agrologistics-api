@@ -22,6 +22,7 @@ import Client from '../models/Client';
 import { deleteDocuments } from '../helpers/delete-docs';
 import { DataLayerService } from './general-services/data-layer-service';
 import Purchase from '../models/Purchase';
+import { populateCompanyOpt } from '../config/populate';
 
 export class CompanyService extends DataLayerService<ICompany> {
   private imageService: ImageService;
@@ -31,46 +32,7 @@ export class CompanyService extends DataLayerService<ICompany> {
 
   constructor() {
     super(Company);
-    this.populateOptions = [
-      {
-        path: 'owner',
-        select: 'firstName lastName image _id',
-      },
-      {
-        path: 'employees',
-        select: 'firstName lastName image role _id',
-        options: { limit: 4 },
-      },
-      {
-        path: 'accountant',
-        select: 'firstName lastName email _id',
-      },
-      {
-        path: 'products',
-        select: 'name price _id',
-        options: { limit: 4 },
-      },
-      {
-        path: 'clients',
-        select: 'firstName lastName phone _id',
-        options: { limit: 4 },
-      },
-      {
-        path: 'purchases',
-        select: 'totalAmount status client _id',
-        options: { limit: 4 },
-        populate: [
-          {
-            path: 'client',
-            select: 'firstName lastName _id',
-          },
-          {
-            path: 'products',
-            select: 'name price _id',
-          },
-        ],
-      },
-    ];
+    this.populateOptions = populateCompanyOpt;
     this.select = '-createdAt -updateAt';
     this.imageService = new ImageService();
     this.userService = new UserService();

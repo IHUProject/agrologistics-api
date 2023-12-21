@@ -1,3 +1,4 @@
+import { populateClientOpt } from '../config/populate';
 import { BadRequestError } from '../errors';
 import { IClient, IPopulate, IUserWithID } from '../interfaces/interfaces';
 import Client from '../models/Client';
@@ -12,16 +13,7 @@ export class ClientService extends DataLayerService<IClient> {
 
   constructor() {
     super(Client);
-    this.populateOptions = [
-      {
-        path: 'purchases',
-        select: 'date totalAmount status _id',
-      },
-      {
-        path: 'createdBy',
-        select: 'firstName lastName _id',
-      },
-    ];
+    this.populateOptions = populateClientOpt;
     this.searchFields = ['firstName', 'lastName'];
     this.select = '-createdAt';
   }
