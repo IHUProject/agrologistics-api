@@ -3,6 +3,7 @@ import { IAccountant, IPopulate, IUserWithID } from '../interfaces/interfaces';
 import { ForbiddenError } from '../errors/forbidden';
 import Company from '../models/Company';
 import { DataLayerService } from './general-services/data-layer-service';
+import { populateAccountantOpt } from '../config/populate';
 
 export class AccountantService extends DataLayerService<IAccountant> {
   private select: string;
@@ -11,12 +12,7 @@ export class AccountantService extends DataLayerService<IAccountant> {
   constructor() {
     super(Accountant);
     this.select = '-createdAt';
-    this.populationOptions = [
-      {
-        path: 'createdBy',
-        select: 'firstName lastName _id',
-      },
-    ];
+    this.populationOptions = populateAccountantOpt;
   }
 
   public async createAccountant(

@@ -1,3 +1,4 @@
+import { populateProductOpt } from '../config/populate';
 import { IPopulate, IProduct, IUserWithID } from '../interfaces/interfaces';
 import Company from '../models/Company';
 import Product from '../models/Product';
@@ -11,16 +12,7 @@ export class ProductService extends DataLayerService<IProduct> {
 
   constructor() {
     super(Product);
-    this.populateOptions = [
-      {
-        path: 'purchases',
-        select: 'date totalAmount status _id',
-      },
-      {
-        path: 'createdBy',
-        select: 'firstName lastName _id',
-      },
-    ];
+    this.populateOptions = populateProductOpt;
     this.searchFields = ['name', 'price', 'description'];
     this.select = '-createdAt';
   }
