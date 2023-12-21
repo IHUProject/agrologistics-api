@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import { AccountantService } from '../services/accountant-service';
 import { Request, Response } from 'express';
+import { IUserWithID } from '../interfaces/interfaces';
 
 export class AccountantController {
   private accountantService: AccountantService;
@@ -9,8 +10,13 @@ export class AccountantController {
   }
 
   public async createAccountant(req: Request, res: Response) {
-    const { body } = req;
-    const accountant = await this.accountantService.createAccountant(body);
+    const { body, currentUser } = req;
+
+    const accountant = await this.accountantService.createAccountant(
+      body,
+      currentUser as IUserWithID
+    );
+
     res.status(StatusCodes.CREATED).json({
       accountant,
       message: 'Accountant had been successfully created!',

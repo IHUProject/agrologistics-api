@@ -2,16 +2,25 @@ import express from 'express';
 import { PurchaseController } from '../controllers/purchase-controller';
 import { isClientExists } from '../middlewares/client-middlewares';
 import { isProductExists } from '../middlewares/product-middlewares';
-import { validateQueryPage } from '../middlewares/validate-request-properties-middlewares';
+import {
+  hasCompanyOrUserId,
+  validateQueryPage,
+} from '../middlewares/validate-request-properties-middlewares';
 import { isPurchaseExists } from '../middlewares/purchase-middlewares';
+import multer, { memoryStorage } from 'multer';
 
 const purchaseController = new PurchaseController();
 const router = express.Router();
 
+const storage = memoryStorage();
+const upload = multer({ storage: storage });
+
 router.post(
   '/create-purchase',
+  upload.none(),
   isClientExists(false),
   isProductExists,
+  hasCompanyOrUserId,
   purchaseController.createPurchase.bind(purchaseController)
 );
 router.get(
@@ -31,9 +40,11 @@ router.delete(
 );
 router.patch(
   '/:purchaseId/update-purchase',
+  upload.none(),
   isPurchaseExists,
   isClientExists(true),
   isProductExists,
+  hasCompanyOrUserId,
   purchaseController.updatePurchase.bind(purchaseController)
 );
 

@@ -3,14 +3,25 @@ import { authorizePermissions } from '../middlewares/auth-middlewares';
 import { Roles } from '../interfaces/enums';
 import { ProductController } from '../controllers/product-controller';
 import { isProductExists } from '../middlewares/product-middlewares';
-import { validateQueryPage } from '../middlewares/validate-request-properties-middlewares';
+import {
+  hasCompanyOrUserId,
+  hasPurchasesProperty,
+  validateQueryPage,
+} from '../middlewares/validate-request-properties-middlewares';
+import multer, { memoryStorage } from 'multer';
 
 const productController = new ProductController();
 const router = express.Router();
 
+const storage = memoryStorage();
+const upload = multer({ storage: storage });
+
 router.post(
   '/create-product',
+  upload.none(),
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
+  hasPurchasesProperty,
+  hasCompanyOrUserId,
   productController.createProduct.bind(productController)
 );
 router.get(
@@ -21,8 +32,8 @@ router.get(
 );
 router.get(
   '/get-products',
-  validateQueryPage,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
+  validateQueryPage,
   productController.getProducts.bind(productController)
 );
 router.delete(
@@ -33,7 +44,10 @@ router.delete(
 );
 router.patch(
   '/:productId/update-product',
+  upload.none(),
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
+  hasPurchasesProperty,
+  hasCompanyOrUserId,
   isProductExists,
   productController.updateProduct.bind(productController)
 );

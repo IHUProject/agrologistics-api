@@ -1,5 +1,5 @@
 import { BadRequestError } from '../errors';
-import { IPopulate, IPurchase } from '../interfaces/interfaces';
+import { IPopulate, IPurchase, IUserWithID } from '../interfaces/interfaces';
 import Client from '../models/Client';
 import Company from '../models/Company';
 import Product from '../models/Product';
@@ -7,38 +7,47 @@ import Purchase from '../models/Purchase';
 import { DataLayerService } from './general-services/data-layer-service';
 
 export class PurchaseService extends DataLayerService<IPurchase> {
-  select: string;
-  populateOptions: IPopulate[];
-  searchFields: string[];
+  private select: string;
+  private populateOptions: IPopulate[];
+  private searchFields: string[];
 
   constructor() {
     super(Purchase);
     this.populateOptions = [
       {
         path: 'client',
-        select: 'fullName',
+        select: 'firstName lastName _id',
       },
       {
         path: 'products',
-        select: 'name price',
+        select: 'name price _id',
+      },
+      {
+        path: 'createdBy',
+        select: 'firstName lastName _id',
       },
     ];
-    this.searchFields = ['status', 'date', 'paymentMethod'];
+    this.searchFields = ['status', 'paymentMethod'];
     this.select = '-createdAt';
   }
 
-  public async createPurchase(payload: IPurchase) {
+  public async createPurchase(payload: IPurchase, currentUser: IUserWithID) {
     const { products, client } = payload;
+    const { userId, company } = currentUser;
 
     const uniqueProducts = new Set(products);
     if (uniqueProducts.size !== products.length) {
       throw new BadRequestError('Duplicate product found in the products.');
     }
 
-    const purchase = await super.create(payload);
+    const purchase = await super.create({
+      ...payload,
+      createdBy: userId,
+      company,
+    });
 
     const { _id } = purchase;
-    await Company.updateOne({}, { $push: { purchases: _id } });
+    await Company.updateOne({ _id: company }, { $push: { purchases: _id } });
     await Client.updateOne({ _id: client }, { $push: { purchases: _id } });
 
     for (const id of products) {
@@ -65,8 +74,8 @@ export class PurchaseService extends DataLayerService<IPurchase> {
   public async deletePurchase(purchaseId: string) {
     const deletedPurchase = (await this.delete(purchaseId)) as IPurchase;
 
-    const { _id, client, products } = deletedPurchase;
-    await Company.updateOne({}, { $pull: { purchases: _id } });
+    const { _id, client, products, company } = deletedPurchase;
+    await Company.updateOne({ _id: company }, { $pull: { purchases: _id } });
     await Client.updateOne({ _id: client }, { $pull: { purchases: _id } });
 
     for (const id of products) {

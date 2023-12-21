@@ -20,10 +20,20 @@ const productSchema = new Schema<IProduct>(
         ref: 'Purchase',
       },
     ],
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'Please provide a the creator.'],
+      ref: 'User',
+    },
+    company: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'Please provide a the company.'],
+      ref: 'Company',
+    },
   },
   { timestamps: true, versionKey: false }
 );
 
-const Product = mongoose.model<IProduct>('Product', productSchema, 'Products');
+const Product = mongoose.model<IProduct>('Product', productSchema);
 
 export default Product;

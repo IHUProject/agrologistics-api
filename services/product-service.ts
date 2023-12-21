@@ -1,30 +1,45 @@
-import { IPopulate, IProduct } from '../interfaces/interfaces';
+import { IPopulate, IProduct, IUserWithID } from '../interfaces/interfaces';
 import Company from '../models/Company';
 import Product from '../models/Product';
 import Purchase from '../models/Purchase';
 import { DataLayerService } from './general-services/data-layer-service';
 
 export class ProductService extends DataLayerService<IProduct> {
-  select: string;
-  populateOptions: IPopulate[];
-  searchFields: string[];
+  private select: string;
+  private populateOptions: IPopulate[];
+  private searchFields: string[];
 
   constructor() {
     super(Product);
     this.populateOptions = [
       {
         path: 'purchases',
-        select: 'date totalAmount status',
+        select: 'date totalAmount status _id',
+      },
+      {
+        path: 'createdBy',
+        select: 'firstName lastName _id',
       },
     ];
     this.searchFields = ['name', 'price', 'description'];
     this.select = '-createdAt';
   }
 
-  public async createProduct(payload: IProduct) {
-    const product = await super.create(payload);
-    await Company.updateOne({}, { $push: { products: product._id } });
-    return product;
+  public async createProduct(payload: IProduct, currentUser: IUserWithID) {
+    const { userId, company } = currentUser;
+
+    const product = await super.create({
+      ...payload,
+      createdBy: userId,
+      company,
+    });
+
+    await Company.updateOne(
+      { _id: company },
+      { $push: { products: product._id } }
+    );
+
+    return this.getOne(product._id, this.select, this.populateOptions);
   }
 
   public async getSingleProduct(productId: string) {
@@ -51,9 +66,15 @@ export class ProductService extends DataLayerService<IProduct> {
   }
 
   public async deleteProduct(productId: string) {
-    const deletedProduct = await this.delete(productId);
-    await Company.updateOne({}, { $pull: { products: productId } });
-    await Purchase.updateOne({}, { $pull: { products: productId } });
+    const deletedProduct = (await this.delete(productId)) as IProduct;
+
+    const { company, _id } = deletedProduct;
+    await Company.updateOne(
+      { _id: company },
+      { $pull: { products: productId } }
+    );
+    await Purchase.updateMany({ products: _id }, { $pull: { products: _id } });
+
     return deletedProduct;
   }
 }

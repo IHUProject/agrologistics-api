@@ -1,11 +1,20 @@
 import mongoose, { Schema } from 'mongoose';
 import { ISupplier } from '../interfaces/interfaces';
+import { validatePhoneNumber } from '../helpers/validate-schema-properties';
+import validator from 'validator';
 
 const supplierSchema = new Schema<ISupplier>(
   {
-    name: {
+    firstName: {
       type: String,
-      required: [true, 'Please provide a name for the supplier.'],
+      required: [true, 'Please provide a first name for the supplier.'],
+      unique: true,
+      minlength: 3,
+      maxlength: 50,
+    },
+    lastName: {
+      type: String,
+      required: [true, 'Please provide a last name for the supplier.'],
       unique: true,
       minlength: 3,
       maxlength: 50,
@@ -13,30 +22,43 @@ const supplierSchema = new Schema<ISupplier>(
     email: {
       type: String,
       unique: true,
-      default: null,
+      sparse: true,
+      minlength: 7,
+      maxlength: 35,
+      validate: [validator.isEmail, 'Please provide a valid email address.'],
     },
     phone: {
-      type: String,
+      type: Number,
       unique: true,
-      default: null,
+      sparse: true,
+      validate: {
+        validator: validatePhoneNumber,
+        message: 'Invalid phone number, must be 10 digits.',
+      },
     },
     address: {
       type: String,
       unique: true,
-      default: null,
+      sparse: true,
     },
-    products: {
-      type: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
+    expenses: {
+      type: [{ type: Schema.Types.ObjectId, ref: 'Expense' }],
       default: [],
+    },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'Please provide a the creator.'],
+      ref: 'User',
+    },
+    company: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'Please provide a the company.'],
+      ref: 'Company',
     },
   },
   { timestamps: true, versionKey: false }
 );
 
-const Supplier = mongoose.model<ISupplier>(
-  'Supplier',
-  supplierSchema,
-  'Suppliers'
-);
+const Supplier = mongoose.model<ISupplier>('Supplier', supplierSchema);
 
 export default Supplier;

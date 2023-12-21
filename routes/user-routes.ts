@@ -1,8 +1,13 @@
 import express from 'express';
 import { authorizePermissions } from '../middlewares/auth-middlewares';
 import { UserController } from '../controllers/user-controller';
-import { validateQueryPage } from '../middlewares/validate-request-properties-middlewares';
 import {
+  hasCompanyOrUserId,
+  validateQueryPage,
+} from '../middlewares/validate-request-properties-middlewares';
+import {
+  hasForbiddenRoleType,
+  hasRoleProperty,
   isUserExits,
   preventSelfModification,
   verifyAccountOwnership,
@@ -18,6 +23,9 @@ const upload = multer({ storage: storage });
 
 router.post(
   '/create-user',
+  upload.single('image'),
+  hasForbiddenRoleType,
+  hasCompanyOrUserId,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
   userController.createUser.bind(userController)
 );
@@ -44,8 +52,10 @@ router.delete(
 );
 router.patch(
   '/:userId/update-user',
-  verifyAccountOwnership,
   upload.single('image'),
+  hasCompanyOrUserId,
+  hasRoleProperty,
+  verifyAccountOwnership,
   userController.updateUser.bind(userController)
 );
 router.patch(
@@ -55,10 +65,29 @@ router.patch(
 );
 router.patch(
   '/:userId/change-role',
+  upload.none(),
+  authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
+  hasForbiddenRoleType,
+  preventSelfModification,
+  hasForbiddenRoleType,
+  isUserExits,
+  userController.changeUserRole.bind(userController)
+);
+router.patch(
+  '/:userId/add-user',
+  upload.none(),
+  authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
+  hasForbiddenRoleType,
+  preventSelfModification,
+  isUserExits,
+  userController.addToCompany.bind(userController)
+);
+router.patch(
+  '/:userId/remove-user',
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   preventSelfModification,
   isUserExits,
-  userController.changeUserRole.bind(userController)
+  userController.removeFromCompany.bind(userController)
 );
 
 export default router;

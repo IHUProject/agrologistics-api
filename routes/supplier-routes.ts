@@ -2,12 +2,14 @@ import express from 'express';
 import { authorizePermissions } from '../middlewares/auth-middlewares';
 import { Roles } from '../interfaces/enums';
 import { SupplierController } from '../controllers/supplier-controller';
+import { hasCompanyOrUserId } from '../middlewares/validate-request-properties-middlewares';
 
 const supplierController = new SupplierController();
 const router = express.Router();
 
 router.post(
   '/create-supplier',
+  hasCompanyOrUserId,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
   supplierController.createSupplier.bind(supplierController)
 );
@@ -27,7 +29,8 @@ router.delete(
   supplierController.deleteSupplier.bind(supplierController)
 );
 router.patch(
-  '/:supplierId/update-supplierId',
+  '/:supplierId/update-supplier',
+  hasCompanyOrUserId,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
   supplierController.updateSupplier.bind(supplierController)
 );

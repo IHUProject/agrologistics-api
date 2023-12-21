@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import { Response, Request } from 'express';
 import { ProductService } from '../services/product-service';
+import { IUserWithID } from '../interfaces/interfaces';
 
 export class ProductController {
   productService: ProductService;
@@ -9,8 +10,12 @@ export class ProductController {
   }
 
   public async createProduct(req: Request, res: Response) {
-    const { body } = req;
-    const product = await this.productService.createProduct(body);
+    const { body, currentUser } = req;
+
+    const product = await this.productService.createProduct(
+      body,
+      currentUser as IUserWithID
+    );
 
     res
       .status(StatusCodes.CREATED)

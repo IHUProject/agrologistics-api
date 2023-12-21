@@ -7,6 +7,7 @@ import { ForbiddenError } from '../errors/forbidden';
 import Company from '../models/Company';
 import { createTokenUser } from '../helpers/create-token-user';
 import { DataLayerService } from './general-services/data-layer-service';
+import { Types } from 'mongoose';
 
 export class UserService extends DataLayerService<IUser> {
   private imageService: ImageService;
@@ -23,14 +24,14 @@ export class UserService extends DataLayerService<IUser> {
   public async deleteUser(userId: string, isExternalRequest: boolean = false) {
     const user = (await this.getOne(userId)) as IUser;
 
-    const { role } = user;
+    const { role, company } = user;
     if (role === Roles.OWNER && !isExternalRequest) {
       throw new ForbiddenError(
         'Please delete your company to proceed to this action!'
       );
     }
 
-    await Company.updateOne({}, { $pull: { employees: userId } });
+    await Company.updateOne({ _id: company }, { $pull: { employees: userId } });
 
     const { deletehash } = user.image;
     if (deletehash) {
@@ -98,18 +99,15 @@ export class UserService extends DataLayerService<IUser> {
     payload: IUser,
     file: Express.Multer.File | undefined
   ) {
-    const { role } = payload;
-    if (role === Roles.OWNER) {
-      throw new BadRequestError('You can not make the new user owner!');
-    }
-
     const image = await this.imageService.handleSingleImage(file);
     const user = await super.create({
       ...payload,
       image,
     });
 
-    await Company.updateOne({}, { $push: { employees: user._id } });
+    const { _id, company } = user;
+    await Company.updateOne({ _id: company }, { $push: { employees: _id } });
+
     return await this.getOne(user._id, this.select);
   }
 
@@ -118,13 +116,8 @@ export class UserService extends DataLayerService<IUser> {
     role: Roles,
     isExternalRequest: boolean = false
   ) {
-    if (role === Roles.OWNER || role === Roles.UNCATEGORIZED) {
-      throw new BadRequestError(
-        'You can not make an employ owner or uncategorized!'
-      );
-    }
-
     const user = (await this.getOne(userId)) as IUser;
+
     if (user.role === Roles.OWNER) {
       throw new BadRequestError('You can not change the owners role!');
     }
@@ -141,5 +134,50 @@ export class UserService extends DataLayerService<IUser> {
     return `The role of employ ${user.firstName} ${
       user.lastName
     } has been changed to ${user.role.replace('_', ' ')}`;
+  }
+
+  async addToCompany(userId: string, role: Roles, company: Types.ObjectId) {
+    if (role === Roles.OWNER || role === Roles.UNCATEGORIZED) {
+      throw new BadRequestError(
+        'You can not make an employ owner or uncategorized!'
+      );
+    }
+
+    const user = (await this.getSingleUser(userId)) as IUser;
+
+    const isWorking = user.role !== Roles.UNCATEGORIZED;
+    if (isWorking) {
+      throw new BadRequestError('User is already working to the company!');
+    }
+
+    await this.update(userId, {
+      role: role || Roles.EMPLOY,
+      company,
+    });
+
+    await Company.updateOne({ _id: company }, { $push: { employees: userId } });
+
+    const message = `The user ${user.firstName} ${
+      user.lastName
+    } has been added to the company with role: ${
+      role.replace('_', ' ') || Roles.EMPLOY
+    }`;
+
+    return message;
+  }
+
+  async removeFromCompany(userId: string) {
+    const user = (await this.getSingleUser(userId)) as IUser;
+
+    const { role } = user;
+    if (role === Roles.UNCATEGORIZED) {
+      throw new BadRequestError('User does not work to the company!');
+    }
+    if (role === Roles.OWNER) {
+      throw new ForbiddenError('You can not remove the owner!');
+    }
+
+    await this.deleteUser(userId, true);
+    return `The employ removed and the account deleted!`;
   }
 }

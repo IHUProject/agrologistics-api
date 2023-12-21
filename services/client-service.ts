@@ -1,35 +1,49 @@
 import { BadRequestError } from '../errors';
-import { IClient, IPopulate } from '../interfaces/interfaces';
+import { IClient, IPopulate, IUserWithID } from '../interfaces/interfaces';
 import Client from '../models/Client';
 import Company from '../models/Company';
 import Purchase from '../models/Purchase';
 import { DataLayerService } from './general-services/data-layer-service';
 
 export class ClientService extends DataLayerService<IClient> {
-  select: string;
-  populateOptions: IPopulate[];
-  searchFields: string[];
+  private select: string;
+  private populateOptions: IPopulate[];
+  private searchFields: string[];
 
   constructor() {
     super(Client);
     this.populateOptions = [
       {
         path: 'purchases',
-        select: 'date totalAmount status',
+        select: 'date totalAmount status _id',
+      },
+      {
+        path: 'createdBy',
+        select: 'firstName lastName _id',
       },
     ];
-    this.searchFields = ['fullName', 'company'];
+    this.searchFields = ['firstName', 'lastName'];
     this.select = '-createdAt';
   }
 
-  public async createClient(payload: IClient) {
+  public async createClient(payload: IClient, currentUser: IUserWithID) {
+    const { userId, company } = currentUser;
+
     const isPhoneUnique = await Client.findOne({ phone: payload.phone });
     if (isPhoneUnique) {
       throw new BadRequestError('The phone number is already in use!');
     }
 
-    const client = await super.create(payload);
-    await Company.updateOne({}, { $push: { clients: client._id } });
+    const client = await super.create({
+      ...payload,
+      createdBy: userId,
+      company,
+    });
+
+    await Company.updateOne(
+      { _id: company },
+      { $push: { clients: client._id } }
+    );
 
     return await this.getOne(client._id, this.select, this.populateOptions);
   }
@@ -49,9 +63,16 @@ export class ClientService extends DataLayerService<IClient> {
   }
 
   public async deleteClient(clientId: string) {
-    const deleteClient = await this.delete(clientId);
-    await Purchase.updateMany({ client: clientId }, { $unset: { client: '' } });
-    await Company.updateOne({}, { $pull: { clients: clientId } });
+    const deleteClient = (await this.delete(clientId)) as IClient;
+
+    await Purchase.updateMany(
+      { client: clientId },
+      { $unset: { client: null } }
+    );
+    await Company.updateOne(
+      { _id: deleteClient.company },
+      { $pull: { clients: clientId } }
+    );
 
     return deleteClient;
   }

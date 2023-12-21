@@ -2,12 +2,11 @@ import express from 'express';
 import { authorizePermissions } from '../middlewares/auth-middlewares';
 import { CompanyController } from '../controllers/company-controller';
 import { Roles } from '../interfaces/enums';
-import { isCompanyExists } from '../middlewares/company-middlewares';
-import multer, { memoryStorage } from 'multer';
 import {
-  isUserExits,
-  preventSelfModification,
-} from '../middlewares/user-middlewares';
+  hasExistingCompanyRelations,
+  isCompanyExists,
+} from '../middlewares/company-middlewares';
+import multer, { memoryStorage } from 'multer';
 import { validateCoordinates } from '../middlewares/validate-request-properties-middlewares';
 
 const companyController = new CompanyController();
@@ -23,8 +22,9 @@ router.get(
 );
 router.post(
   '/create-company',
-  authorizePermissions(Roles.UNCATEGORIZED),
   upload.single('logo'),
+  authorizePermissions(Roles.UNCATEGORIZED),
+  hasExistingCompanyRelations,
   validateCoordinates,
   companyController.createCompany.bind(companyController)
 );
@@ -36,25 +36,12 @@ router.delete(
 );
 router.patch(
   '/:companyId/update-company',
-  authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
-  isCompanyExists,
   upload.single('logo'),
+  authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
+  hasExistingCompanyRelations,
+  isCompanyExists,
   validateCoordinates,
   companyController.updateCompany.bind(companyController)
-);
-router.patch(
-  '/:userId/add-user',
-  authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
-  preventSelfModification,
-  isUserExits,
-  companyController.addToCompany.bind(companyController)
-);
-router.patch(
-  '/:userId/remove-user',
-  authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
-  preventSelfModification,
-  isUserExits,
-  companyController.removeFromCompany.bind(companyController)
 );
 
 export default router;

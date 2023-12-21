@@ -45,6 +45,11 @@ const accountantSchema = new Schema<IAccountant>(
           `${props.value} is not a valid longitude, longitude must be a number between -180 and 180.`,
       },
     },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'Please provide a the creator.'],
+      ref: 'User',
+    },
   },
   {
     timestamps: true,
@@ -52,10 +57,6 @@ const accountantSchema = new Schema<IAccountant>(
   }
 );
 
-const Accountant = mongoose.model<IAccountant>(
-  'Accountant',
-  accountantSchema,
-  'Accountants'
-);
+const Accountant = mongoose.model<IAccountant>('Accountant', accountantSchema);
 
 export default Accountant;

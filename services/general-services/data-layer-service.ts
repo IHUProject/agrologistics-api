@@ -48,7 +48,7 @@ export class DataLayerService<T> {
   public async update(
     id: string,
     data: Partial<T>,
-    select: string,
+    select = '',
     populateOptions: Array<IPopulate> = []
   ) {
     const options = { new: true, runValidators: true };

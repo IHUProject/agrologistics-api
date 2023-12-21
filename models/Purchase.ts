@@ -27,7 +27,7 @@ const purchaseSchema = new Schema<IPurchase>(
       required: [true, 'Please provide a payment method!'],
     },
     date: {
-      type: String,
+      type: Date,
       default: null,
       validate: {
         validator: validateDate,
@@ -47,16 +47,22 @@ const purchaseSchema = new Schema<IPurchase>(
         required: [true, 'At least one product is required.'],
       },
     ],
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'Please provide a the creator.'],
+      ref: 'User',
+    },
+    company: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'Please provide a the company.'],
+      ref: 'Company',
+    },
   },
   {
     timestamps: true,
     versionKey: false,
   }
 );
-const Purchase = mongoose.model<IPurchase>(
-  'Purchase',
-  purchaseSchema,
-  'Purchases'
-);
+const Purchase = mongoose.model<IPurchase>('Purchase', purchaseSchema);
 
 export default Purchase;

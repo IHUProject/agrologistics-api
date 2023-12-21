@@ -58,6 +58,11 @@ const userSchema = new Schema<IUser>(
         message: 'Invalid phone number, must be 10 digits.',
       },
     },
+    company: {
+      type: Schema.Types.ObjectId,
+      ref: 'Company',
+      default: null,
+    },
   },
   { timestamps: true, versionKey: false }
 );
@@ -76,6 +81,6 @@ userSchema.methods.comparePassword = async function (
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-const User = mongoose.model<IUser>('User', userSchema, 'Users');
+const User = mongoose.model<IUser>('User', userSchema);
 
 export default User;

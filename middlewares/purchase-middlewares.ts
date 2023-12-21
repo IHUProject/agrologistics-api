@@ -8,8 +8,8 @@ export const isPurchaseExists = async (
   next: NextFunction
 ) => {
   const { purchaseId } = req.params;
-  const purchase = await Purchase.findById(purchaseId);
 
+  const purchase = await Purchase.findById(purchaseId);
   if (!purchase) {
     throw new NotFoundError('Purchase does not exists!');
   }

@@ -4,13 +4,18 @@ import { IClient } from '../interfaces/interfaces';
 
 const clientSchema = new Schema<IClient>(
   {
-    fullName: {
+    firstName: {
       type: String,
-      required: [true, 'Provide full name name for the client.'],
+      required: [true, 'Provide first name name for the client.'],
       minlength: 3,
       maxlength: 50,
     },
-    company: { type: String, minlength: 3, maxlength: 50, default: null },
+    lastName: {
+      type: String,
+      required: [true, 'Provide last  name name for the client.'],
+      minlength: 3,
+      maxlength: 50,
+    },
     address: { type: String, minlength: 3, maxlength: 50, default: null },
     phone: {
       type: Number,
@@ -25,10 +30,20 @@ const clientSchema = new Schema<IClient>(
       type: [{ type: Schema.Types.ObjectId, ref: 'Purchase' }],
       default: [],
     },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'Please provide a the creator.'],
+      ref: 'User',
+    },
+    company: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'Please provide a the company.'],
+      ref: 'Company',
+    },
   },
   { timestamps: true, versionKey: false }
 );
 
-const Client = mongoose.model<IClient>('Client', clientSchema, 'Clients');
+const Client = mongoose.model<IClient>('Client', clientSchema);
 
 export default Client;

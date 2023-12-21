@@ -28,6 +28,7 @@ export const authenticateUser = async (
       role: payload.role,
       image: payload.image,
       phone: payload.phone,
+      company: payload.company,
     } as IUserWithID;
 
     next();

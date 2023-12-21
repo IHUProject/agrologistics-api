@@ -1,8 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
-import { NotFoundError, UnauthorizedError } from '../errors';
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+  UnauthorizedError,
+} from '../errors';
 import User from '../models/User';
-import { IUserWithID } from '../interfaces/interfaces';
+import { IUser, IUserWithID } from '../interfaces/interfaces';
 import { ForbiddenError } from '../errors/forbidden';
+import { Roles } from '../interfaces/enums';
 
 export const verifyAccountOwnership = async (
   req: Request,
@@ -24,8 +30,8 @@ export const isUserExits = async (
   next: NextFunction
 ) => {
   const { userId } = req.params;
-  const user = await User.findById(userId);
 
+  const user = await User.findById(userId);
   if (!user) {
     throw new NotFoundError('User does not exists!');
   }
@@ -43,6 +49,34 @@ export const preventSelfModification = async (
 
   if (userId === (currentUser as IUserWithID).userId.toString()) {
     throw new ForbiddenError('You can perform that action to your account!');
+  }
+
+  next();
+};
+
+export const hasRoleProperty = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { role } = req.body as IUser;
+
+  if (role) {
+    throw new ConflictError('You can not change or add the role!');
+  }
+
+  next();
+};
+
+export const hasForbiddenRoleType = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { role } = req.body;
+
+  if (role === Roles.OWNER || role === Roles.UNCATEGORIZED) {
+    throw new BadRequestError(`Forbidden role type ${role}`);
   }
 
   next();
