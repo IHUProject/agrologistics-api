@@ -14,10 +14,10 @@ const accountantSchema = new Schema<IAccountant>(
     phone: {
       type: Number,
       default: null,
-      validate: {
-        validator: validatePhoneNumber,
-        message: 'Invalid phone number, must be 10 digits.',
-      },
+      validate: [
+        validatePhoneNumber,
+        'Invalid phone number, must be 10 digits.',
+      ],
     },
     email: {
       type: String,

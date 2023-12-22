@@ -46,14 +46,14 @@ export const populateClientOpt = [
   },
   {
     path: 'createdBy',
-    select: 'firstName lastName _id',
+    select: 'firstName lastName image _id',
   },
 ];
 
 export const populateAccountantOpt = [
   {
     path: 'createdBy',
-    select: 'firstName lastName _id',
+    select: 'firstName lastName image _id',
   },
 ];
 
@@ -64,7 +64,7 @@ export const populateProductOpt = [
   },
   {
     path: 'createdBy',
-    select: 'firstName lastName _id',
+    select: 'firstName lastName image _id',
   },
 ];
 
@@ -79,6 +79,6 @@ export const populatePurchaseOpt = [
   },
   {
     path: 'createdBy',
-    select: 'firstName lastName _id',
+    select: 'firstName lastName image _id',
   },
 ];

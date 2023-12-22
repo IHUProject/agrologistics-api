@@ -39,13 +39,8 @@ const userSchema = new Schema<IUser>(
     role: {
       type: String,
       enum: {
-        values: [
-          Roles.UNCATEGORIZED,
-          Roles.EMPLOY,
-          Roles.SENIOR_EMPLOY,
-          Roles.OWNER,
-        ],
-        message: '{VALUE} is not valid.',
+        values: Object.values(Roles),
+        message: '{VALUE} is not valid role.',
       },
       default: Roles.UNCATEGORIZED,
     },
@@ -53,10 +48,10 @@ const userSchema = new Schema<IUser>(
       type: Number,
       unique: true,
       sparse: true,
-      validate: {
-        validator: validatePhoneNumber,
-        message: 'Invalid phone number, must be 10 digits.',
-      },
+      validate: [
+        validatePhoneNumber,
+        'Invalid phone number, must be 10 digits.',
+      ],
     },
     company: {
       type: Schema.Types.ObjectId,
