@@ -21,10 +21,10 @@ const companySchema = new Schema<ICompany>(
       type: Number,
       unique: true,
       default: null,
-      validate: {
-        validator: validatePhoneNumber,
-        message: 'Invalid phone number, must be 10 digits.',
-      },
+      validate: [
+        validatePhoneNumber,
+        'Invalid phone number, must be 10 digits.',
+      ],
     },
     address: { type: String, minlength: 5, maxlength: 35 },
     afm: {
@@ -45,7 +45,7 @@ const companySchema = new Schema<ICompany>(
       validate: {
         validator: validateDate,
         message: (props) =>
-          `${props.value} is not a valid date, please use the format DD/MM/YYYY.`,
+          `${props.value} is not a valid date, please use the format YYYY/MM/DD.`,
       },
     },
     latitude: {

@@ -31,10 +31,10 @@ const supplierSchema = new Schema<ISupplier>(
       type: Number,
       unique: true,
       sparse: true,
-      validate: {
-        validator: validatePhoneNumber,
-        message: 'Invalid phone number, must be 10 digits.',
-      },
+      validate: [
+        validatePhoneNumber,
+        'Invalid phone number, must be 10 digits.',
+      ],
     },
     address: {
       type: String,

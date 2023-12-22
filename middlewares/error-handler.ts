@@ -16,13 +16,13 @@ export const errorHandlerMiddleware = (
 
   if (err.name === 'CastError') {
     customError.msg = `Error: the value ${err.value} is wrong format or type for property ${err.path}`;
-    customError.statusCode = 404;
+    customError.statusCode = 400;
   }
 
   if (err.name === 'ValidationError') {
     const errors = Object.values(err.errors).map((item) => {
       if (item.name === 'CastError') {
-        return `Error: the value ${item.value} is wrong format or type for property ${item.path}`;
+        return `The value ${item.value} is wrong format or type for property ${item.path}`;
       }
       if (item.kind === 'minlength') {
         return `The ${item.path} must be more than ${
@@ -45,7 +45,7 @@ export const errorHandlerMiddleware = (
     customError.msg = `The ${Object.keys(
       err.keyValue
     )} you provide is already in use, please choose something else`;
-    customError.statusCode = 400;
+    customError.statusCode = 409;
   }
 
   if (err.path === '_id') {

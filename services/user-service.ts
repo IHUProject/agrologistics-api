@@ -21,8 +21,12 @@ export class UserService extends DataLayerService<IUser> {
     this.searchFields = ['firstName', 'lastName', 'role'];
   }
 
-  public async deleteUser(userId: string, isExternalRequest: boolean = false) {
-    const user = (await this.getOne(userId)) as IUser;
+  public async deleteUser(
+    userId: string,
+    isExternalRequest: boolean = false,
+    userInfo?: IUser
+  ) {
+    const user = !userInfo ? ((await this.getOne(userId)) as IUser) : userInfo;
 
     const { role, company } = user;
     if (role === Roles.OWNER && !isExternalRequest) {
@@ -167,7 +171,7 @@ export class UserService extends DataLayerService<IUser> {
   }
 
   async removeFromCompany(userId: string) {
-    const user = (await this.getSingleUser(userId)) as IUser;
+    const user = (await this.getOne(userId)) as IUser;
 
     const { role } = user;
     if (role === Roles.UNCATEGORIZED) {
@@ -177,7 +181,7 @@ export class UserService extends DataLayerService<IUser> {
       throw new ForbiddenError('You can not remove the owner!');
     }
 
-    await this.deleteUser(userId, true);
+    await this.deleteUser(userId, true, user);
     return `The employ removed and the account deleted!`;
   }
 }

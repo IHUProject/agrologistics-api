@@ -32,7 +32,7 @@ const purchaseSchema = new Schema<IPurchase>(
       validate: {
         validator: validateDate,
         message: (props) =>
-          `${props.value} is not a valid date, please use the format DD/MM/YYYY.`,
+          `${props.value} is not a valid date, please use the format YYYY/MM/DD.`,
       },
     },
     client: {
