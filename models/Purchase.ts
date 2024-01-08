@@ -24,7 +24,7 @@ const purchaseSchema = new Schema<IPurchase>(
         values: Object.values(PaymentMethod),
         message: '{VALUE} is not a valid payment method',
       },
-      required: [true, 'Please provide a payment method!'],
+      default: PaymentMethod.OTHER,
     },
     date: {
       type: Date,
@@ -37,8 +37,8 @@ const purchaseSchema = new Schema<IPurchase>(
     },
     client: {
       type: Schema.Types.ObjectId,
-      ref: 'Client',
       required: [true, 'Client is required.'],
+      ref: 'Client',
     },
     products: [
       {
@@ -49,12 +49,12 @@ const purchaseSchema = new Schema<IPurchase>(
     ],
     createdBy: {
       type: Schema.Types.ObjectId,
-      required: [true, 'Please provide a the creator.'],
+      required: [true, 'Please provide the creator.'],
       ref: 'User',
     },
     company: {
       type: Schema.Types.ObjectId,
-      required: [true, 'Please provide a the company.'],
+      required: [true, 'Please provide the company.'],
       ref: 'Company',
     },
   },
@@ -63,6 +63,7 @@ const purchaseSchema = new Schema<IPurchase>(
     versionKey: false,
   }
 );
+
 const Purchase = mongoose.model<IPurchase>('Purchase', purchaseSchema);
 
 export default Purchase;

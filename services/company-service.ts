@@ -9,7 +9,6 @@ import {
   IUser,
   IUserWithID,
 } from '../interfaces/interfaces';
-import Company from '../models/Company';
 import { ImageService } from './general-services/image-service';
 import { Roles } from '../interfaces/enums';
 import User from '../models/User';
@@ -23,6 +22,7 @@ import { deleteDocuments } from '../helpers/delete-docs';
 import { DataLayerService } from './general-services/data-layer-service';
 import Purchase from '../models/Purchase';
 import { populateCompanyOpt } from '../config/populate';
+import Company from '../models/Company';
 
 export class CompanyService extends DataLayerService<ICompany> {
   private imageService: ImageService;

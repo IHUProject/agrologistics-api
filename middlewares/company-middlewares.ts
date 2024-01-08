@@ -31,6 +31,7 @@ export const hasExistingCompanyRelations = async (
     purchases,
     clients,
     products,
+    expenses,
   } = req.body as ICompany;
 
   const hasRelations =
@@ -40,7 +41,8 @@ export const hasExistingCompanyRelations = async (
     owner ||
     purchases?.length ||
     clients?.length ||
-    products?.length;
+    products?.length ||
+    expenses?.length;
 
   if (hasRelations) {
     throw new ConflictError(

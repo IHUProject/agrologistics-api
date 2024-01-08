@@ -32,12 +32,12 @@ const clientSchema = new Schema<IClient>(
     },
     createdBy: {
       type: Schema.Types.ObjectId,
-      required: [true, 'Please provide a the creator.'],
+      required: [true, 'Please provide the creator.'],
       ref: 'User',
     },
     company: {
       type: Schema.Types.ObjectId,
-      required: [true, 'Please provide a the company.'],
+      required: [true, 'Please provide the company.'],
       ref: 'Company',
     },
   },

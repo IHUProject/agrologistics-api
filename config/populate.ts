@@ -37,6 +37,16 @@ export const populateCompanyOpt = [
       },
     ],
   },
+  {
+    path: 'suppliers',
+    select: 'firstName lastName _id',
+    options: { limit: 4 },
+  },
+  {
+    path: 'expenses',
+    select: '_id',
+    options: { limit: 4 },
+  },
 ];
 
 export const populateClientOpt = [
@@ -76,6 +86,17 @@ export const populatePurchaseOpt = [
   {
     path: 'products',
     select: 'name price _id',
+  },
+  {
+    path: 'createdBy',
+    select: 'firstName lastName image _id',
+  },
+];
+
+export const populateSupplierOpt = [
+  {
+    path: 'costs',
+    select: 'date totalAmount',
   },
   {
     path: 'createdBy',

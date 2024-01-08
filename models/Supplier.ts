@@ -1,21 +1,19 @@
 import mongoose, { Schema } from 'mongoose';
 import { ISupplier } from '../interfaces/interfaces';
 import { validatePhoneNumber } from '../helpers/validate-schema-properties';
-import validator from 'validator';
+import isEmail from 'validator/lib/isEmail';
 
 const supplierSchema = new Schema<ISupplier>(
   {
     firstName: {
       type: String,
       required: [true, 'Please provide a first name for the supplier.'],
-      unique: true,
       minlength: 3,
       maxlength: 50,
     },
     lastName: {
       type: String,
       required: [true, 'Please provide a last name for the supplier.'],
-      unique: true,
       minlength: 3,
       maxlength: 50,
     },
@@ -25,7 +23,7 @@ const supplierSchema = new Schema<ISupplier>(
       sparse: true,
       minlength: 7,
       maxlength: 35,
-      validate: [validator.isEmail, 'Please provide a valid email address.'],
+      validate: [isEmail, 'Please provide a valid email address.'],
     },
     phone: {
       type: Number,
@@ -38,8 +36,7 @@ const supplierSchema = new Schema<ISupplier>(
     },
     address: {
       type: String,
-      unique: true,
-      sparse: true,
+      default: null,
     },
     expenses: {
       type: [{ type: Schema.Types.ObjectId, ref: 'Expense' }],
@@ -47,12 +44,12 @@ const supplierSchema = new Schema<ISupplier>(
     },
     createdBy: {
       type: Schema.Types.ObjectId,
-      required: [true, 'Please provide a the creator.'],
+      required: [true, 'Please provide the creator.'],
       ref: 'User',
     },
     company: {
       type: Schema.Types.ObjectId,
-      required: [true, 'Please provide a the company.'],
+      required: [true, 'Please provide the company.'],
       ref: 'Company',
     },
   },

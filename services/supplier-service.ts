@@ -1,4 +1,7 @@
+import { populateSupplierOpt } from '../config/populate';
 import { IPopulate, ISupplier } from '../interfaces/interfaces';
+import Company from '../models/Company';
+import Expanse from '../models/Expense';
 import Supplier from '../models/Supplier';
 import { DataLayerService } from './general-services/data-layer-service';
 
@@ -9,17 +12,19 @@ export class SupplierService extends DataLayerService<ISupplier> {
 
   constructor() {
     super(Supplier);
-    this.populateOptions = [
-      {
-        path: 'expenses',
-        select: 'date totalAmount',
-      },
-    ];
-    this.searchFields = ['email', 'address', 'fullName'];
+    this.populateOptions = populateSupplierOpt;
+    this.searchFields = ['email', 'address', 'fullName', 'lastName'];
     this.select = '-createdAt';
   }
 
-  public async createSupplier(payload: ISupplier) {}
+  public async createSupplier(payload: ISupplier) {
+    const supplier = await super.create(payload);
+
+    const { _id, company } = supplier;
+    await Company.updateOne({ _id: company }, { $push: { suppliers: _id } });
+
+    return await this.getOne(_id, this.select, this.populateOptions);
+  }
 
   public async getSingleSupplier(supplierId: string) {
     return await this.getOne(supplierId, this.select, this.populateOptions);
@@ -35,7 +40,22 @@ export class SupplierService extends DataLayerService<ISupplier> {
     );
   }
 
-  public async deleteSupplier(supplierId: string) {}
+  public async deleteSupplier(supplierId: string) {
+    const deletedSupplier = (await this.delete(supplierId)) as ISupplier;
 
-  public async updatePurchase(payload: ISupplier, purchaseId: string) {}
+    const { _id, company } = deletedSupplier;
+    await Company.updateOne({ _id: company }, { $pull: { suppliers: _id } });
+    await Expanse.updateOne({ supplier: _id }, { $pull: { purchases: _id } });
+
+    return deletedSupplier;
+  }
+
+  public async updateSupplier(payload: ISupplier, supplierId: string) {
+    return await this.update(
+      supplierId,
+      payload,
+      this.select,
+      this.populateOptions
+    );
+  }
 }
