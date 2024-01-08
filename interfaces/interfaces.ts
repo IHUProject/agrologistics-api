@@ -54,6 +54,7 @@ export interface ICompany extends Document {
   suppliers: Types.ObjectId[];
   purchases: Types.ObjectId[];
   clients: Types.ObjectId[];
+  expenses: Types.ObjectId[];
 }
 
 export interface IUserWithID extends IUser {
@@ -122,6 +123,18 @@ export interface IClient extends Document {
   address: string;
   phone: number;
   purchases: Types.ObjectId[];
+  createdBy: Types.ObjectId;
+  company: Types.ObjectId;
+}
+
+export interface IExpense extends Document {
+  date: Date;
+  images: IDataImgur[];
+  totalAmount: number;
+  paymentMethod: PaymentMethod;
+  description: string;
+  category: Types.ObjectId | string;
+  supplier: Types.ObjectId;
   createdBy: Types.ObjectId;
   company: Types.ObjectId;
 }

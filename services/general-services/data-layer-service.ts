@@ -63,7 +63,7 @@ export class DataLayerService<T> {
     return await this.model.findByIdAndDelete(id).select('-createdAt');
   }
 
-  public async validateData(data: Partial<T>): Promise<void> {
+  public async validateData(data: Partial<T>) {
     const schemaPaths = Object.keys(this.model.schema.paths);
 
     const invalidKeys = Object.keys(data).filter((key) => {

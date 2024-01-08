@@ -6,8 +6,8 @@ export enum Roles {
 }
 
 export enum DefaultImage {
-  PROFILE_IMAGE = 'https://i.imgur.com/WPgl8tQ.png',
-  LOGO = 'https://i.imgur.com/8duOjAs.jpg',
+  PROFILE_IMAGE = 'https://i.imgur.com/8duOjAs.jpg',
+  LOGO = 'https://i.imgur.com/WPgl8tQ.png',
 }
 
 export enum PaymentMethod {

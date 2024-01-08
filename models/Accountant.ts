@@ -47,7 +47,7 @@ const accountantSchema = new Schema<IAccountant>(
     },
     createdBy: {
       type: Schema.Types.ObjectId,
-      required: [true, 'Please provide a the creator.'],
+      required: [true, 'Please provide the creator.'],
       ref: 'User',
     },
   },

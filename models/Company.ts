@@ -8,6 +8,7 @@ import {
   validatePhoneNumber,
 } from '../helpers/validate-schema-properties';
 import { DefaultImage } from '../interfaces/enums';
+import './Expense';
 
 const companySchema = new Schema<ICompany>(
   {
@@ -36,7 +37,7 @@ const companySchema = new Schema<ICompany>(
       },
     },
     logo: {
-      link: { type: String, default: DefaultImage.PROFILE_IMAGE },
+      link: { type: String, default: DefaultImage.LOGO },
       deletehash: { type: String, default: '' },
     },
     founded: {
@@ -86,6 +87,10 @@ const companySchema = new Schema<ICompany>(
     },
     suppliers: {
       type: [{ type: Schema.Types.ObjectId, ref: 'Supplier' }],
+      default: [],
+    },
+    expenses: {
+      type: [{ type: Schema.Types.ObjectId, ref: 'Expanse' }],
       default: [],
     },
     purchases: {
