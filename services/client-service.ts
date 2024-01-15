@@ -44,13 +44,14 @@ export class ClientService extends DataLayerService<IClient> {
     return await this.getOne(clientId, this.select, this.populateOptions);
   }
 
-  public async getClients(page: string, searchString: string) {
+  public async getClients(page: string, searchString: string, limit: string) {
     return await this.getMany(
       page,
       this.select,
       searchString,
       this.searchFields,
-      this.populateOptions
+      this.populateOptions,
+      Number(limit)
     );
   }
 

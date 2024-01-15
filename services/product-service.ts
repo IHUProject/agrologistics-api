@@ -38,13 +38,14 @@ export class ProductService extends DataLayerService<IProduct> {
     return await this.getOne(productId, this.select, this.populateOptions);
   }
 
-  public async getProducts(page: string, searchString: string) {
+  public async getProducts(page: string, searchString: string, limit: string) {
     return await this.getMany(
       page,
       this.select,
       searchString,
       this.searchFields,
-      this.populateOptions
+      this.populateOptions,
+      Number(limit)
     );
   }
 

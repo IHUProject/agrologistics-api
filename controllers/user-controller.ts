@@ -61,11 +61,12 @@ export class UserController {
   }
 
   public async getUsers(req: Request, res: Response) {
-    const { page, searchString } = req.query;
+    const { page, searchString, limit } = req.query;
 
     const users = await this.userService.getUsers(
       page as string,
-      searchString as string
+      searchString as string,
+      limit as string
     );
 
     res.status(StatusCodes.OK).json({ users, totalCount: users.length });

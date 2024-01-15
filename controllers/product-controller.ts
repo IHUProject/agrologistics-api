@@ -48,11 +48,12 @@ export class ProductController {
   }
 
   public async getProducts(req: Request, res: Response) {
-    const { page, searchString } = req.query;
+    const { page, searchString, limit } = req.query;
 
     const products = await this.productService.getProducts(
       page as string,
-      searchString as string
+      searchString as string,
+      limit as string
     );
 
     res.status(StatusCodes.OK).json({ products, totalCount: products.length });

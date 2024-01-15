@@ -49,13 +49,14 @@ export class PurchaseService extends DataLayerService<IPurchase> {
     return await this.getOne(purchaseId, this.select, this.populateOptions);
   }
 
-  public async getPurchases(page: string, searchString: string) {
+  public async getPurchases(page: string, searchString: string, limit: string) {
     return await this.getMany(
       page,
       this.select,
       searchString,
       this.searchFields,
-      this.populateOptions
+      this.populateOptions,
+      Number(limit)
     );
   }
 

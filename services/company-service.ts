@@ -6,12 +6,13 @@ import {
   IPopulate,
   IProduct,
   IPurchase,
-  IUser,
+  ISupplier,
   IUserWithID,
 } from '../interfaces/interfaces';
 import { ImageService } from './general-services/image-service';
 import { Roles } from '../interfaces/enums';
 import User from '../models/User';
+import Supplier from '../models/Supplier';
 import Accountant from '../models/Accountant';
 import { ForbiddenError } from '../errors/forbidden';
 import { NotFoundError } from '../errors';
@@ -88,28 +89,22 @@ export class CompanyService extends DataLayerService<ICompany> {
   }
 
   public async deleteCompany(companyId: string) {
-    const employees = (await User.find()) as IUser[];
     const accountants = (await Accountant.find()) as IAccountant[];
     const products = (await Product.find()) as IProduct[];
     const clients = (await Client.find()) as IClient[];
     const purchases = (await Purchase.find()) as IPurchase[];
+    const suppliers = (await Supplier.find()) as ISupplier[];
 
-    await Promise.all(
-      employees.map((emp) => {
-        const { _id, role } = emp;
-        if (role !== Roles.UNCATEGORIZED) {
-          return User.findByIdAndUpdate(_id, {
-            role: Roles.UNCATEGORIZED,
-          });
-        }
-        return Promise.resolve();
-      })
+    await User.updateMany(
+      { role: { $ne: Roles.UNCATEGORIZED } },
+      { $set: { role: Roles.UNCATEGORIZED } }
     );
 
     await deleteDocuments(accountants, Accountant);
     await deleteDocuments(products, Product);
     await deleteDocuments(clients, Client);
     await deleteDocuments(purchases, Purchase);
+    await deleteDocuments(suppliers, Supplier);
 
     return await this.delete(companyId);
   }

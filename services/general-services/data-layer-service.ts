@@ -16,7 +16,7 @@ export class DataLayerService<T> {
     searchString: string,
     searchFields: string[],
     populateOptions: Array<IPopulate> = [],
-    limit = 5
+    limit = 10
   ) {
     const skip = (Number(page) - 1) * limit;
     const searchQuery = createSearchQuery(searchString, searchFields);
@@ -67,7 +67,7 @@ export class DataLayerService<T> {
     const schemaPaths = Object.keys(this.model.schema.paths);
 
     const invalidKeys = Object.keys(data).filter((key) => {
-      if (key === 'image' || key === 'logo') {
+      if (key === 'image' || key === 'logo' || key === 'images') {
         key = `${key}.link`;
       }
 

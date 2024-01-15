@@ -30,13 +30,14 @@ export class SupplierService extends DataLayerService<ISupplier> {
     return await this.getOne(supplierId, this.select, this.populateOptions);
   }
 
-  public async getSuppliers(page: string, searchString: string) {
+  public async getSuppliers(page: string, searchString: string, limit: string) {
     return await this.getMany(
       page,
       this.select,
       searchString,
       this.searchFields,
-      this.populateOptions
+      this.populateOptions,
+      Number(limit)
     );
   }
 

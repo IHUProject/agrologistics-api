@@ -19,6 +19,26 @@ export const validateCoordinates = (
   next();
 };
 
+export const validateQueryLimit = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { limit } = req.query;
+
+  if (limit && isNaN(Number(limit))) {
+    throw new BadRequestError('Limit number must be a valid number');
+  }
+
+  const limitNumber = Number(limit) || 1;
+
+  if (!Number.isSafeInteger(limitNumber) || limitNumber < 1) {
+    throw new BadRequestError('Limit number must be a positive safe integer');
+  }
+
+  next();
+};
+
 export const validateQueryPage = (
   req: Request,
   res: Response,

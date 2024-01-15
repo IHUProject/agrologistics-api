@@ -70,12 +70,14 @@ export class UserService extends DataLayerService<IUser> {
     return createTokenUser(user);
   }
 
-  public async getUsers(page: string, searchString: string) {
+  public async getUsers(page: string, searchString: string, limit: string) {
     return (await this.getMany(
       page,
       this.select,
       searchString,
-      this.searchFields
+      this.searchFields,
+      [],
+      Number(limit)
     )) as IUser[];
   }
 
