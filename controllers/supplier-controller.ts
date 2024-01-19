@@ -54,11 +54,12 @@ export class SupplierController {
   }
 
   public async getSuppliers(req: Request, res: Response) {
-    const { searchString, page } = req.query;
+    const { searchString, page, limit } = req.query;
 
     const suppliers = await this.supplierService.getSuppliers(
       page as string,
-      searchString as string
+      searchString as string,
+      limit as string
     );
 
     res

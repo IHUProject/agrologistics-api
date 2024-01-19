@@ -52,11 +52,12 @@ export class PurchaseController {
   }
 
   public async getPurchases(req: Request, res: Response) {
-    const { page, searchString } = req.query;
+    const { page, searchString, limit } = req.query;
 
     const purchase = await this.purchaseService.getPurchases(
       page as string,
-      searchString as string
+      searchString as string,
+      limit as string
     );
 
     res.status(StatusCodes.OK).json({ purchase, totalCount: purchase.length });

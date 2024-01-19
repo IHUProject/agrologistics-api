@@ -39,11 +39,12 @@ export class ClientController {
   }
 
   public async getClients(req: Request, res: Response) {
-    const { page, searchString } = req.query;
+    const { page, searchString, limit } = req.query;
 
     const clients = await this.clientService.getClients(
       page as string,
-      searchString as string
+      searchString as string,
+      limit as string
     );
 
     res.status(StatusCodes.OK).json({ clients, totalCount: clients.length });

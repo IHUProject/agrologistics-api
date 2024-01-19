@@ -4,6 +4,7 @@ import { isClientExists } from '../middlewares/client-middlewares';
 import { isProductExists } from '../middlewares/product-middlewares';
 import {
   hasCompanyOrUserId,
+  validateQueryLimit,
   validateQueryPage,
 } from '../middlewares/validate-request-properties-middlewares';
 import { isPurchaseExists } from '../middlewares/purchase-middlewares';
@@ -31,6 +32,7 @@ router.get(
 router.get(
   '/get-purchases',
   validateQueryPage,
+  validateQueryLimit,
   purchaseController.getPurchases.bind(purchaseController)
 );
 router.delete(

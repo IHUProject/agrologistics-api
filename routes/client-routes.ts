@@ -6,6 +6,7 @@ import { isClientExists } from '../middlewares/client-middlewares';
 import {
   hasCompanyOrUserId,
   hasPurchasesProperty,
+  validateQueryLimit,
   validateQueryPage,
 } from '../middlewares/validate-request-properties-middlewares';
 import multer, { memoryStorage } from 'multer';
@@ -34,6 +35,7 @@ router.get(
   '/get-clients',
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
   validateQueryPage,
+  validateQueryLimit,
   clientController.getClients.bind(clientController)
 );
 router.delete(

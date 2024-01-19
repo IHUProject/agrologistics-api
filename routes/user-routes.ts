@@ -3,6 +3,7 @@ import { authorizePermissions } from '../middlewares/auth-middlewares';
 import { UserController } from '../controllers/user-controller';
 import {
   hasCompanyOrUserId,
+  validateQueryLimit,
   validateQueryPage,
 } from '../middlewares/validate-request-properties-middlewares';
 import {
@@ -35,8 +36,9 @@ router.get(
 );
 router.get(
   '/get-users',
-  validateQueryPage,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
+  validateQueryPage,
+  validateQueryLimit,
   userController.getUsers.bind(userController)
 );
 router.get(

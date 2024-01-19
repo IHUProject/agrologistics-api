@@ -2,7 +2,11 @@ import express from 'express';
 import { authorizePermissions } from '../middlewares/auth-middlewares';
 import { Roles } from '../interfaces/enums';
 import { SupplierController } from '../controllers/supplier-controller';
-import { hasCompanyOrUserId } from '../middlewares/validate-request-properties-middlewares';
+import {
+  hasCompanyOrUserId,
+  validateQueryLimit,
+  validateQueryPage,
+} from '../middlewares/validate-request-properties-middlewares';
 import {
   hasExpenses,
   isSupplierExists,
@@ -27,6 +31,8 @@ router.get(
 router.get(
   '/get-suppliers',
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
+  validateQueryLimit,
+  validateQueryPage,
   supplierController.getSuppliers.bind(supplierController)
 );
 router.delete(

@@ -55,6 +55,7 @@ export interface ICompany extends Document {
   purchases: Types.ObjectId[];
   clients: Types.ObjectId[];
   expenses: Types.ObjectId[];
+  categories: Types.ObjectId[];
 }
 
 export interface IUserWithID extends IUser {
