@@ -29,6 +29,8 @@ import productRouter from './routes/product-routes';
 import supplierRouter from './routes/supplier-routes';
 import clientRouter from './routes/client-routes';
 import purchaseRouter from './routes/purchase-routes';
+import categoryRouter from './routes/category-routes';
+import expenseRouter from './routes/expense-routes';
 
 const server = express();
 const corsObject = {
@@ -73,6 +75,18 @@ server.use(
   authenticateUser,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
   purchaseRouter
+);
+server.use(
+  `${process.env.BASE_URL}/category`,
+  authenticateUser,
+  authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
+  categoryRouter
+);
+server.use(
+  `${process.env.BASE_URL}/expense`,
+  authenticateUser,
+  authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
+  expenseRouter
 );
 
 server.use(notFoundMiddleware);

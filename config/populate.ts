@@ -39,12 +39,27 @@ export const populateCompanyOpt = [
   },
   {
     path: 'suppliers',
-    select: 'firstName lastName _id',
+    select: 'firstName lastName phone email _id',
     options: { limit: 4 },
   },
   {
     path: 'expenses',
-    select: '_id',
+    select: 'totalAmount status date _id',
+    options: { limit: 4 },
+    populate: [
+      {
+        path: 'category',
+        select: 'name _id',
+      },
+      {
+        path: 'suppliers',
+        select: 'firstName lastName _id',
+      },
+    ],
+  },
+  {
+    path: 'categories',
+    select: '_id name',
     options: { limit: 4 },
   },
 ];
@@ -95,8 +110,30 @@ export const populatePurchaseOpt = [
 
 export const populateSupplierOpt = [
   {
-    path: 'costs',
+    path: 'expenses',
     select: 'date totalAmount',
+  },
+  {
+    path: 'createdBy',
+    select: 'firstName lastName image _id',
+  },
+];
+
+export const populateExpensesOpt = [
+  {
+    path: 'supplier',
+    select: 'firstName lastName phone email _id',
+  },
+  {
+    path: 'createdBy',
+    select: 'firstName lastName image _id',
+  },
+];
+
+export const populateCategoryOpt = [
+  {
+    path: 'expenses',
+    select: 'totalAmount status _id',
   },
   {
     path: 'createdBy',

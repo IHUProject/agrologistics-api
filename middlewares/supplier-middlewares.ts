@@ -1,27 +1,13 @@
 import { NextFunction, Response, Request } from 'express';
-import { ConflictError, NotFoundError } from '../errors';
+import { NotFoundError } from '../errors';
 import Supplier from '../models/Supplier';
-
-export const hasExpenses = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const { costs } = req.body;
-
-  if (costs?.length) {
-    throw new ConflictError('You can not add expenses!');
-  }
-
-  next();
-};
 
 export const isSupplierExists = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const { supplierId } = req.params;
+  const supplierId = req.params.supplierId || req.body.supplier;
 
   const supplier = await Supplier.findById(supplierId);
   if (!supplier) {

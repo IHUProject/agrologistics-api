@@ -1,4 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
+import './Expense';
+import './Supplier';
+import './Category';
 import { ICompany } from '../interfaces/interfaces';
 import {
   validateAFM,
@@ -8,7 +11,6 @@ import {
   validatePhoneNumber,
 } from '../helpers/validate-schema-properties';
 import { DefaultImage } from '../interfaces/enums';
-import './Expense';
 
 const companySchema = new Schema<ICompany>(
   {
@@ -99,6 +101,10 @@ const companySchema = new Schema<ICompany>(
     },
     clients: {
       type: [{ type: Schema.Types.ObjectId, ref: 'Client' }],
+      default: [],
+    },
+    categories: {
+      type: [{ type: Schema.Types.ObjectId, ref: 'Category' }],
       default: [],
     },
   },

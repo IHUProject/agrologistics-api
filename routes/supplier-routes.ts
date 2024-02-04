@@ -4,13 +4,11 @@ import { Roles } from '../interfaces/enums';
 import { SupplierController } from '../controllers/supplier-controller';
 import {
   hasCompanyOrUserId,
+  hasExpenses,
   validateQueryLimit,
   validateQueryPage,
 } from '../middlewares/validate-request-properties-middlewares';
-import {
-  hasExpenses,
-  isSupplierExists,
-} from '../middlewares/supplier-middlewares';
+import { isSupplierExists } from '../middlewares/supplier-middlewares';
 
 const supplierController = new SupplierController();
 const router = express.Router();

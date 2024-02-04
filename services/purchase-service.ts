@@ -42,7 +42,7 @@ export class PurchaseService extends DataLayerService<IPurchase> {
       await Product.updateOne({ _id: id }, { $push: { purchases: _id } });
     }
 
-    return await this.getOne(purchase._id, this.select, this.populateOptions);
+    return await this.getOne(_id, this.select, this.populateOptions);
   }
 
   public async getSinglePurchase(purchaseId: string) {
@@ -52,31 +52,34 @@ export class PurchaseService extends DataLayerService<IPurchase> {
   public async getPurchases(page: string, searchString: string, limit: string) {
     return await this.getMany(
       page,
-      this.select,
       searchString,
+      this.select,
       this.searchFields,
       this.populateOptions,
-      Number(limit)
+      isNaN(Number(limit)) ? 10 : Number(limit)
     );
   }
 
   public async deletePurchase(purchaseId: string) {
-    const deletedPurchase = (await this.delete(purchaseId)) as IPurchase;
+    const deletedPurchase = await this.delete(purchaseId);
 
-    const { _id, client, products, company } = deletedPurchase;
+    const { _id, client, company } = deletedPurchase;
     await Company.updateOne({ _id: company }, { $pull: { purchases: _id } });
     await Client.updateOne({ _id: client }, { $pull: { purchases: _id } });
-
-    for (const id of products) {
-      await Product.updateOne({ _id: id }, { $pull: { purchases: _id } });
-    }
+    await Product.updateMany({ purchases: _id }, { $pull: { purchases: _id } });
 
     return deletedPurchase;
   }
 
   public async updatePurchase(payload: IPurchase, purchaseId: string) {
+    const purchase = await this.update(
+      purchaseId,
+      payload,
+      this.select,
+      this.populateOptions
+    );
+
     const { client, products } = payload;
-    const purchase = (await this.getOne(purchaseId)) as IPurchase;
 
     if (client && client !== purchase.client) {
       await Client.updateOne(
@@ -112,11 +115,6 @@ export class PurchaseService extends DataLayerService<IPurchase> {
       }
     }
 
-    return await this.update(
-      purchaseId,
-      payload,
-      this.select,
-      this.populateOptions
-    );
+    return await this.getOne(purchaseId);
   }
 }

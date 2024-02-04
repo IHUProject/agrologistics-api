@@ -1,6 +1,10 @@
 import mongoose, { Schema } from 'mongoose';
 import { IExpense } from '../interfaces/interfaces';
-import { DefaultImage, PaymentMethod } from '../interfaces/enums';
+import {
+  DefaultImage,
+  PaymentMethod,
+  PurchaseExpenseStatus,
+} from '../interfaces/enums';
 import { validateDate } from '../helpers/validate-schema-properties';
 
 const expenseSchema = new Schema<IExpense>(
@@ -17,6 +21,14 @@ const expenseSchema = new Schema<IExpense>(
       },
       default: PaymentMethod.OTHER,
     },
+    status: {
+      type: String,
+      enum: {
+        values: Object.values(PurchaseExpenseStatus),
+        message: '{VALUE} is not a valid status',
+      },
+      default: PurchaseExpenseStatus.PENDING,
+    },
     date: {
       type: Date,
       default: null,
@@ -30,6 +42,10 @@ const expenseSchema = new Schema<IExpense>(
       type: String,
       default: null,
     },
+    isSend: {
+      type: Boolean,
+      default: false,
+    },
     images: {
       type: [
         {
@@ -40,8 +56,9 @@ const expenseSchema = new Schema<IExpense>(
       default: [{ link: DefaultImage.EXPENSE_IMAGE, deletehash: '' }],
     },
     category: {
-      type: String,
-      default: null,
+      type: Schema.Types.ObjectId,
+      ref: 'Category',
+      required: [true, 'Please provide category.'],
     },
     supplier: {
       type: Schema.Types.ObjectId,

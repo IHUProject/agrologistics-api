@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
+import './Expense';
 import { ISupplier } from '../interfaces/interfaces';
 import { validatePhoneNumber } from '../helpers/validate-schema-properties';
 import isEmail from 'validator/lib/isEmail';
@@ -39,7 +40,7 @@ const supplierSchema = new Schema<ISupplier>(
       default: null,
     },
     expenses: {
-      type: [{ type: Schema.Types.ObjectId, ref: 'Expense' }],
+      type: [{ type: Schema.Types.ObjectId, ref: 'Expanse' }],
       default: [],
     },
     createdBy: {

@@ -4,6 +4,7 @@ import { isClientExists } from '../middlewares/client-middlewares';
 import { isProductExists } from '../middlewares/product-middlewares';
 import {
   hasCompanyOrUserId,
+  hasSendProperty,
   validateQueryLimit,
   validateQueryPage,
 } from '../middlewares/validate-request-properties-middlewares';
@@ -22,6 +23,7 @@ router.post(
   isClientExists(false),
   isProductExists,
   hasCompanyOrUserId,
+  hasSendProperty,
   purchaseController.createPurchase.bind(purchaseController)
 );
 router.get(
@@ -47,6 +49,7 @@ router.patch(
   isClientExists(true),
   isProductExists,
   hasCompanyOrUserId,
+  hasSendProperty,
   purchaseController.updatePurchase.bind(purchaseController)
 );
 

@@ -1,5 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 import { BadRequestError, ConflictError } from '../errors';
+import {
+  ICategory,
+  IExpense,
+  IPurchase,
+  ISupplier,
+} from '../interfaces/interfaces';
 
 export const validateCoordinates = (
   req: Request,
@@ -82,6 +88,34 @@ export const hasCompanyOrUserId = (
 
   if (createdBy || company) {
     throw new ConflictError('You can not add company or user to the entity!');
+  }
+
+  next();
+};
+
+export const hasSendProperty = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { isSend } = req.body as IPurchase | IExpense;
+
+  if (isSend) {
+    throw new ConflictError('Send property does not allow!');
+  }
+
+  next();
+};
+
+export const hasExpenses = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { expenses } = req.body as ICategory | ISupplier;
+
+  if (expenses?.length) {
+    throw new ConflictError('You can not add expenses!');
   }
 
   next();

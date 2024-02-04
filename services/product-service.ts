@@ -26,12 +26,10 @@ export class ProductService extends DataLayerService<IProduct> {
       company,
     });
 
-    await Company.updateOne(
-      { _id: company },
-      { $push: { products: product._id } }
-    );
+    const { _id } = product;
+    await Company.updateOne({ _id: company }, { $push: { products: _id } });
 
-    return this.getOne(product._id, this.select, this.populateOptions);
+    return this.getOne(_id, this.select, this.populateOptions);
   }
 
   public async getSingleProduct(productId: string) {
@@ -41,11 +39,11 @@ export class ProductService extends DataLayerService<IProduct> {
   public async getProducts(page: string, searchString: string, limit: string) {
     return await this.getMany(
       page,
-      this.select,
       searchString,
+      this.select,
       this.searchFields,
       this.populateOptions,
-      Number(limit)
+      isNaN(Number(limit)) ? 10 : Number(limit)
     );
   }
 
@@ -59,13 +57,10 @@ export class ProductService extends DataLayerService<IProduct> {
   }
 
   public async deleteProduct(productId: string) {
-    const deletedProduct = (await this.delete(productId)) as IProduct;
+    const deletedProduct = await this.delete(productId);
 
     const { company, _id } = deletedProduct;
-    await Company.updateOne(
-      { _id: company },
-      { $pull: { products: productId } }
-    );
+    await Company.updateOne({ _id: company }, { $pull: { products: _id } });
     await Purchase.updateMany({ products: _id }, { $pull: { products: _id } });
 
     return deletedProduct;

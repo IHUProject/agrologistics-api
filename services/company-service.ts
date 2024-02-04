@@ -1,8 +1,10 @@
 import {
   IAccountant,
+  ICategory,
   IClient,
   ICompany,
   IDataImgur,
+  IExpense,
   IPopulate,
   IProduct,
   IPurchase,
@@ -24,6 +26,8 @@ import { DataLayerService } from './general-services/data-layer-service';
 import Purchase from '../models/Purchase';
 import { populateCompanyOpt } from '../config/populate';
 import Company from '../models/Company';
+import Category from '../models/Category';
+import Expanse from '../models/Expense';
 
 export class CompanyService extends DataLayerService<ICompany> {
   private imageService: ImageService;
@@ -54,12 +58,13 @@ export class CompanyService extends DataLayerService<ICompany> {
     const logo = await this.imageService.handleSingleImage(file);
     const company = await super.create({ ...payload, logo, owner: userId });
 
+    const { _id } = company;
     await this.userService.update(userId.toString(), {
       role: Roles.OWNER,
-      company: company._id,
+      company: _id,
     });
 
-    return await this.getOne(company._id, this.select, this.populateOptions);
+    return await this.getOne(_id, this.select, this.populateOptions);
   }
 
   public async updateCompany(
@@ -94,6 +99,8 @@ export class CompanyService extends DataLayerService<ICompany> {
     const clients = (await Client.find()) as IClient[];
     const purchases = (await Purchase.find()) as IPurchase[];
     const suppliers = (await Supplier.find()) as ISupplier[];
+    const categories = (await Category.find()) as ICategory[];
+    const expenses = (await Expanse.find()) as IExpense[];
 
     await User.updateMany(
       { role: { $ne: Roles.UNCATEGORIZED } },
@@ -105,12 +112,14 @@ export class CompanyService extends DataLayerService<ICompany> {
     await deleteDocuments(clients, Client);
     await deleteDocuments(purchases, Purchase);
     await deleteDocuments(suppliers, Supplier);
+    await deleteDocuments(categories, Category);
+    await deleteDocuments(expenses, Expanse);
 
     return await this.delete(companyId);
   }
 
   async getCompany() {
-    const company = await Company.findOne({})
+    const company = await Company.findOne()
       .select('-createdAt -updateAt')
       .populate(this.populateOptions);
 

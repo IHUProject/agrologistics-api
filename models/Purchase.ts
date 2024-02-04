@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { validateDate } from '../helpers/validate-schema-properties';
-import { PaymentMethod, PurchaseStatus } from '../interfaces/enums';
+import { PaymentMethod, PurchaseExpenseStatus } from '../interfaces/enums';
 import { IPurchase } from '../interfaces/interfaces';
 
 const purchaseSchema = new Schema<IPurchase>(
@@ -13,10 +13,10 @@ const purchaseSchema = new Schema<IPurchase>(
     status: {
       type: String,
       enum: {
-        values: Object.values(PurchaseStatus),
+        values: Object.values(PurchaseExpenseStatus),
         message: '{VALUE} is not a valid status',
       },
-      default: PurchaseStatus.PENDING,
+      default: PurchaseExpenseStatus.PENDING,
     },
     paymentMethod: {
       type: String,
@@ -39,6 +39,14 @@ const purchaseSchema = new Schema<IPurchase>(
       type: Schema.Types.ObjectId,
       required: [true, 'Client is required.'],
       ref: 'Client',
+    },
+    description: {
+      type: String,
+      default: null,
+    },
+    isSend: {
+      type: Boolean,
+      default: false,
     },
     products: [
       {

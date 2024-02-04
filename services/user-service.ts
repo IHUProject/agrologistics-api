@@ -26,7 +26,7 @@ export class UserService extends DataLayerService<IUser> {
     isExternalRequest: boolean = false,
     userInfo?: IUser
   ) {
-    const user = !userInfo ? ((await this.getOne(userId)) as IUser) : userInfo;
+    const user = !userInfo ? await this.getOne(userId) : userInfo;
 
     const { role, company } = user;
     if (role === Roles.OWNER && !isExternalRequest) {
@@ -50,7 +50,7 @@ export class UserService extends DataLayerService<IUser> {
     userId: string,
     file: Express.Multer.File | undefined
   ) {
-    let user = (await this.getOne(userId)) as IUser;
+    let user = await this.getOne(userId);
 
     let image: IDataImgur | undefined;
     if (file) {
@@ -61,34 +61,30 @@ export class UserService extends DataLayerService<IUser> {
       image = await this.imageService.handleSingleImage(file);
     }
 
-    user = (await this.update(
-      userId,
-      { ...payload, image },
-      this.select
-    )) as IUser;
+    user = await this.update(userId, { ...payload, image }, this.select);
 
     return createTokenUser(user);
   }
 
   public async getUsers(page: string, searchString: string, limit: string) {
-    return (await this.getMany(
+    return await this.getMany(
       page,
-      this.select,
       searchString,
+      this.select,
       this.searchFields,
       [],
-      Number(limit)
-    )) as IUser[];
+      isNaN(Number(limit)) ? 10 : Number(limit)
+    );
   }
 
   public async getSingleUser(userId: string) {
-    return (await this.getOne(userId, this.select)) as IUser;
+    return await this.getOne(userId, this.select);
   }
 
   public async changePassword(userId: string, payload: IPasswordPayload) {
     const { oldPassword, newPassword } = payload;
 
-    const user = (await this.getOne(userId)) as IUser;
+    const user = await this.getOne(userId);
 
     const isMatch = await user.comparePassword(oldPassword);
     if (!isMatch) {
@@ -122,7 +118,7 @@ export class UserService extends DataLayerService<IUser> {
     role: Roles,
     isExternalRequest: boolean = false
   ) {
-    const user = (await this.getOne(userId)) as IUser;
+    const user = await this.getOne(userId);
 
     if (user.role === Roles.OWNER) {
       throw new BadRequestError('You can not change the owners role!');
@@ -149,7 +145,7 @@ export class UserService extends DataLayerService<IUser> {
       );
     }
 
-    const user = (await this.getSingleUser(userId)) as IUser;
+    const user = await this.getSingleUser(userId);
 
     const isWorking = user.role !== Roles.UNCATEGORIZED;
     if (isWorking) {
@@ -173,7 +169,7 @@ export class UserService extends DataLayerService<IUser> {
   }
 
   async removeFromCompany(userId: string) {
-    const user = (await this.getOne(userId)) as IUser;
+    const user = await this.getOne(userId);
 
     const { role } = user;
     if (role === Roles.UNCATEGORIZED) {

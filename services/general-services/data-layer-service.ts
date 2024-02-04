@@ -12,21 +12,21 @@ export class DataLayerService<T> {
 
   public async getMany(
     page: string,
-    select: string,
     searchString: string,
+    select: string,
     searchFields: string[],
     populateOptions: Array<IPopulate> = [],
-    limit = 10
+    limit: number
   ) {
     const skip = (Number(page) - 1) * limit;
     const searchQuery = createSearchQuery(searchString, searchFields);
 
-    return await this.model
+    return (await this.model
       .find(searchQuery)
       .skip(skip)
       .limit(limit)
       .select(select)
-      .populate(populateOptions);
+      .populate(populateOptions)) as T[];
   }
 
   public async getOne(
@@ -34,15 +34,15 @@ export class DataLayerService<T> {
     selectOptions = '',
     populateOptions: Array<IPopulate> = []
   ) {
-    return await this.model
+    return (await this.model
       .findById(id)
       .select(selectOptions)
-      .populate(populateOptions);
+      .populate(populateOptions)) as T;
   }
 
   public async create(data: Partial<T>) {
     await this.validateData(data);
-    return await this.model.create(data);
+    return (await this.model.create(data)) as T;
   }
 
   public async update(
@@ -53,14 +53,14 @@ export class DataLayerService<T> {
   ) {
     const options = { new: true, runValidators: true };
     await this.validateData(data);
-    return await this.model
+    return (await this.model
       .findByIdAndUpdate(id, data, options)
       .select(select)
-      .populate(populateOptions);
+      .populate(populateOptions)) as T;
   }
 
   public async delete(id: string) {
-    return await this.model.findByIdAndDelete(id).select('-createdAt');
+    return (await this.model.findByIdAndDelete(id).select('-createdAt')) as T;
   }
 
   public async validateData(data: Partial<T>) {

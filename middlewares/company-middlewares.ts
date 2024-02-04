@@ -23,22 +23,22 @@ export const hasExistingCompanyRelations = async (
   res: Response,
   next: NextFunction
 ) => {
-  const company = req.body as ICompany;
+  const payload = req.body as ICompany;
 
   const relations = [
-    company.suppliers,
-    company.employees,
-    company.purchases,
-    company.clients,
-    company.products,
-    company.expenses,
-    company.categories,
+    payload.suppliers,
+    payload.employees,
+    payload.purchases,
+    payload.clients,
+    payload.products,
+    payload.expenses,
+    payload.categories,
   ];
 
   const hasRelations =
     relations.some((relation) => relation?.length) ||
-    company.accountant ||
-    company.owner;
+    payload.accountant ||
+    payload.owner;
 
   if (hasRelations) {
     throw new ConflictError(

@@ -31,16 +31,10 @@ export class AccountantService extends DataLayerService<IAccountant> {
       createdBy: userId,
     });
 
-    await Company.updateOne(
-      { _id: company },
-      { $set: { accountant: accountant._id } }
-    );
+    const { _id } = accountant;
+    await Company.updateOne({ _id: company }, { $set: { accountant: _id } });
 
-    return await this.getOne(
-      accountant._id,
-      this.select,
-      this.populationOptions
-    );
+    return await this.getOne(_id, this.select, this.populationOptions);
   }
 
   public async updateAccountant(payload: IAccountant, accId: string) {

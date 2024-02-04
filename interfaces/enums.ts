@@ -19,7 +19,7 @@ export enum PaymentMethod {
   OTHER = 'Other',
 }
 
-export enum PurchaseStatus {
+export enum PurchaseExpenseStatus {
   PENDING = 'Pending',
   COMPLETED = 'Completed',
   CANCELLED = 'Cancelled',

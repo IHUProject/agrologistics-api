@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { NotFoundError } from '../errors';
+import { ConflictError, NotFoundError } from '../errors';
 import Client from '../models/Client';
 
 export const isClientExists =
@@ -11,7 +11,7 @@ export const isClientExists =
       if (isUpdatingPurchase) {
         return next();
       } else {
-        throw new NotFoundError('Client ID is required.');
+        throw new ConflictError('Client ID is required.');
       }
     }
 

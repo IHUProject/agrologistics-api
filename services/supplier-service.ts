@@ -33,11 +33,11 @@ export class SupplierService extends DataLayerService<ISupplier> {
   public async getSuppliers(page: string, searchString: string, limit: string) {
     return await this.getMany(
       page,
-      this.select,
       searchString,
+      this.select,
       this.searchFields,
       this.populateOptions,
-      Number(limit)
+      isNaN(Number(limit)) ? 10 : Number(limit)
     );
   }
 
@@ -46,7 +46,7 @@ export class SupplierService extends DataLayerService<ISupplier> {
 
     const { _id, company } = deletedSupplier;
     await Company.updateOne({ _id: company }, { $pull: { suppliers: _id } });
-    await Expanse.updateOne({ supplier: _id }, { $pull: { purchases: _id } });
+    await Expanse.updateMany({ supplier: _id }, { $unset: { supplier: null } });
 
     return deletedSupplier;
   }

@@ -32,12 +32,10 @@ export class ClientService extends DataLayerService<IClient> {
       company,
     });
 
-    await Company.updateOne(
-      { _id: company },
-      { $push: { clients: client._id } }
-    );
+    const { _id } = client;
+    await Company.updateOne({ _id: company }, { $push: { clients: _id } });
 
-    return await this.getOne(client._id, this.select, this.populateOptions);
+    return await this.getOne(_id, this.select, this.populateOptions);
   }
 
   public async getSingleClient(clientId: string) {
@@ -47,11 +45,11 @@ export class ClientService extends DataLayerService<IClient> {
   public async getClients(page: string, searchString: string, limit: string) {
     return await this.getMany(
       page,
-      this.select,
       searchString,
+      this.select,
       this.searchFields,
       this.populateOptions,
-      Number(limit)
+      isNaN(Number(limit)) ? 10 : Number(limit)
     );
   }
 

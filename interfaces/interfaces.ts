@@ -1,4 +1,4 @@
-import { PaymentMethod, PurchaseStatus, Roles } from './enums';
+import { PaymentMethod, PurchaseExpenseStatus, Roles } from './enums';
 import { Document, Types } from 'mongoose';
 
 export interface ICustomError {
@@ -109,9 +109,11 @@ export interface ISupplier extends Document {
 
 export interface IPurchase extends Document {
   totalAmount: number;
-  status: PurchaseStatus;
+  status: PurchaseExpenseStatus;
   paymentMethod: PaymentMethod;
   date: Date;
+  isSend: boolean;
+  description: string;
   client: Types.ObjectId;
   products: Types.ObjectId[];
   createdBy: Types.ObjectId;
@@ -134,10 +136,19 @@ export interface IExpense extends Document {
   totalAmount: number;
   paymentMethod: PaymentMethod;
   description: string;
-  category: Types.ObjectId | string;
+  isSend: boolean;
+  status: PurchaseExpenseStatus;
+  category: Types.ObjectId;
   supplier: Types.ObjectId;
   createdBy: Types.ObjectId;
   company: Types.ObjectId;
+}
+
+export interface ICategory extends Document {
+  name: string;
+  expenses: Types.ObjectId[];
+  company: Types.ObjectId;
+  createdBy: Types.ObjectId;
 }
 
 export interface IPopulate {
