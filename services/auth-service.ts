@@ -17,6 +17,7 @@ export class AuthService extends DataLayerService<IUser> {
     payload: IUser,
     file: Express.Multer.File | undefined
   ) {
+    await super.validateData(payload);
     const image = await this.imageService.handleSingleImage(file);
     const user = await super.create({ ...payload, image });
     return createTokenUser(user);

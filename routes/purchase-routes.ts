@@ -8,8 +8,9 @@ import {
   validateQueryLimit,
   validateQueryPage,
 } from '../middlewares/validate-request-properties-middlewares';
-import { isPurchaseExists } from '../middlewares/purchase-middlewares';
 import multer, { memoryStorage } from 'multer';
+import { isEntityExists } from '../middlewares/is-entity-exists';
+import Purchase from '../models/Purchase';
 
 const purchaseController = new PurchaseController();
 const router = express.Router();
@@ -27,8 +28,8 @@ router.post(
   purchaseController.createPurchase.bind(purchaseController)
 );
 router.get(
-  '/:purchaseId/get-purchase',
-  isPurchaseExists,
+  '/:id/get-purchase',
+  isEntityExists(Purchase),
   purchaseController.getSinglePurchase.bind(purchaseController)
 );
 router.get(
@@ -38,14 +39,14 @@ router.get(
   purchaseController.getPurchases.bind(purchaseController)
 );
 router.delete(
-  '/:purchaseId/delete-purchase',
-  isPurchaseExists,
+  '/:id/delete-purchase',
+  isEntityExists(Purchase),
   purchaseController.deletePurchase.bind(purchaseController)
 );
 router.patch(
-  '/:purchaseId/update-purchase',
+  '/:id/update-purchase',
   upload.none(),
-  isPurchaseExists,
+  isEntityExists(Purchase),
   isClientExists(true),
   isProductExists,
   hasCompanyOrUserId,

@@ -30,12 +30,9 @@ export class AccountantController {
 
   public async updateAccountant(req: Request, res: Response) {
     const { body } = req;
-    const { accId } = req.params;
+    const { id } = req.params;
 
-    const accountant = await this.accountantService.updateAccountant(
-      body,
-      accId
-    );
+    const accountant = await this.accountantService.updateAccountant(body, id);
 
     res.status(StatusCodes.OK).json({
       accountant,
@@ -44,8 +41,8 @@ export class AccountantController {
   }
 
   public async deleteAccountant(req: Request, res: Response) {
-    const { accId } = req.params;
-    const accountant = await this.accountantService.deleteAccountant(accId);
+    const { id } = req.params;
+    const accountant = await this.accountantService.deleteAccountant(id);
     res
       .status(StatusCodes.OK)
       .json({ accountant, message: 'Accountant have been deleted!' });

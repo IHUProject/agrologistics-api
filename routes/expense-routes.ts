@@ -8,7 +8,8 @@ import {
 import multer, { memoryStorage } from 'multer';
 import { isSupplierExists } from '../middlewares/supplier-middlewares';
 import { isCategoryExists } from '../middlewares/category-middlewares';
-import { isExpenseExists } from '../middlewares/expense-middlewares';
+import { isEntityExists } from '../middlewares/is-entity-exists';
+import Expanse from '../models/Expense';
 
 const expenseController = new ExpenseController();
 const router = express.Router();
@@ -18,15 +19,15 @@ const upload = multer({ storage: storage });
 
 router.post(
   '/create-expense',
+  upload.array('images'),
   isSupplierExists,
   isCategoryExists,
   hasCompanyOrUserId,
-  upload.array('files'),
   expenseController.createExpense.bind(expenseController)
 );
 router.get(
-  '/:expenseId/get-category',
-  isExpenseExists,
+  '/:id/get-expense',
+  isEntityExists(Expanse),
   expenseController.getSingleExpense.bind(expenseController)
 );
 router.get(
@@ -36,13 +37,13 @@ router.get(
   expenseController.getExpenses.bind(expenseController)
 );
 router.delete(
-  '/:expensesId/delete-expense',
-  isExpenseExists,
+  '/:id/delete-expense',
+  isEntityExists(Expanse),
   expenseController.deleteCategory.bind(expenseController)
 );
 router.patch(
-  '/:expensesId/update-expense',
-  isExpenseExists,
+  '/:id/update-expense',
+  isEntityExists(Expanse),
   hasCompanyOrUserId,
   isSupplierExists,
   isCategoryExists,

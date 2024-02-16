@@ -48,6 +48,8 @@ export class CompanyService extends DataLayerService<ICompany> {
     currentUser: IUserWithID,
     file: Express.Multer.File | undefined
   ) {
+    await super.validateData(payload);
+
     const { userId } = currentUser as IUserWithID;
 
     const isFirstCompany = (await Company.countDocuments({})) === 0;
@@ -72,6 +74,8 @@ export class CompanyService extends DataLayerService<ICompany> {
     companyId: string,
     file: Express.Multer.File | undefined
   ) {
+    await super.validateData(payload);
+
     let company = await this.getOne(companyId);
 
     let logo: IDataImgur | undefined;

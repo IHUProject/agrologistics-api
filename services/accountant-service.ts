@@ -19,6 +19,8 @@ export class AccountantService extends DataLayerService<IAccountant> {
     payload: IAccountant,
     currentUser: IUserWithID
   ) {
+    await super.validateData(payload);
+
     const { userId, company } = currentUser;
 
     const isFirstAccountant = (await Accountant.countDocuments({})) === 0;
@@ -38,6 +40,7 @@ export class AccountantService extends DataLayerService<IAccountant> {
   }
 
   public async updateAccountant(payload: IAccountant, accId: string) {
+    await super.validateData(payload);
     return await this.update(
       accId,
       payload,

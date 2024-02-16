@@ -50,9 +50,11 @@ export class UserService extends DataLayerService<IUser> {
     userId: string,
     file: Express.Multer.File | undefined
   ) {
-    let user = await this.getOne(userId);
+    await super.validateData(payload);
 
+    let user = await this.getOne(userId);
     let image: IDataImgur | undefined;
+
     if (file) {
       const { deletehash } = user.image;
       if (deletehash) {
@@ -101,13 +103,15 @@ export class UserService extends DataLayerService<IUser> {
     payload: IUser,
     file: Express.Multer.File | undefined
   ) {
+    await super.validateData(payload);
+
     const image = await this.imageService.handleSingleImage(file);
     const user = await super.create({
       ...payload,
       image,
     });
-
     const { _id, company } = user;
+
     await Company.updateOne({ _id: company }, { $push: { employees: _id } });
 
     return await this.getOne(user._id, this.select);

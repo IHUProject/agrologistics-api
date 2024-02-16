@@ -18,15 +18,16 @@ export class ProductService extends DataLayerService<IProduct> {
   }
 
   public async createProduct(payload: IProduct, currentUser: IUserWithID) {
-    const { userId, company } = currentUser;
+    await super.validateData(payload);
 
+    const { userId, company } = currentUser;
     const product = await super.create({
       ...payload,
       createdBy: userId,
       company,
     });
-
     const { _id } = product;
+
     await Company.updateOne({ _id: company }, { $push: { products: _id } });
 
     return this.getOne(_id, this.select, this.populateOptions);
@@ -48,6 +49,7 @@ export class ProductService extends DataLayerService<IProduct> {
   }
 
   public async updateProduct(payload: IProduct, productId: string) {
+    await super.validateData(payload);
     return await this.update(
       productId,
       payload,

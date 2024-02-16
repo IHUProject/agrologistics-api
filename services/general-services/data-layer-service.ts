@@ -41,7 +41,6 @@ export class DataLayerService<T> {
   }
 
   public async create(data: Partial<T>) {
-    await this.validateData(data);
     return (await this.model.create(data)) as T;
   }
 
@@ -52,7 +51,6 @@ export class DataLayerService<T> {
     populateOptions: Array<IPopulate> = []
   ) {
     const options = { new: true, runValidators: true };
-    await this.validateData(data);
     return (await this.model
       .findByIdAndUpdate(id, data, options)
       .select(select)
@@ -67,7 +65,7 @@ export class DataLayerService<T> {
     const schemaPaths = Object.keys(this.model.schema.paths);
 
     const invalidKeys = Object.keys(data).filter((key) => {
-      if (key === 'image' || key === 'logo' || key === 'images') {
+      if (key === 'image' || key === 'logo') {
         key = `${key}.link`;
       }
 

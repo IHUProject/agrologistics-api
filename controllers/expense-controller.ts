@@ -31,15 +31,15 @@ export class ExpenseController {
   }
 
   public async getSingleExpense(req: Request, res: Response) {
-    const { expenseId } = req.params;
-    const expense = await this.expenseService.getSingleExpense(expenseId);
-    res.status(StatusCodes.CREATED).json({ expense });
+    const { id } = req.params;
+    const expense = await this.expenseService.getSingleExpense(id);
+    res.status(StatusCodes.OK).json({ expense });
   }
 
   public async updateExpense(req: Request, res: Response) {
-    const { expenseId } = req.params;
+    const { id } = req.params;
     const { body } = req;
-    const client = await this.expenseService.updateExpense(body, expenseId);
+    const client = await this.expenseService.updateExpense(body, id);
 
     res
       .status(StatusCodes.OK)
@@ -59,8 +59,8 @@ export class ExpenseController {
   }
 
   public async deleteCategory(req: Request, res: Response) {
-    const { expensesId } = req.params;
-    const expense = await this.expenseService.deleteExpense(expensesId);
+    const { id } = req.params;
+    const expense = await this.expenseService.deleteExpense(id);
 
     res
       .status(StatusCodes.OK)

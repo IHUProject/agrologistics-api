@@ -2,12 +2,13 @@ import express, { Router } from 'express';
 import { AccountantController } from '../controllers/accountant-controller';
 import { authorizePermissions } from '../middlewares/auth-middlewares';
 import { Roles } from '../interfaces/enums';
-import { isAccountantExists } from '../middlewares/accountant-middlewares';
 import {
   hasCompanyOrUserId,
   validateCoordinates,
 } from '../middlewares/validate-request-properties-middlewares';
 import multer, { memoryStorage } from 'multer';
+import { isEntityExists } from '../middlewares/is-entity-exists';
+import Accountant from '../models/Accountant';
 
 const router: Router = express.Router();
 const accountantController = new AccountantController();
@@ -24,8 +25,8 @@ router.post(
   accountantController.createAccountant.bind(accountantController)
 );
 router.delete(
-  '/:accId/delete-accountant',
-  isAccountantExists,
+  '/:id/delete-accountant',
+  isEntityExists(Accountant),
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   accountantController.deleteAccountant.bind(accountantController)
 );
@@ -35,10 +36,10 @@ router.get(
   accountantController.getSingleAccountant.bind(accountantController)
 );
 router.patch(
-  '/:accId/update-accountant',
+  '/:id/update-accountant',
   upload.none(),
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY, Roles.EMPLOY),
-  isAccountantExists,
+  isEntityExists(Accountant),
   validateCoordinates,
   hasCompanyOrUserId,
   accountantController.updateAccountant.bind(accountantController)

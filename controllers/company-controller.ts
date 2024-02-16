@@ -3,6 +3,7 @@ import { CompanyService } from '../services/company-service';
 import { StatusCodes } from 'http-status-codes';
 import { IUserWithID } from '../interfaces/interfaces';
 import { reattachTokens } from '../helpers/re-attack-tokens';
+
 export class CompanyController {
   private companyService: CompanyService;
 
@@ -33,13 +34,9 @@ export class CompanyController {
 
   public async updateCompany(req: Request, res: Response) {
     const { body, file } = req;
-    const { companyId } = req.params;
+    const { id } = req.params;
 
-    const company = await this.companyService.updateCompany(
-      body,
-      companyId,
-      file
-    );
+    const company = await this.companyService.updateCompany(body, id, file);
 
     res
       .status(StatusCodes.OK)
@@ -47,11 +44,11 @@ export class CompanyController {
   }
 
   public async deleteCompany(req: Request, res: Response) {
-    const { companyId } = req.params;
+    const { id } = req.params;
     const { currentUser } = req;
     const { userId } = currentUser as IUserWithID;
 
-    const company = await this.companyService.deleteCompany(companyId);
+    const company = await this.companyService.deleteCompany(id);
     await reattachTokens(res, userId.toString());
 
     res

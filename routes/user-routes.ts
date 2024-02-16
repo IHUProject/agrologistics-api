@@ -9,12 +9,13 @@ import {
 import {
   hasForbiddenRoleType,
   hasRoleProperty,
-  isUserExits,
   preventSelfModification,
   verifyAccountOwnership,
 } from '../middlewares/user-middlewares';
 import { Roles } from '../interfaces/enums';
 import multer, { memoryStorage } from 'multer';
+import { isEntityExists } from '../middlewares/is-entity-exists';
+import User from '../models/User';
 
 const userController = new UserController();
 const router = express.Router();
@@ -42,18 +43,18 @@ router.get(
   userController.getUsers.bind(userController)
 );
 router.get(
-  '/:userId/get-single-user',
+  '/:id/get-single-user',
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
-  isUserExits,
+  isEntityExists(User),
   userController.getSingleUser.bind(userController)
 );
 router.delete(
-  '/:userId/delete-user',
+  '/:id/delete-user',
   verifyAccountOwnership,
   userController.deleteUser.bind(userController)
 );
 router.patch(
-  '/:userId/update-user',
+  '/:id/update-user',
   upload.single('image'),
   hasCompanyOrUserId,
   hasRoleProperty,
@@ -61,34 +62,34 @@ router.patch(
   userController.updateUser.bind(userController)
 );
 router.patch(
-  '/:userId/change-password',
+  '/:id/change-password',
   verifyAccountOwnership,
   userController.changePassword.bind(userController)
 );
 router.patch(
-  '/:userId/change-role',
+  '/:id/change-role',
   upload.none(),
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   hasForbiddenRoleType,
   preventSelfModification,
   hasForbiddenRoleType,
-  isUserExits,
+  isEntityExists(User),
   userController.changeUserRole.bind(userController)
 );
 router.patch(
-  '/:userId/add-user',
+  '/:id/add-user',
   upload.none(),
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   hasForbiddenRoleType,
   preventSelfModification,
-  isUserExits,
+  isEntityExists(User),
   userController.addToCompany.bind(userController)
 );
 router.patch(
-  '/:userId/remove-user',
+  '/:id/remove-user',
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   preventSelfModification,
-  isUserExits,
+  isEntityExists(User),
   userController.removeFromCompany.bind(userController)
 );
 

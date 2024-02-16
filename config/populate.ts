@@ -128,6 +128,10 @@ export const populateExpensesOpt = [
     path: 'createdBy',
     select: 'firstName lastName image _id',
   },
+  {
+    path: 'category',
+    select: 'name',
+  },
 ];
 
 export const populateCategoryOpt = [

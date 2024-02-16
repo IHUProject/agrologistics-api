@@ -1,11 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import {
-  BadRequestError,
-  ConflictError,
-  NotFoundError,
-  UnauthorizedError,
-} from '../errors';
-import User from '../models/User';
+import { BadRequestError, ConflictError, UnauthorizedError } from '../errors';
 import { IUser, IUserWithID } from '../interfaces/interfaces';
 import { ForbiddenError } from '../errors/forbidden';
 import { Roles } from '../interfaces/enums';
@@ -19,21 +13,6 @@ export const verifyAccountOwnership = async (
 
   if (userId !== req.currentUser?.userId.toString()) {
     throw new UnauthorizedError('You can perform this action!');
-  }
-
-  next();
-};
-
-export const isUserExits = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const { userId } = req.params;
-
-  const user = await User.findById(userId);
-  if (!user) {
-    throw new NotFoundError('User does not exists!');
   }
 
   next();

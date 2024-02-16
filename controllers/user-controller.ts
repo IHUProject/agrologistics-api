@@ -17,11 +17,11 @@ export class UserController {
 
   public async updateUser(req: Request, res: Response) {
     const { body } = req;
-    const { userId } = req.params;
+    const { id } = req.params;
     const { file } = req;
     const { currentUser } = req;
 
-    const user = await this.userService.updateUser(body, userId, file);
+    const user = await this.userService.updateUser(body, id, file);
     await reattachTokens(res, (currentUser as IUserWithID).userId.toString());
 
     res.status(StatusCodes.OK).json({
@@ -44,8 +44,8 @@ export class UserController {
   }
 
   public async deleteUser(req: Request, res: Response) {
-    const { userId } = req.params;
-    const user = await this.userService.deleteUser(userId);
+    const { id } = req.params;
+    const user = await this.userService.deleteUser(id);
 
     res.cookie('token', 'logout', {
       httpOnly: true,
@@ -73,33 +73,33 @@ export class UserController {
   }
 
   public async getSingleUser(req: Request, res: Response) {
-    const { userId } = req.params;
-    const user = await this.userService.getSingleUser(userId);
+    const { id } = req.params;
+    const user = await this.userService.getSingleUser(id);
     res.status(StatusCodes.OK).json({ user });
   }
 
   public async changePassword(req: Request, res: Response) {
-    const { userId } = req.params;
+    const { id } = req.params;
     const { body } = req;
-    const message = await this.userService.changePassword(userId, body);
+    const message = await this.userService.changePassword(id, body);
     res.status(StatusCodes.OK).json({ message });
   }
 
   public async changeUserRole(req: Request, res: Response) {
-    const { userId } = req.params;
+    const { id } = req.params;
     const { body } = req;
     const { role } = body;
-    const message = await this.userService.changeUserRole(userId, role);
+    const message = await this.userService.changeUserRole(id, role);
     res.status(StatusCodes.OK).json({ message });
   }
 
   public async addToCompany(req: Request, res: Response) {
-    const { userId } = req.params;
+    const { id } = req.params;
     const { role } = req.body;
     const { currentUser } = req;
 
     const message = await this.userService.addToCompany(
-      userId,
+      id,
       role,
       (currentUser as IUserWithID).company
     );
@@ -108,8 +108,8 @@ export class UserController {
   }
 
   public async removeFromCompany(req: Request, res: Response) {
-    const { userId } = req.params;
-    const message = await this.userService.removeFromCompany(userId);
+    const { id } = req.params;
+    const message = await this.userService.removeFromCompany(id);
     res.status(StatusCodes.OK).json({ message });
   }
 }

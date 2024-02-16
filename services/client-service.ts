@@ -19,6 +19,8 @@ export class ClientService extends DataLayerService<IClient> {
   }
 
   public async createClient(payload: IClient, currentUser: IUserWithID) {
+    await super.validateData(payload);
+
     const { userId, company } = currentUser;
 
     const isPhoneUnique = await Client.findOne({ phone: payload.phone });
@@ -69,6 +71,8 @@ export class ClientService extends DataLayerService<IClient> {
   }
 
   public async updateClient(payload: IClient, clientId: string) {
+    await super.validateData(payload);
+
     return await this.update(
       clientId,
       payload,

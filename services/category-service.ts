@@ -18,6 +18,8 @@ export class CategoryService extends DataLayerService<ICategory> {
   }
 
   public async createCategory(payload: ICategory, currentUser: IUserWithID) {
+    await super.validateData(payload);
+
     const { userId, company } = currentUser;
 
     const category = await super.create({
@@ -52,6 +54,8 @@ export class CategoryService extends DataLayerService<ICategory> {
   }
 
   public async updateCategory(payload: ICategory, categoryId: string) {
+    await super.validateData(payload);
+
     return await this.update(
       categoryId,
       payload,

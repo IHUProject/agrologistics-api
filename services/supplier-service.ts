@@ -18,9 +18,11 @@ export class SupplierService extends DataLayerService<ISupplier> {
   }
 
   public async createSupplier(payload: ISupplier) {
-    const supplier = await super.create(payload);
+    await super.validateData(payload);
 
+    const supplier = await super.create(payload);
     const { _id, company } = supplier;
+
     await Company.updateOne({ _id: company }, { $push: { suppliers: _id } });
 
     return await this.getOne(_id, this.select, this.populateOptions);
@@ -52,6 +54,7 @@ export class SupplierService extends DataLayerService<ISupplier> {
   }
 
   public async updateSupplier(payload: ISupplier, supplierId: string) {
+    await super.validateData(payload);
     return await this.update(
       supplierId,
       payload,

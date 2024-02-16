@@ -26,6 +26,8 @@ export class ExpenseService extends DataLayerService<IExpense> {
     files: Express.Multer.File[] | undefined,
     currentUser: IUserWithID
   ) {
+    await super.validateData(payload);
+
     const { userId, company } = currentUser;
 
     const images = await this.imageService.handleMultipleImages(files);
@@ -61,6 +63,7 @@ export class ExpenseService extends DataLayerService<IExpense> {
   }
 
   public async updateExpense(payload: IExpense, expenseId: string) {
+    await super.validateData(payload);
     await this.update(expenseId, payload, this.select, this.populateOptions);
 
     const { supplier, category } = payload;

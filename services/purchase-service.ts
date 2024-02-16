@@ -20,10 +20,12 @@ export class PurchaseService extends DataLayerService<IPurchase> {
   }
 
   public async createPurchase(payload: IPurchase, currentUser: IUserWithID) {
+    await super.validateData(payload);
+
     const { products, client } = payload;
     const { userId, company } = currentUser;
-
     const uniqueProducts = new Set(products);
+
     if (uniqueProducts.size !== products.length) {
       throw new BadRequestError('Duplicate product found in the products.');
     }
@@ -33,8 +35,8 @@ export class PurchaseService extends DataLayerService<IPurchase> {
       createdBy: userId,
       company,
     });
-
     const { _id } = purchase;
+
     await Company.updateOne({ _id: company }, { $push: { purchases: _id } });
     await Client.updateOne({ _id: client }, { $push: { purchases: _id } });
 
@@ -72,6 +74,7 @@ export class PurchaseService extends DataLayerService<IPurchase> {
   }
 
   public async updatePurchase(payload: IPurchase, purchaseId: string) {
+    await super.validateData(payload);
     const purchase = await this.update(
       purchaseId,
       payload,

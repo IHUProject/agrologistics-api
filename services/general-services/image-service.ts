@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ImgurResponse } from '../../interfaces/interfaces';
+import { IDataImgur, ImgurResponse } from '../../interfaces/interfaces';
 
 export class ImageService {
   public async handleSingleImage(file: Express.Multer.File | undefined) {
@@ -8,6 +8,7 @@ export class ImageService {
     }
 
     const encodedImage = file.buffer.toString('base64');
+    console.log(process.env.IMGUR_URL, process.env.CLIENT_ID);
 
     const imgurResponse: ImgurResponse = await axios.post(
       process.env.IMGUR_URL as string,
@@ -30,25 +31,16 @@ export class ImageService {
       return;
     }
 
-    const uploadPromises = files.map(async (file) => {
-      const encodedImage = file.buffer.toString('base64');
+    const images: IDataImgur[] = [];
 
-      const imgurResponse: ImgurResponse = await axios.post(
-        process.env.IMGUR_URL as string,
-        {
-          image: encodedImage,
-          type: 'base64',
-        },
-        {
-          headers: {
-            Authorization: `Client-ID ${process.env.CLIENT_ID}`,
-          },
-        }
-      );
-      return imgurResponse.data.data;
-    });
+    for (const file of files) {
+      const image = await this.handleSingleImage(file);
+      if (image) {
+        images.push(image);
+      }
+    }
 
-    return Promise.all(uploadPromises);
+    return images;
   }
 
   public async deleteSingleImage(deletehash: string) {

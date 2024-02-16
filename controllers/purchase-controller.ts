@@ -24,18 +24,15 @@ export class PurchaseController {
   }
 
   public async getSinglePurchase(req: Request, res: Response) {
-    const { purchaseId } = req.params;
-    const purchase = await this.purchaseService.getSinglePurchase(purchaseId);
+    const { id } = req.params;
+    const purchase = await this.purchaseService.getSinglePurchase(id);
     res.status(StatusCodes.OK).json({ purchase });
   }
 
   public async updatePurchase(req: Request, res: Response) {
     const { body } = req;
-    const { purchaseId } = req.params;
-    const purchase = await this.purchaseService.updatePurchase(
-      body,
-      purchaseId
-    );
+    const { id } = req.params;
+    const purchase = await this.purchaseService.updatePurchase(body, id);
 
     res
       .status(StatusCodes.OK)
@@ -43,8 +40,8 @@ export class PurchaseController {
   }
 
   public async deletePurchase(req: Request, res: Response) {
-    const { purchaseId } = req.params;
-    const purchase = await this.purchaseService.deletePurchase(purchaseId);
+    const { id } = req.params;
+    const purchase = await this.purchaseService.deletePurchase(id);
 
     res
       .status(StatusCodes.OK)
