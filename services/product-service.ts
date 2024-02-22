@@ -60,8 +60,8 @@ export class ProductService extends DataLayerService<IProduct> {
 
   public async deleteProduct(productId: string) {
     const deletedProduct = await this.delete(productId);
-
     const { company, _id } = deletedProduct;
+
     await Company.updateOne({ _id: company }, { $pull: { products: _id } });
     await Purchase.updateMany({ products: _id }, { $pull: { products: _id } });
 

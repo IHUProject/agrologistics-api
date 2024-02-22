@@ -1,16 +1,19 @@
 import express from 'express';
 import { PurchaseController } from '../controllers/purchase-controller';
-import { isClientExists } from '../middlewares/client-middlewares';
-import { isProductExists } from '../middlewares/product-middlewares';
 import {
+  areProductsExists,
   hasCompanyOrUserId,
   hasSendProperty,
   validateQueryLimit,
   validateQueryPage,
 } from '../middlewares/validate-request-properties-middlewares';
 import multer, { memoryStorage } from 'multer';
-import { isEntityExists } from '../middlewares/is-entity-exists';
+import {
+  isEntityExists,
+  isEntityExistsIdOnPayload,
+} from '../middlewares/is-entity-exists';
 import Purchase from '../models/Purchase';
+import Client from '../models/Client';
 
 const purchaseController = new PurchaseController();
 const router = express.Router();
@@ -21,8 +24,8 @@ const upload = multer({ storage: storage });
 router.post(
   '/create-purchase',
   upload.none(),
-  isClientExists(false),
-  isProductExists,
+  isEntityExistsIdOnPayload(Client, 'client', true),
+  areProductsExists,
   hasCompanyOrUserId,
   hasSendProperty,
   purchaseController.createPurchase.bind(purchaseController)
@@ -47,8 +50,8 @@ router.patch(
   '/:id/update-purchase',
   upload.none(),
   isEntityExists(Purchase),
-  isClientExists(true),
-  isProductExists,
+  isEntityExistsIdOnPayload(Client, 'client', true),
+  areProductsExists,
   hasCompanyOrUserId,
   hasSendProperty,
   purchaseController.updatePurchase.bind(purchaseController)

@@ -23,15 +23,15 @@ export class CategoryController {
   }
 
   public async getSingleCategory(req: Request, res: Response) {
-    const { categoryId } = req.params;
-    const category = await this.categoryService.getSingleCategory(categoryId);
+    const { id } = req.params;
+    const category = await this.categoryService.getSingleCategory(id);
     res.status(StatusCodes.CREATED).json({ category });
   }
 
   public async updateCategory(req: Request, res: Response) {
-    const { categoryId } = req.params;
+    const { id } = req.params;
     const { body } = req;
-    const client = await this.categoryService.updateCategory(body, categoryId);
+    const client = await this.categoryService.updateCategory(body, id);
 
     res
       .status(StatusCodes.OK)
@@ -53,8 +53,8 @@ export class CategoryController {
   }
 
   public async deleteCategory(req: Request, res: Response) {
-    const { categoryId } = req.params;
-    const category = await this.categoryService.deleteCategory(categoryId);
+    const { id } = req.params;
+    const category = await this.categoryService.deleteCategory(id);
 
     res
       .status(StatusCodes.OK)

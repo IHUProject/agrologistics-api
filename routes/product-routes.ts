@@ -2,7 +2,6 @@ import express from 'express';
 import { authorizePermissions } from '../middlewares/auth-middlewares';
 import { Roles } from '../interfaces/enums';
 import { ProductController } from '../controllers/product-controller';
-import { isProductExists } from '../middlewares/product-middlewares';
 import {
   hasCompanyOrUserId,
   hasPurchasesProperty,
@@ -10,6 +9,8 @@ import {
   validateQueryPage,
 } from '../middlewares/validate-request-properties-middlewares';
 import multer, { memoryStorage } from 'multer';
+import { isEntityExists } from '../middlewares/is-entity-exists';
+import Product from '../models/Product';
 
 const productController = new ProductController();
 const router = express.Router();
@@ -26,9 +27,9 @@ router.post(
   productController.createProduct.bind(productController)
 );
 router.get(
-  '/:productId/get-product',
+  '/:id/get-product',
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
-  isProductExists,
+  isEntityExists(Product),
   productController.getSingleProduct.bind(productController)
 );
 router.get(
@@ -39,18 +40,18 @@ router.get(
   productController.getProducts.bind(productController)
 );
 router.delete(
-  '/:productId/delete-product',
+  '/:id/delete-product',
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
-  isProductExists,
+  isEntityExists(Product),
   productController.deleteProduct.bind(productController)
 );
 router.patch(
-  '/:productId/update-product',
+  '/:id/update-product',
   upload.none(),
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
   hasPurchasesProperty,
   hasCompanyOrUserId,
-  isProductExists,
+  isEntityExists(Product),
   productController.updateProduct.bind(productController)
 );
 

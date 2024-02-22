@@ -22,8 +22,8 @@ export class AccountantService extends DataLayerService<IAccountant> {
     await super.validateData(payload);
 
     const { userId, company } = currentUser;
-
     const isFirstAccountant = (await Accountant.countDocuments({})) === 0;
+
     if (!isFirstAccountant) {
       throw new ForbiddenError('Accountant already exists!');
     }
@@ -32,8 +32,8 @@ export class AccountantService extends DataLayerService<IAccountant> {
       ...payload,
       createdBy: userId,
     });
-
     const { _id } = accountant;
+
     await Company.updateOne({ _id: company }, { $set: { accountant: _id } });
 
     return await this.getOne(_id, this.select, this.populationOptions);
@@ -51,6 +51,7 @@ export class AccountantService extends DataLayerService<IAccountant> {
 
   public async deleteAccountant(accId: string) {
     const deletedAccountant = await this.delete(accId);
+
     await Company.updateOne(
       { accountant: accId },
       { $set: { accountant: null } }

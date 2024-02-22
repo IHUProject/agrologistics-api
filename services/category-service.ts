@@ -21,14 +21,13 @@ export class CategoryService extends DataLayerService<ICategory> {
     await super.validateData(payload);
 
     const { userId, company } = currentUser;
-
     const category = await super.create({
       ...payload,
       createdBy: userId,
       company,
     });
-
     const { _id } = category;
+
     await Company.updateOne({ _id: company }, { $push: { categories: _id } });
 
     return this.getOne(_id, this.select, this.populateOptions);
@@ -55,7 +54,6 @@ export class CategoryService extends DataLayerService<ICategory> {
 
   public async updateCategory(payload: ICategory, categoryId: string) {
     await super.validateData(payload);
-
     return await this.update(
       categoryId,
       payload,
@@ -66,7 +64,6 @@ export class CategoryService extends DataLayerService<ICategory> {
 
   public async deleteCategory(categoryId: string) {
     const deletedCategory = await this.delete(categoryId);
-
     const { company, _id } = deletedCategory;
 
     await Company.updateOne({ _id: company }, { $pull: { categories: _id } });

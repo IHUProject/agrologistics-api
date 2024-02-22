@@ -64,8 +64,8 @@ export class PurchaseService extends DataLayerService<IPurchase> {
 
   public async deletePurchase(purchaseId: string) {
     const deletedPurchase = await this.delete(purchaseId);
-
     const { _id, client, company } = deletedPurchase;
+
     await Company.updateOne({ _id: company }, { $pull: { purchases: _id } });
     await Client.updateOne({ _id: client }, { $pull: { purchases: _id } });
     await Product.updateMany({ purchases: _id }, { $pull: { purchases: _id } });
@@ -75,6 +75,7 @@ export class PurchaseService extends DataLayerService<IPurchase> {
 
   public async updatePurchase(payload: IPurchase, purchaseId: string) {
     await super.validateData(payload);
+
     const purchase = await this.update(
       purchaseId,
       payload,

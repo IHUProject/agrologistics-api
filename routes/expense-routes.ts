@@ -6,10 +6,13 @@ import {
   validateQueryPage,
 } from '../middlewares/validate-request-properties-middlewares';
 import multer, { memoryStorage } from 'multer';
-import { isSupplierExists } from '../middlewares/supplier-middlewares';
-import { isCategoryExists } from '../middlewares/category-middlewares';
-import { isEntityExists } from '../middlewares/is-entity-exists';
+import {
+  isEntityExists,
+  isEntityExistsIdOnPayload,
+} from '../middlewares/is-entity-exists';
 import Expanse from '../models/Expense';
+import Supplier from '../models/Supplier';
+import Category from '../models/Category';
 
 const expenseController = new ExpenseController();
 const router = express.Router();
@@ -20,8 +23,8 @@ const upload = multer({ storage: storage });
 router.post(
   '/create-expense',
   upload.array('images'),
-  isSupplierExists,
-  isCategoryExists,
+  isEntityExistsIdOnPayload(Supplier, 'supplier'),
+  isEntityExistsIdOnPayload(Category, 'category'),
   hasCompanyOrUserId,
   expenseController.createExpense.bind(expenseController)
 );
@@ -45,9 +48,14 @@ router.patch(
   '/:id/update-expense',
   isEntityExists(Expanse),
   hasCompanyOrUserId,
-  isSupplierExists,
-  isCategoryExists,
+  isEntityExistsIdOnPayload(Supplier, 'supplier'),
+  isEntityExistsIdOnPayload(Category, 'category'),
   expenseController.updateExpense.bind(expenseController)
+);
+router.delete(
+  '/:id/delete-image',
+  isEntityExists(Expanse),
+  expenseController.deleteImage.bind(expenseController)
 );
 
 export default router;

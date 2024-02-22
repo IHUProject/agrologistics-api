@@ -39,11 +39,11 @@ export class ExpenseController {
   public async updateExpense(req: Request, res: Response) {
     const { id } = req.params;
     const { body } = req;
-    const client = await this.expenseService.updateExpense(body, id);
+    const expense = await this.expenseService.updateExpense(body, id);
 
     res
       .status(StatusCodes.OK)
-      .json({ client, message: 'Expense has been updated' });
+      .json({ expense, message: 'Expense has been updated' });
   }
 
   public async getExpenses(req: Request, res: Response) {
@@ -65,5 +65,16 @@ export class ExpenseController {
     res
       .status(StatusCodes.OK)
       .json({ expense, message: 'Expense has been deleted' });
+  }
+
+  public async deleteImage(req: Request, res: Response) {
+    const { id } = req.params;
+    const { imageId } = req.body;
+
+    const expense = await this.expenseService.deleteImage(imageId, id);
+
+    res
+      .status(StatusCodes.OK)
+      .json({ expense, message: "Expense's image has been deleted" });
   }
 }

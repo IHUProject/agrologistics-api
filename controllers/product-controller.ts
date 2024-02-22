@@ -23,15 +23,15 @@ export class ProductController {
   }
 
   public async getSingleProduct(req: Request, res: Response) {
-    const { productId } = req.params;
-    const product = await this.productService.getSingleProduct(productId);
+    const { id } = req.params;
+    const product = await this.productService.getSingleProduct(id);
     res.status(StatusCodes.OK).json({ product });
   }
 
   public async updateProduct(req: Request, res: Response) {
     const { body } = req;
-    const { productId } = req.params;
-    const product = await this.productService.updateProduct(body, productId);
+    const { id } = req.params;
+    const product = await this.productService.updateProduct(body, id);
 
     res
       .status(StatusCodes.OK)
@@ -39,8 +39,8 @@ export class ProductController {
   }
 
   public async deleteProduct(req: Request, res: Response) {
-    const { productId } = req.params;
-    const product = await this.productService.deleteProduct(productId);
+    const { id } = req.params;
+    const product = await this.productService.deleteProduct(id);
 
     res
       .status(StatusCodes.OK)

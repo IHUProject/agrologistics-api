@@ -85,10 +85,9 @@ export class UserService extends DataLayerService<IUser> {
 
   public async changePassword(userId: string, payload: IPasswordPayload) {
     const { oldPassword, newPassword } = payload;
-
     const user = await this.getOne(userId);
-
     const isMatch = await user.comparePassword(oldPassword);
+
     if (!isMatch) {
       throw new BadRequestError('Passwords does not match!');
     }
@@ -150,8 +149,8 @@ export class UserService extends DataLayerService<IUser> {
     }
 
     const user = await this.getSingleUser(userId);
-
     const isWorking = user.role !== Roles.UNCATEGORIZED;
+
     if (isWorking) {
       throw new BadRequestError('User is already working to the company!');
     }
@@ -174,8 +173,8 @@ export class UserService extends DataLayerService<IUser> {
 
   async removeFromCompany(userId: string) {
     const user = await this.getOne(userId);
-
     const { role } = user;
+
     if (role === Roles.UNCATEGORIZED) {
       throw new BadRequestError('User does not work to the company!');
     }
@@ -184,6 +183,7 @@ export class UserService extends DataLayerService<IUser> {
     }
 
     await this.deleteUser(userId, true, user);
+
     return `The employ removed and the account deleted!`;
   }
 }

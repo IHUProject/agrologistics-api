@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { BadRequestError, ConflictError } from '../errors';
+import { BadRequestError, ConflictError, NotFoundError } from '../errors';
 import {
   ICategory,
   ICompany,
@@ -7,6 +7,7 @@ import {
   IPurchase,
   ISupplier,
 } from '../interfaces/interfaces';
+import Product from '../models/Product';
 
 export const validateCoordinates = (
   req: Request,
@@ -147,6 +148,27 @@ export const hasExistingCompanyRelations = async (
   if (hasRelations) {
     throw new ConflictError(
       'Operation forbidden: Existing company references detected.'
+    );
+  }
+
+  next();
+};
+
+export const areProductsExists = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { products } = req.body as IPurchase;
+
+  if (products?.length) {
+    await Promise.all(
+      products.map(async (id) => {
+        const product = await Product.findById(id);
+        if (!product) {
+          throw new NotFoundError(`No product found with ID: ${id}!`);
+        }
+      })
     );
   }
 

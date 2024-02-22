@@ -23,15 +23,15 @@ export class ClientController {
   }
 
   public async getSingleClient(req: Request, res: Response) {
-    const { clientId } = req.params;
-    const client = await this.clientService.getSingleClient(clientId);
+    const { id } = req.params;
+    const client = await this.clientService.getSingleClient(id);
     res.status(StatusCodes.CREATED).json({ client });
   }
 
   public async updateClient(req: Request, res: Response) {
-    const { clientId } = req.params;
+    const { id } = req.params;
     const { body } = req;
-    const client = await this.clientService.updateClient(body, clientId);
+    const client = await this.clientService.updateClient(body, id);
 
     res
       .status(StatusCodes.OK)
@@ -51,8 +51,8 @@ export class ClientController {
   }
 
   public async deleteClient(req: Request, res: Response) {
-    const { clientId } = req.params;
-    const client = await this.clientService.deleteClient(clientId);
+    const { id } = req.params;
+    const client = await this.clientService.deleteClient(id);
 
     res
       .status(StatusCodes.OK)

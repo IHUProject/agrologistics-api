@@ -8,7 +8,8 @@ import {
   validateQueryLimit,
   validateQueryPage,
 } from '../middlewares/validate-request-properties-middlewares';
-import { isSupplierExists } from '../middlewares/supplier-middlewares';
+import { isEntityExists } from '../middlewares/is-entity-exists';
+import Supplier from '../models/Supplier';
 
 const supplierController = new SupplierController();
 const router = express.Router();
@@ -23,7 +24,7 @@ router.post(
 router.get(
   '/:supplierId/get-supplier',
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
-  isSupplierExists,
+  isEntityExists(Supplier),
   supplierController.getSingleSupplier.bind(supplierController)
 );
 router.get(
@@ -36,13 +37,13 @@ router.get(
 router.delete(
   '/:supplierId/delete-supplier',
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
-  isSupplierExists,
+  isEntityExists(Supplier),
   supplierController.deleteSupplier.bind(supplierController)
 );
 router.patch(
   '/:supplierId/update-supplier',
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
-  isSupplierExists,
+  isEntityExists(Supplier),
   hasCompanyOrUserId,
   hasExpenses,
   supplierController.updateSupplier.bind(supplierController)

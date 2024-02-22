@@ -92,6 +92,7 @@ export interface ImgurResponse {
 }
 
 export interface IDataImgur {
+  _id?: string;
   link: string;
   deletehash: string;
 }

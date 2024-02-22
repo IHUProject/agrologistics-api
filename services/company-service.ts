@@ -51,16 +51,16 @@ export class CompanyService extends DataLayerService<ICompany> {
     await super.validateData(payload);
 
     const { userId } = currentUser as IUserWithID;
-
     const isFirstCompany = (await Company.countDocuments({})) === 0;
+
     if (!isFirstCompany) {
       throw new ForbiddenError('Company already exists!');
     }
 
     const logo = await this.imageService.handleSingleImage(file);
     const company = await super.create({ ...payload, logo, owner: userId });
-
     const { _id } = company;
+
     await this.userService.update(userId.toString(), {
       role: Roles.OWNER,
       company: _id,
@@ -77,8 +77,8 @@ export class CompanyService extends DataLayerService<ICompany> {
     await super.validateData(payload);
 
     let company = await this.getOne(companyId);
-
     let logo: IDataImgur | undefined;
+
     if (file) {
       const { deletehash } = company!.logo;
       if (deletehash) {

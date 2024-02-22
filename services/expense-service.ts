@@ -1,5 +1,12 @@
 import { populateExpensesOpt } from '../config/populate';
-import { IExpense, IPopulate, IUserWithID } from '../interfaces/interfaces';
+import { NotFoundError } from '../errors';
+import { DefaultImage } from '../interfaces/enums';
+import {
+  IDataImgur,
+  IExpense,
+  IPopulate,
+  IUserWithID,
+} from '../interfaces/interfaces';
 import Category from '../models/Category';
 import Company from '../models/Company';
 import Expanse from '../models/Expense';
@@ -29,9 +36,7 @@ export class ExpenseService extends DataLayerService<IExpense> {
     await super.validateData(payload);
 
     const { userId, company } = currentUser;
-
     const images = await this.imageService.handleMultipleImages(files);
-
     const expense = await super.create({
       ...payload,
       images,
@@ -64,7 +69,6 @@ export class ExpenseService extends DataLayerService<IExpense> {
 
   public async updateExpense(payload: IExpense, expenseId: string) {
     await super.validateData(payload);
-    await this.update(expenseId, payload, this.select, this.populateOptions);
 
     const { supplier, category } = payload;
     if (supplier || category) {
@@ -91,17 +95,56 @@ export class ExpenseService extends DataLayerService<IExpense> {
       }
     }
 
-    return await this.getOne(expenseId);
+    return await this.update(
+      expenseId,
+      payload,
+      this.select,
+      this.populateOptions
+    );
   }
 
   public async deleteExpense(expenseId: string) {
     const deletedExpense = await this.delete(expenseId);
-
     const { company, _id } = deletedExpense;
+
     await Company.updateOne({ _id: company }, { $pull: { expenses: _id } });
-    await Supplier.updateMany({ expenses: _id }, { $pull: { expenses: _id } });
-    await Category.updateMany({ expenses: _id }, { $pull: { expenses: _id } });
+    await Supplier.updateOne({ expenses: _id }, { $pull: { expenses: _id } });
+    await Category.updateOne({ expenses: _id }, { $pull: { expenses: _id } });
 
     return deletedExpense;
+  }
+
+  public async deleteImage(imageId: string, expenseId: string) {
+    const expense = await Expanse.findOne({ 'images._id': imageId });
+    if (!expense) {
+      throw new NotFoundError('Expense did not found!');
+    }
+
+    await Expanse.updateOne(
+      { _id: expenseId },
+      { $pull: { images: { _id: imageId } } }
+    );
+
+    const imageToDelete = expense.images.find(
+      (image) => image._id!.toString() === imageId
+    );
+    const { deletehash } = imageToDelete as IDataImgur;
+    if (deletehash) {
+      await this.imageService.deleteSingleImage(deletehash);
+    }
+
+    const updatedExpense = await this.getOne(expenseId);
+    if (updatedExpense.images.length === 0) {
+      await Expanse.updateOne(
+        { _id: expenseId },
+        {
+          $push: {
+            images: { link: DefaultImage.EXPENSE_IMAGE, deletehash: '' },
+          },
+        }
+      );
+    }
+
+    return await this.getOne(expenseId);
   }
 }

@@ -45,8 +45,8 @@ export class SupplierService extends DataLayerService<ISupplier> {
 
   public async deleteSupplier(supplierId: string) {
     const deletedSupplier = (await this.delete(supplierId)) as ISupplier;
-
     const { _id, company } = deletedSupplier;
+
     await Company.updateOne({ _id: company }, { $pull: { suppliers: _id } });
     await Expanse.updateMany({ supplier: _id }, { $unset: { supplier: null } });
 

@@ -14,3 +14,24 @@ export const isEntityExists =
 
     next();
   };
+
+export const isEntityExistsIdOnPayload =
+  <T>(model: Model<T>, idOnPayload: string, isUpdating = false) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    const entityId = req.body[idOnPayload];
+
+    if (!entityId) {
+      if (!isUpdating) {
+        return next();
+      } else {
+        throw new NotFoundError(`Entity ${idOnPayload} is missing!`);
+      }
+    }
+
+    const entity = await model.findById(entityId);
+    if (!entity) {
+      throw new NotFoundError(`Entity ${idOnPayload} does not exist!`);
+    }
+
+    next();
+  };

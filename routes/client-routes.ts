@@ -2,7 +2,6 @@ import express from 'express';
 import { authorizePermissions } from '../middlewares/auth-middlewares';
 import { Roles } from '../interfaces/enums';
 import { ClientController } from '../controllers/client-controller';
-import { isClientExists } from '../middlewares/client-middlewares';
 import {
   hasCompanyOrUserId,
   hasPurchasesProperty,
@@ -10,6 +9,8 @@ import {
   validateQueryPage,
 } from '../middlewares/validate-request-properties-middlewares';
 import multer, { memoryStorage } from 'multer';
+import Client from '../models/Client';
+import { isEntityExists } from '../middlewares/is-entity-exists';
 
 const clientController = new ClientController();
 const router = express.Router();
@@ -26,9 +27,9 @@ router.post(
   clientController.createClient.bind(clientController)
 );
 router.get(
-  '/:clientId/get-client',
+  '/:id/get-client',
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
-  isClientExists(false),
+  isEntityExists(Client),
   clientController.getSingleClient.bind(clientController)
 );
 router.get(
@@ -39,17 +40,17 @@ router.get(
   clientController.getClients.bind(clientController)
 );
 router.delete(
-  '/:clientId/delete-client',
+  '/:id/delete-client',
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
-  isClientExists(false),
+  isEntityExists(Client),
   clientController.deleteClient.bind(clientController)
 );
 router.patch(
-  '/:clientId/update-client',
+  '/:id/update-client',
   upload.none(),
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
   hasPurchasesProperty,
-  isClientExists(false),
+  isEntityExists(Client),
   hasCompanyOrUserId,
   clientController.updateClient.bind(clientController)
 );

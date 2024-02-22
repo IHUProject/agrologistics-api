@@ -22,8 +22,8 @@ export class ClientService extends DataLayerService<IClient> {
     await super.validateData(payload);
 
     const { userId, company } = currentUser;
-
     const isPhoneUnique = await Client.findOne({ phone: payload.phone });
+
     if (isPhoneUnique) {
       throw new BadRequestError('The phone number is already in use!');
     }
@@ -33,8 +33,8 @@ export class ClientService extends DataLayerService<IClient> {
       createdBy: userId,
       company,
     });
-
     const { _id } = client;
+
     await Company.updateOne({ _id: company }, { $push: { clients: _id } });
 
     return await this.getOne(_id, this.select, this.populateOptions);
@@ -72,7 +72,6 @@ export class ClientService extends DataLayerService<IClient> {
 
   public async updateClient(payload: IClient, clientId: string) {
     await super.validateData(payload);
-
     return await this.update(
       clientId,
       payload,
