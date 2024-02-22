@@ -2,6 +2,7 @@ import { ExpenseService } from './../services/expense-service';
 import { StatusCodes } from 'http-status-codes';
 import { IUserWithID } from '../interfaces/interfaces';
 import { Request, Response } from 'express';
+import { normalizeFilesInput } from '../helpers/handle-images';
 
 export class ExpenseController {
   private expenseService: ExpenseService;
@@ -12,13 +13,7 @@ export class ExpenseController {
   public async createExpense(req: Request, res: Response) {
     const { body, currentUser, files } = req;
 
-    let fileArray: Express.Multer.File[] | undefined;
-    if (Array.isArray(files)) {
-      fileArray = files;
-    } else if (typeof files === 'object' && files !== null) {
-      fileArray = Object.values(files).flat();
-    }
-
+    const fileArray = normalizeFilesInput(files);
     const client = await this.expenseService.createExpense(
       body,
       fileArray,
@@ -76,5 +71,17 @@ export class ExpenseController {
     res
       .status(StatusCodes.OK)
       .json({ expense, message: "Expense's image has been deleted" });
+  }
+
+  public async uploadImages(req: Request, res: Response) {
+    const { id } = req.params;
+    const { files } = req;
+
+    const fileArray = normalizeFilesInput(files);
+    const expense = await this.expenseService.uploadImages(id, fileArray);
+
+    res
+      .status(StatusCodes.OK)
+      .json({ expense, message: "Expense's new images has been uploaded" });
   }
 }

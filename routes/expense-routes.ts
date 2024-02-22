@@ -48,14 +48,20 @@ router.patch(
   '/:id/update-expense',
   isEntityExists(Expanse),
   hasCompanyOrUserId,
-  isEntityExistsIdOnPayload(Supplier, 'supplier'),
-  isEntityExistsIdOnPayload(Category, 'category'),
+  isEntityExistsIdOnPayload(Supplier, 'supplier', true),
+  isEntityExistsIdOnPayload(Category, 'category', true),
   expenseController.updateExpense.bind(expenseController)
 );
 router.delete(
   '/:id/delete-image',
   isEntityExists(Expanse),
   expenseController.deleteImage.bind(expenseController)
+);
+router.patch(
+  '/:id/upload-images',
+  upload.array('images'),
+  isEntityExists(Expanse),
+  expenseController.uploadImages.bind(expenseController)
 );
 
 export default router;

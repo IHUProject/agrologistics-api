@@ -1,5 +1,5 @@
 import { populateExpensesOpt } from '../config/populate';
-import { NotFoundError } from '../errors';
+import { BadRequestError, NotFoundError } from '../errors';
 import { DefaultImage } from '../interfaces/enums';
 import {
   IDataImgur,
@@ -145,6 +145,37 @@ export class ExpenseService extends DataLayerService<IExpense> {
       );
     }
 
-    return await this.getOne(expenseId);
+    await this.getOne(expenseId, this.select, this.populateOptions);
+  }
+
+  public async uploadImages(
+    expenseId: string,
+    files: Express.Multer.File[] | undefined
+  ) {
+    const images = await this.imageService.handleMultipleImages(files);
+    if (!images) {
+      throw new BadRequestError('No images found!');
+    }
+
+    const expense = (await Expanse.findById(expenseId)) as IExpense;
+
+    images.forEach((image) => {
+      expense.images.push({
+        link: image.link,
+        deletehash: image.deletehash,
+      });
+    });
+
+    const defaultImageIndex = expense.images.findIndex(
+      (image) => image.link === DefaultImage.EXPENSE_IMAGE
+    );
+
+    if (defaultImageIndex > -1) {
+      expense.images.splice(defaultImageIndex, 1);
+    }
+
+    await expense.save();
+
+    return await this.getOne(expenseId, this.select, this.populateOptions);
   }
 }
