@@ -135,14 +135,12 @@ export class ExpenseService extends DataLayerService<IExpense> {
 
     const updatedExpense = await this.getOne(expenseId);
     if (updatedExpense.images.length === 0) {
-      await Expanse.updateOne(
-        { _id: expenseId },
-        {
-          $push: {
-            images: { link: DefaultImage.EXPENSE_IMAGE, deletehash: '' },
-          },
-        }
-      );
+      updatedExpense.images.push({
+        link: DefaultImage.EXPENSE_IMAGE,
+        deletehash: '',
+      });
+
+      await updatedExpense.save();
     }
 
     await this.getOne(expenseId, this.select, this.populateOptions);
