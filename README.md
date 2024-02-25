@@ -8,7 +8,6 @@ The AgroLogistics API is a API designed to enhance logistics in the agricultural
 - **Inventory Management**: Monitor stock levels, manage storage conditions, and update product statuses in real-time.
 - **Order Tracking**: Enable users to place orders, track the progress of shipments, and receive timely updates.
 - **User Authentication**: Secure application access using JWT, ensuring data protection for users and administrators.
-- **Responsive Web Design**: A dynamic and user-friendly interface that adapts to different devices and screen sizes.
 - **Review System**: Gather and analyze feedback on logistics services to drive continuous improvement.
 - **Backend Technologies**: Utilizes Node.js and Express.js for robust server-side functionality.
 - **Database**: Employs MongoDB with Mongoose for efficient data storage and retrieval.
