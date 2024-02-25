@@ -178,8 +178,4 @@ export class ExpenseService extends DataLayerService<IExpense> {
 
     return await this.getOne(expenseId, this.select, this.populateOptions);
   }
-
-  public async getNonSendedExpenses() {
-    const expenses = await Expanse.find({ isSend: false });
-  }
 }
