@@ -5,8 +5,7 @@ import { ClientController } from '../controllers/client-controller';
 import {
   hasCompanyOrUserId,
   hasPurchasesProperty,
-  validateQueryLimit,
-  validateQueryPage,
+  validateQueryPageAndQueryLimit,
 } from '../middlewares/validate-request-properties-middlewares';
 import multer, { memoryStorage } from 'multer';
 import Client from '../models/Client';
@@ -35,8 +34,7 @@ router.get(
 router.get(
   '/get-clients',
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
-  validateQueryPage,
-  validateQueryLimit,
+  validateQueryPageAndQueryLimit,
   clientController.getClients.bind(clientController)
 );
 router.delete(

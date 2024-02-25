@@ -25,7 +25,7 @@ export class ClientController {
   public async getSingleClient(req: Request, res: Response) {
     const { id } = req.params;
     const client = await this.clientService.getSingleClient(id);
-    res.status(StatusCodes.CREATED).json({ client });
+    res.status(StatusCodes.OK).json({ client });
   }
 
   public async updateClient(req: Request, res: Response) {

@@ -48,6 +48,7 @@ export interface ICompany extends Document {
   latitude: number;
   longitude: number;
   owner: Types.ObjectId;
+  credentials: Types.ObjectId;
   employees: Types.ObjectId[];
   accountant: Types.ObjectId;
   products: Types.ObjectId[];
@@ -152,11 +153,19 @@ export interface ICategory extends Document {
   createdBy: Types.ObjectId;
 }
 
+export interface ICredential extends Document {
+  email: string;
+  pass: string;
+  company: Types.ObjectId;
+  createdBy: Types.ObjectId;
+}
+
 export interface IPopulate {
   path: string;
   select: string;
   options?: {
-    limit: number;
+    limit?: number;
+    strictPopulate?: boolean;
   };
   populate?: IPopulate[];
 }

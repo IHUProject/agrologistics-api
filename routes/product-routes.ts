@@ -5,8 +5,7 @@ import { ProductController } from '../controllers/product-controller';
 import {
   hasCompanyOrUserId,
   hasPurchasesProperty,
-  validateQueryLimit,
-  validateQueryPage,
+  validateQueryPageAndQueryLimit,
 } from '../middlewares/validate-request-properties-middlewares';
 import multer, { memoryStorage } from 'multer';
 import { isEntityExists } from '../middlewares/is-entity-exists';
@@ -35,8 +34,7 @@ router.get(
 router.get(
   '/get-products',
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
-  validateQueryPage,
-  validateQueryLimit,
+  validateQueryPageAndQueryLimit,
   productController.getProducts.bind(productController)
 );
 router.delete(

@@ -3,8 +3,7 @@ import { authorizePermissions } from '../middlewares/auth-middlewares';
 import { UserController } from '../controllers/user-controller';
 import {
   hasCompanyOrUserId,
-  validateQueryLimit,
-  validateQueryPage,
+  validateQueryPageAndQueryLimit,
 } from '../middlewares/validate-request-properties-middlewares';
 import {
   hasForbiddenRoleType,
@@ -38,8 +37,7 @@ router.get(
 router.get(
   '/get-users',
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
-  validateQueryPage,
-  validateQueryLimit,
+  validateQueryPageAndQueryLimit,
   userController.getUsers.bind(userController)
 );
 router.get(

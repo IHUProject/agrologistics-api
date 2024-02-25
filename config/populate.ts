@@ -40,12 +40,12 @@ export const populateCompanyOpt = [
   {
     path: 'suppliers',
     select: 'firstName lastName phone email _id',
-    options: { limit: 4 },
+    options: { limit: 4, strictPopulate: false },
   },
   {
     path: 'expenses',
     select: 'totalAmount status date _id',
-    options: { limit: 4 },
+    options: { limit: 4, strictPopulate: false },
     populate: [
       {
         path: 'category',
@@ -54,6 +54,7 @@ export const populateCompanyOpt = [
       {
         path: 'suppliers',
         select: 'firstName lastName _id',
+        options: { strictPopulate: false },
       },
     ],
   },
@@ -61,6 +62,10 @@ export const populateCompanyOpt = [
     path: 'categories',
     select: '_id name',
     options: { limit: 4 },
+  },
+  {
+    path: 'credentials',
+    select: '_id email pass',
   },
 ];
 

@@ -1,9 +1,9 @@
 import Accountant from '../models/Accountant';
 import { IAccountant, IPopulate, IUserWithID } from '../interfaces/interfaces';
-import { ForbiddenError } from '../errors/forbidden';
 import Company from '../models/Company';
 import { DataLayerService } from './general-services/data-layer-service';
 import { populateAccountantOpt } from '../config/populate';
+import { checkIsFirstDocument } from '../helpers/is-first-doc';
 
 export class AccountantService extends DataLayerService<IAccountant> {
   private select: string;
@@ -22,11 +22,7 @@ export class AccountantService extends DataLayerService<IAccountant> {
     await super.validateData(payload);
 
     const { userId, company } = currentUser;
-    const isFirstAccountant = (await Accountant.countDocuments({})) === 0;
-
-    if (!isFirstAccountant) {
-      throw new ForbiddenError('Accountant already exists!');
-    }
+    await checkIsFirstDocument(Accountant);
 
     const accountant = await super.create({
       ...payload,

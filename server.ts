@@ -19,6 +19,8 @@ import {
   authenticateUser,
   authorizePermissions,
 } from './middlewares/auth-middlewares';
+import { hasEmail } from './middlewares/is-accountant-have-email';
+import { hasCreds } from './middlewares/has-credentials';
 
 //routes
 import authRouter from './routes/auth-routes';
@@ -31,6 +33,8 @@ import clientRouter from './routes/client-routes';
 import purchaseRouter from './routes/purchase-routes';
 import categoryRouter from './routes/category-routes';
 import expenseRouter from './routes/expense-routes';
+import sendEmailRouter from './routes/email-sender-routes';
+import credRouter from './routes/credentail-routes';
 
 const server = express();
 const corsObject = {
@@ -55,38 +59,44 @@ server.use(cookieParser(process.env.JWT_SECRET));
 server.use(cors(corsObject));
 server.use(morgan('dev'));
 
-server.use(`${process.env.BASE_URL}/auth`, authRouter);
-server.use(`${process.env.BASE_URL}/user`, authenticateUser, userRouter);
-server.use(`${process.env.BASE_URL}/company`, authenticateUser, companyRouter);
+server.use('/api/v1/al/auth', authRouter);
+server.use('/api/v1/al/user', authenticateUser, userRouter);
+server.use('/api/v1/al/company', authenticateUser, companyRouter);
+server.use('/api/v1/al/accountant', authenticateUser, accountantRouter);
+server.use('/api/v1/al/supplier', authenticateUser, supplierRouter);
+server.use('/api/v1/al/product', authenticateUser, productRouter);
+server.use('/api/v1/al/client', authenticateUser, clientRouter);
 server.use(
-  `${process.env.BASE_URL}/accountant`,
-  authenticateUser,
-  accountantRouter
-);
-server.use(
-  `${process.env.BASE_URL}/supplier`,
-  authenticateUser,
-  supplierRouter
-);
-server.use(`${process.env.BASE_URL}/product`, authenticateUser, productRouter);
-server.use(`${process.env.BASE_URL}/client`, authenticateUser, clientRouter);
-server.use(
-  `${process.env.BASE_URL}/purchase`,
+  '/api/v1/al/purchase',
   authenticateUser,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
   purchaseRouter
 );
 server.use(
-  `${process.env.BASE_URL}/category`,
+  '/api/v1/al/category',
   authenticateUser,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
   categoryRouter
 );
 server.use(
-  `${process.env.BASE_URL}/expense`,
+  '/api/v1/al/expense',
   authenticateUser,
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
   expenseRouter
+);
+server.use(
+  '/api/v1/al/send-email',
+  hasCreds,
+  hasEmail,
+  authenticateUser,
+  authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
+  sendEmailRouter
+);
+server.use(
+  '/api/v1/al/credentials',
+  authenticateUser,
+  authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER),
+  credRouter
 );
 
 server.use(notFoundMiddleware);

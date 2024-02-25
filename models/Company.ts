@@ -2,6 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import './Expense';
 import './Supplier';
 import './Category';
+import './Credential';
 import { ICompany } from '../interfaces/interfaces';
 import {
   validateAFM,
@@ -81,6 +82,11 @@ const companySchema = new Schema<ICompany>(
     accountant: {
       type: Schema.Types.ObjectId,
       ref: 'Accountant',
+      default: null,
+    },
+    credentials: {
+      type: Schema.Types.ObjectId,
+      ref: 'Credential',
       default: null,
     },
     products: {

@@ -27,32 +27,12 @@ export const validateCoordinates = (
   next();
 };
 
-export const validateQueryLimit = (
+export const validateQueryPageAndQueryLimit = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const { limit } = req.query;
-
-  if (limit && isNaN(Number(limit))) {
-    throw new BadRequestError('Limit number must be a valid number');
-  }
-
-  const limitNumber = Number(limit) || 1;
-
-  if (!Number.isSafeInteger(limitNumber) || limitNumber < 1) {
-    throw new BadRequestError('Limit number must be a positive safe integer');
-  }
-
-  next();
-};
-
-export const validateQueryPage = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const { page } = req.query;
+  const { page, limit } = req.query;
 
   if (page && isNaN(Number(page))) {
     throw new BadRequestError('Page number must be a valid number');
@@ -62,6 +42,16 @@ export const validateQueryPage = (
 
   if (!Number.isSafeInteger(pageNumber) || pageNumber < 1) {
     throw new BadRequestError('Page number must be a positive safe integer');
+  }
+
+  if (limit && isNaN(Number(limit))) {
+    throw new BadRequestError('Limit number must be a valid number');
+  }
+
+  const limitNumber = Number(limit) || 1;
+
+  if (!Number.isSafeInteger(limitNumber) || limitNumber < 1) {
+    throw new BadRequestError('Limit number must be a positive safe integer');
   }
 
   next();

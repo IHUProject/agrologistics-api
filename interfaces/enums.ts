@@ -24,3 +24,8 @@ export enum PurchaseExpenseStatus {
   COMPLETED = 'Completed',
   CANCELLED = 'Cancelled',
 }
+
+export enum EmailSubjects {
+  EXPENSE = 'Δαπάνη',
+  PURCHASE = 'Αγορά',
+}

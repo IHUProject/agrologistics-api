@@ -3,6 +3,7 @@ import {
   ICategory,
   IClient,
   ICompany,
+  ICredential,
   IDataImgur,
   IExpense,
   IPopulate,
@@ -16,7 +17,6 @@ import { Roles } from '../interfaces/enums';
 import User from '../models/User';
 import Supplier from '../models/Supplier';
 import Accountant from '../models/Accountant';
-import { ForbiddenError } from '../errors/forbidden';
 import { NotFoundError } from '../errors';
 import { UserService } from './user-service';
 import Product from '../models/Product';
@@ -28,6 +28,8 @@ import { populateCompanyOpt } from '../config/populate';
 import Company from '../models/Company';
 import Category from '../models/Category';
 import Expanse from '../models/Expense';
+import Credential from '../models/Credential';
+import { checkIsFirstDocument } from '../helpers/is-first-doc';
 
 export class CompanyService extends DataLayerService<ICompany> {
   private imageService: ImageService;
@@ -49,15 +51,10 @@ export class CompanyService extends DataLayerService<ICompany> {
     file: Express.Multer.File | undefined
   ) {
     await super.validateData(payload);
-
-    const { userId } = currentUser as IUserWithID;
-    const isFirstCompany = (await Company.countDocuments({})) === 0;
-
-    if (!isFirstCompany) {
-      throw new ForbiddenError('Company already exists!');
-    }
+    await checkIsFirstDocument(Company);
 
     const logo = await this.imageService.handleSingleImage(file);
+    const { userId } = currentUser as IUserWithID;
     const company = await super.create({ ...payload, logo, owner: userId });
     const { _id } = company;
 
@@ -105,6 +102,7 @@ export class CompanyService extends DataLayerService<ICompany> {
     const suppliers = (await Supplier.find()) as ISupplier[];
     const categories = (await Category.find()) as ICategory[];
     const expenses = (await Expanse.find()) as IExpense[];
+    const creds = (await Credential.find()) as ICredential[];
 
     await User.updateMany(
       { role: { $ne: Roles.UNCATEGORIZED } },
@@ -118,6 +116,7 @@ export class CompanyService extends DataLayerService<ICompany> {
     await deleteDocuments(suppliers, Supplier);
     await deleteDocuments(categories, Category);
     await deleteDocuments(expenses, Expanse);
+    await deleteDocuments(creds, Credential);
 
     return await this.delete(companyId);
   }

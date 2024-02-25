@@ -2,8 +2,7 @@ import express from 'express';
 import {
   hasCompanyOrUserId,
   hasExpenses,
-  validateQueryLimit,
-  validateQueryPage,
+  validateQueryPageAndQueryLimit,
 } from '../middlewares/validate-request-properties-middlewares';
 import { CategoryController } from '../controllers/category-controller';
 import Category from '../models/Category';
@@ -25,8 +24,7 @@ router.get(
 );
 router.get(
   '/get-categories',
-  validateQueryLimit,
-  validateQueryPage,
+  validateQueryPageAndQueryLimit,
   categoryController.getCategories.bind(categoryController)
 );
 router.delete(

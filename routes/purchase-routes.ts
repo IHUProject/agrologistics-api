@@ -4,8 +4,7 @@ import {
   areProductsExists,
   hasCompanyOrUserId,
   hasSendProperty,
-  validateQueryLimit,
-  validateQueryPage,
+  validateQueryPageAndQueryLimit,
 } from '../middlewares/validate-request-properties-middlewares';
 import multer, { memoryStorage } from 'multer';
 import {
@@ -37,8 +36,7 @@ router.get(
 );
 router.get(
   '/get-purchases',
-  validateQueryPage,
-  validateQueryLimit,
+  validateQueryPageAndQueryLimit,
   purchaseController.getPurchases.bind(purchaseController)
 );
 router.delete(

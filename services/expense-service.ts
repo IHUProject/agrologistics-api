@@ -120,14 +120,16 @@ export class ExpenseService extends DataLayerService<IExpense> {
       throw new NotFoundError('Expense did not found!');
     }
 
-    await Expanse.updateOne(
-      { _id: expenseId },
-      { $pull: { images: { _id: imageId } } }
+    expense.images = expense.images.filter(
+      (image) => image?._id!.toString() !== imageId
     );
+
+    await expense.save();
 
     const imageToDelete = expense.images.find(
       (image) => image._id!.toString() === imageId
     );
+
     const { deletehash } = imageToDelete as IDataImgur;
     if (deletehash) {
       await this.imageService.deleteSingleImage(deletehash);
@@ -175,5 +177,9 @@ export class ExpenseService extends DataLayerService<IExpense> {
     await expense.save();
 
     return await this.getOne(expenseId, this.select, this.populateOptions);
+  }
+
+  public async getNonSendedExpenses() {
+    const expenses = await Expanse.find({ isSend: false });
   }
 }

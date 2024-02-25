@@ -5,8 +5,7 @@ import { SupplierController } from '../controllers/supplier-controller';
 import {
   hasCompanyOrUserId,
   hasExpenses,
-  validateQueryLimit,
-  validateQueryPage,
+  validateQueryPageAndQueryLimit,
 } from '../middlewares/validate-request-properties-middlewares';
 import { isEntityExists } from '../middlewares/is-entity-exists';
 import Supplier from '../models/Supplier';
@@ -30,8 +29,7 @@ router.get(
 router.get(
   '/get-suppliers',
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
-  validateQueryLimit,
-  validateQueryPage,
+  validateQueryPageAndQueryLimit,
   supplierController.getSuppliers.bind(supplierController)
 );
 router.delete(

@@ -2,8 +2,7 @@ import express from 'express';
 import { ExpenseController } from '../controllers/expense-controller';
 import {
   hasCompanyOrUserId,
-  validateQueryLimit,
-  validateQueryPage,
+  validateQueryPageAndQueryLimit,
 } from '../middlewares/validate-request-properties-middlewares';
 import multer, { memoryStorage } from 'multer';
 import {
@@ -35,8 +34,7 @@ router.get(
 );
 router.get(
   '/get-expenses',
-  validateQueryLimit,
-  validateQueryPage,
+  validateQueryPageAndQueryLimit,
   expenseController.getExpenses.bind(expenseController)
 );
 router.delete(
