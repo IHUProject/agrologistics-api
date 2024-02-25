@@ -36,6 +36,6 @@ const credentialSchema = new Schema<ICredential>(
   { timestamps: true, versionKey: false }
 );
 
-const Creds = mongoose.model<ICredential>('Credential', credentialSchema);
+const Credential = mongoose.model<ICredential>('Credential', credentialSchema);
 
-export default Creds;
+export default Credential;
