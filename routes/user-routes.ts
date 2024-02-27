@@ -70,7 +70,6 @@ router.patch(
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   hasForbiddenRoleType,
   preventSelfModification,
-  hasForbiddenRoleType,
   isEntityExists(User),
   userController.changeUserRole.bind(userController)
 );

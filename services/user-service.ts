@@ -127,6 +127,9 @@ export class UserService extends DataLayerService<IUser> {
   ) {
     const user = await this.getOne(userId);
 
+    if (!role) {
+      throw new BadRequestError('Please add a role!');
+    }
     if (user.role === Roles.OWNER) {
       throw new BadRequestError('You can not change the owners role!');
     }
