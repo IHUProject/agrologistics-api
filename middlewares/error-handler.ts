@@ -55,5 +55,5 @@ export const errorHandlerMiddleware = (
 
   return res
     .status(Number(customError.statusCode))
-    .json({ message: customError.msg });
+    .json({ message: customError.msg.replace('/', '') });
 };
