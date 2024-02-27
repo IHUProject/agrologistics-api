@@ -85,6 +85,10 @@ export class UserService extends DataLayerService<IUser> {
 
   public async changePassword(userId: string, payload: IPasswordPayload) {
     const { oldPassword, newPassword } = payload;
+    if (!oldPassword && !newPassword) {
+      throw new BadRequestError('Νο old password and new password find!');
+    }
+
     const user = await this.getOne(userId);
     const isMatch = await user.comparePassword(oldPassword);
 
