@@ -9,9 +9,9 @@ export const verifyAccountOwnership = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { userId } = req.params;
+  const { id } = req.params;
 
-  if (userId !== req.currentUser?.userId.toString()) {
+  if (id !== req.currentUser?.userId.toString()) {
     throw new UnauthorizedError('You can perform this action!');
   }
 
@@ -23,10 +23,10 @@ export const preventSelfModification = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { userId } = req.params;
+  const { id } = req.params;
   const { currentUser } = req;
 
-  if (userId === (currentUser as IUserWithID).userId.toString()) {
+  if (id === (currentUser as IUserWithID).userId.toString()) {
     throw new ForbiddenError('You can perform that action to your account!');
   }
 
