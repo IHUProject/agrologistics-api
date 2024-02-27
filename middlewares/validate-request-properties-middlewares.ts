@@ -133,7 +133,8 @@ export const hasExistingCompanyRelations = async (
   const hasRelations =
     relations.some((relation) => relation?.length) ||
     payload.accountant ||
-    payload.owner;
+    payload.owner ||
+    payload.credentials;
 
   if (hasRelations) {
     throw new ConflictError(
