@@ -21,7 +21,7 @@ router.post(
   supplierController.createSupplier.bind(supplierController)
 );
 router.get(
-  '/:supplierId/get-supplier',
+  '/:id/get-supplier',
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
   isEntityExists(Supplier),
   supplierController.getSingleSupplier.bind(supplierController)
@@ -33,13 +33,13 @@ router.get(
   supplierController.getSuppliers.bind(supplierController)
 );
 router.delete(
-  '/:supplierId/delete-supplier',
+  '/:id/delete-supplier',
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   isEntityExists(Supplier),
   supplierController.deleteSupplier.bind(supplierController)
 );
 router.patch(
-  '/:supplierId/update-supplier',
+  '/:id/update-supplier',
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
   isEntityExists(Supplier),
   hasCompanyOrUserId,
