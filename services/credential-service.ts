@@ -1,15 +1,18 @@
+import { populateCredOpt } from '../config/populate';
 import { checkIsFirstDocument } from '../helpers/is-first-doc';
-import { ICredential, IUserWithID } from '../interfaces/interfaces';
+import { ICredential, IPopulate, IUserWithID } from '../interfaces/interfaces';
 import Company from '../models/Company';
 import Credential from '../models/Credential';
 import { DataLayerService } from './general-services/data-layer-service';
 
 export class CredentialService extends DataLayerService<ICredential> {
   private select: string;
+  private populateOptions: IPopulate[];
 
   constructor() {
     super(Credential);
     this.select = '-createdAt';
+    this.populateOptions = populateCredOpt;
   }
 
   public async createCreds(payload: ICredential, currentUser: IUserWithID) {
@@ -26,16 +29,18 @@ export class CredentialService extends DataLayerService<ICredential> {
     const { _id } = creds;
     await Company.updateOne({ _id: company }, { $set: { credentials: _id } });
 
-    return this.getOne(_id, this.select);
+    return this.getOne(_id, this.select, this.populateOptions);
   }
 
   public async getCreds() {
-    return await Credential.findOne().select(this.select);
+    return await Credential.findOne()
+      .select(this.select)
+      .populate(this.populateOptions);
   }
 
   public async updateCreds(payload: ICredential, id: string) {
     await super.validateData(payload);
-    return await this.update(id, payload, this.select);
+    return await this.update(id, payload, this.select, this.populateOptions);
   }
 
   public async deleteCreds(id: string) {

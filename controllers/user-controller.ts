@@ -112,4 +112,10 @@ export class UserController {
     const message = await this.userService.removeFromCompany(id);
     res.status(StatusCodes.OK).json({ message });
   }
+
+  public async forgotPassword(req: Request, res: Response) {
+    const { email } = req.body;
+    const message = await this.userService.forgotPassword(email);
+    res.status(StatusCodes.OK).json({ message });
+  }
 }

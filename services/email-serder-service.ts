@@ -148,4 +148,39 @@ export class EmailSenderService {
     await this.sendEmail(purchase!, EmailSubjects.PURCHASE);
     await this.updateEntity(id, Purchase);
   }
+
+  public async sendEmailWithNewPassword(password: string, email: string) {
+    await this.initVariables();
+
+    const htmlTemplate = `
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; }
+          .header { background: #f3f3f3; padding: 20px; text-align: center; }
+          .content { margin: 20px; }
+          .footer { background: #f3f3f3; padding: 10px; text-align: center; }
+          img { max-width: 350px; margin: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+         <p>O νέος κωδικός πρόσβασης ${password}</p>
+          <p>Παρακαλώ αλλάξτε τον από τις ρυθμίσεις στο προφίλ σας</p>
+        </div>
+        <div class="footer">
+          <p>Ευχαριστούμε.</p>
+        </div>
+      </body>
+    </html>`;
+
+    const mailOptions = {
+      from: this.email,
+      to: email,
+      subject: 'Αλλαγή κωδικού πρόσβασης',
+      html: htmlTemplate,
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
 }

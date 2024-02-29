@@ -60,7 +60,7 @@ server.use(cors(corsObject));
 server.use(morgan('dev'));
 
 server.use('/api/v1/al/auth', authRouter);
-server.use('/api/v1/al/user', authenticateUser, userRouter);
+server.use('/api/v1/al/user', userRouter);
 server.use('/api/v1/al/company', authenticateUser, companyRouter);
 server.use('/api/v1/al/accountant', authenticateUser, accountantRouter);
 server.use('/api/v1/al/supplier', authenticateUser, supplierRouter);

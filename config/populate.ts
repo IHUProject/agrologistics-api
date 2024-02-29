@@ -149,3 +149,10 @@ export const populateCategoryOpt = [
     select: 'firstName lastName image _id',
   },
 ];
+
+export const populateCredOpt = [
+  {
+    path: 'createdBy',
+    select: 'firstName lastName image _id',
+  },
+];

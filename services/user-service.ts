@@ -1,4 +1,5 @@
-import { BadRequestError } from '../errors';
+import { EmailSenderService } from './email-serder-service';
+import { BadRequestError, NotFoundError } from '../errors';
 import User from '../models/User';
 import { IDataImgur, IPasswordPayload, IUser } from '../interfaces/interfaces';
 import { ImageService } from './general-services/image-service';
@@ -8,9 +9,11 @@ import Company from '../models/Company';
 import { createTokenUser } from '../helpers/create-token-user';
 import { DataLayerService } from './general-services/data-layer-service';
 import { Types } from 'mongoose';
+import { randomBytes } from 'crypto';
 
 export class UserService extends DataLayerService<IUser> {
   private imageService: ImageService;
+  private emailService: EmailSenderService;
   private select: string;
   private searchFields: string[];
 
@@ -18,6 +21,7 @@ export class UserService extends DataLayerService<IUser> {
     super(User);
     this.select = '-password -createdAt -updatedAt';
     this.imageService = new ImageService();
+    this.emailService = new EmailSenderService();
     this.searchFields = ['firstName', 'lastName', 'role'];
   }
 
@@ -192,5 +196,19 @@ export class UserService extends DataLayerService<IUser> {
     await this.deleteUser(userId, true, user);
 
     return `The employ removed and the account deleted!`;
+  }
+
+  async forgotPassword(email: string) {
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new NotFoundError('User did not found!');
+    }
+
+    const pw = randomBytes(5).toString('hex');
+    user.password = pw;
+    user.save();
+    await this.emailService.sendEmailWithNewPassword(pw, email);
+
+    return 'Password has been changed and we had been sent it to your email';
   }
 }
