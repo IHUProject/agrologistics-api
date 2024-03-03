@@ -44,5 +44,9 @@ router.patch(
   validateCoordinates,
   companyController.updateCompany.bind(companyController)
 );
+router.get(
+  '/is-company-exists',
+  companyController.isCompanyExists.bind(companyController)
+);
 
 export default router;

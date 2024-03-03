@@ -55,4 +55,9 @@ export class CompanyController {
       .status(StatusCodes.OK)
       .json({ company, message: 'Company have been deleted!' });
   }
+
+  public async isCompanyExists(req: Request, res: Response) {
+    const isExists = await this.companyService.isCompanyExists();
+    res.status(StatusCodes.OK).json({ isExists });
+  }
 }

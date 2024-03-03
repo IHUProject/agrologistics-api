@@ -132,4 +132,9 @@ export class CompanyService extends DataLayerService<ICompany> {
 
     return company;
   }
+
+  async isCompanyExists() {
+    const isExists = (await Company.find()).length ? true : false;
+    return isExists;
+  }
 }
