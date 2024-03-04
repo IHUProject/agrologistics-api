@@ -1,5 +1,9 @@
-export const validateDate = (date: Date) =>
-  date instanceof Date && !isNaN(date.getTime());
+export const validateDate = (date: Date) => {
+  if (date === null) {
+    return true;
+  }
+  return date instanceof Date && !isNaN(date.getTime());
+};
 
 export const validatePhoneNumber = (value: number | string) => {
   if (!value) {

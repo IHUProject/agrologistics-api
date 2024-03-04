@@ -14,6 +14,7 @@ export class CompanyController {
   public async createCompany(req: Request, res: Response) {
     const { body, currentUser } = req;
     const { file } = req;
+    console.log(body);
 
     const company = await this.companyService.createCompany(
       body,
