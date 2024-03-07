@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 import { IUserWithID } from '../interfaces/interfaces';
 import { CategoryService } from '../services/category-service';
 import { Request, Response } from 'express';
+import Category from '../models/Category';
 
 export class CategoryController {
   private categoryService: CategoryService;
@@ -47,9 +48,11 @@ export class CategoryController {
       limit as string
     );
 
+    const total = await Category.countDocuments();
+
     res
       .status(StatusCodes.OK)
-      .json({ categories, totalCount: categories.length });
+      .json({ categories, totalCount: categories.length, total });
   }
 
   public async deleteCategory(req: Request, res: Response) {

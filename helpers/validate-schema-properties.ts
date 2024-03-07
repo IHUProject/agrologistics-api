@@ -6,7 +6,7 @@ export const validateDate = (date: Date) => {
 };
 
 export const validatePhoneNumber = (value: number | string) => {
-  if (!value) {
+  if (!value && value !== 0) {
     return true;
   }
   return /^[0-9]{10}$/.test(

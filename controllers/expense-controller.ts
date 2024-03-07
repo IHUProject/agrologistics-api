@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import { IUserWithID } from '../interfaces/interfaces';
 import { Request, Response } from 'express';
 import { normalizeFilesInput } from '../helpers/handle-images';
+import Expanse from '../models/Expense';
 
 export class ExpenseController {
   private expenseService: ExpenseService;
@@ -50,7 +51,11 @@ export class ExpenseController {
       limit as string
     );
 
-    res.status(StatusCodes.OK).json({ expenses, totalCount: expenses.length });
+    const total = await Expanse.countDocuments();
+
+    res
+      .status(StatusCodes.OK)
+      .json({ expenses, totalCount: expenses.length, total });
   }
 
   public async deleteCategory(req: Request, res: Response) {

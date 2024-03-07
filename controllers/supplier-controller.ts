@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 import { IUserWithID } from '../interfaces/interfaces';
 import { SupplierService } from '../services/supplier-service';
+import Supplier from '../models/Supplier';
 
 export class SupplierController {
   supplierService: SupplierService;
@@ -62,8 +63,10 @@ export class SupplierController {
       limit as string
     );
 
+    const total = await Supplier.countDocuments();
+
     res
       .status(StatusCodes.OK)
-      .json({ suppliers, totalCount: suppliers.length });
+      .json({ suppliers, totalCount: suppliers.length, total });
   }
 }

@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 import { PurchaseService } from '../services/purchase-service';
 import { IUserWithID } from '../interfaces/interfaces';
+import Purchase from '../models/Purchase';
 
 export class PurchaseController {
   private purchaseService: PurchaseService;
@@ -57,6 +58,10 @@ export class PurchaseController {
       limit as string
     );
 
-    res.status(StatusCodes.OK).json({ purchase, totalCount: purchase.length });
+    const total = Purchase.countDocuments();
+
+    res
+      .status(StatusCodes.OK)
+      .json({ purchase, totalCount: purchase.length, total });
   }
 }

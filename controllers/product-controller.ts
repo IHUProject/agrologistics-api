@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 import { Response, Request } from 'express';
 import { ProductService } from '../services/product-service';
 import { IUserWithID } from '../interfaces/interfaces';
+import Product from '../models/Product';
 
 export class ProductController {
   productService: ProductService;
@@ -56,6 +57,10 @@ export class ProductController {
       limit as string
     );
 
-    res.status(StatusCodes.OK).json({ products, totalCount: products.length });
+    const total = await Product.countDocuments();
+
+    res
+      .status(StatusCodes.OK)
+      .json({ products, totalCount: products.length, total });
   }
 }

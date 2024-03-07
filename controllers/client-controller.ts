@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 import { ClientService } from '../services/client-service';
 import { IUserWithID } from '../interfaces/interfaces';
+import Client from '../models/Client';
 
 export class ClientController {
   private clientService: ClientService;
@@ -47,7 +48,11 @@ export class ClientController {
       limit as string
     );
 
-    res.status(StatusCodes.OK).json({ clients, totalCount: clients.length });
+    const total = await Client.countDocuments();
+
+    res
+      .status(StatusCodes.OK)
+      .json({ clients, totalCount: clients.length, total });
   }
 
   public async deleteClient(req: Request, res: Response) {

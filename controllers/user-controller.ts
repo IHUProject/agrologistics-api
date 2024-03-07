@@ -3,6 +3,7 @@ import { UserService } from '../services/user-service';
 import { StatusCodes } from 'http-status-codes';
 import { reattachTokens } from '../helpers/re-attack-tokens';
 import { IUserWithID } from '../interfaces/interfaces';
+import User from '../models/User';
 
 export class UserController {
   private userService: UserService;
@@ -69,7 +70,9 @@ export class UserController {
       limit as string
     );
 
-    res.status(StatusCodes.OK).json({ users, totalCount: users.length });
+    const total = await User.countDocuments();
+
+    res.status(StatusCodes.OK).json({ users, totalCount: users.length, total });
   }
 
   public async getSingleUser(req: Request, res: Response) {
