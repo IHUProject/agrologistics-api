@@ -46,7 +46,7 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
-      currentUser?: IUserWithID;
+      currentUser: IUserWithID;
     }
   }
 }
