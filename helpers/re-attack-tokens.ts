@@ -8,6 +8,6 @@ export const reattachTokens = async (res: Response, id: string) => {
 
   if (updatedUser) {
     const tokenUser = createTokenUser(updatedUser);
-    attachTokens(res, tokenUser);
+    return attachTokens(res, tokenUser);
   }
 };

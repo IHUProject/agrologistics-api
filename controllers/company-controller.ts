@@ -21,10 +21,11 @@ export class CompanyController {
       file
     );
 
-    await reattachTokens(res, currentUser.userId.toString());
+    const token = await reattachTokens(res, currentUser.userId.toString());
+
     res
       .status(StatusCodes.CREATED)
-      .json({ company, message: 'Company had been successfully created!' });
+      .json({ company, token,message: 'Company had been successfully created!' });
   }
 
   public async getCompany(req: Request, res: Response) {
@@ -49,11 +50,11 @@ export class CompanyController {
     const { userId } = currentUser as IUserWithID;
 
     const company = await this.companyService.deleteCompany(id);
-    await reattachTokens(res, userId.toString());
+    const token = await reattachTokens(res, userId.toString());
 
     res
       .status(StatusCodes.OK)
-      .json({ company, message: 'Company have been deleted!' });
+      .json({ company, token, message: 'Company have been deleted!' });
   }
 
   public async isCompanyExists(req: Request, res: Response) {

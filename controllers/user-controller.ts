@@ -21,10 +21,11 @@ export class UserController {
     const { currentUser } = req;
 
     const user = await this.userService.updateUser(body, id, file);
-    await reattachTokens(res, currentUser.userId.toString());
+    const token = await reattachTokens(res, currentUser.userId.toString());
 
     res.status(StatusCodes.OK).json({
       user,
+      token,
       message: 'User had been successfully updated!',
     });
   }
