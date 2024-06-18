@@ -14,7 +14,7 @@ export class CredsController {
 
     const client = await this.credService.createCreds(
       body,
-      currentUser as IUserWithID
+      currentUser
     );
 
     res
