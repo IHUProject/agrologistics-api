@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { UserService } from '../services/user-service';
 import { StatusCodes } from 'http-status-codes';
 import { reattachTokens } from '../helpers/re-attack-tokens';
-import { IUserWithID } from '../interfaces/interfaces';
 import User from '../models/User';
 
 export class UserController {
@@ -17,13 +16,12 @@ export class UserController {
   }
 
   public async updateUser(req: Request, res: Response) {
-    const { body } = req;
+    const { body, file } = req;
     const { id } = req.params;
-    const { file } = req;
     const { currentUser } = req;
 
     const user = await this.userService.updateUser(body, id, file);
-    await reattachTokens(res, (currentUser as IUserWithID).userId.toString());
+    await reattachTokens(res, currentUser.userId.toString());
 
     res.status(StatusCodes.OK).json({
       user,
@@ -34,10 +32,8 @@ export class UserController {
   public async createUser(req: Request, res: Response) {
     const { body, file, currentUser } = req;
 
-    const user = await this.userService.createUser(
-      { ...body, company: currentUser?.company },
-      file
-    );
+    const payload = { ...body, company: currentUser.company };
+    const user = await this.userService.createUser(payload, file);
 
     res
       .status(StatusCodes.OK)
@@ -104,7 +100,7 @@ export class UserController {
     const message = await this.userService.addToCompany(
       id,
       role,
-      (currentUser as IUserWithID).company
+      currentUser.company
     );
 
     res.status(StatusCodes.OK).json({ message });

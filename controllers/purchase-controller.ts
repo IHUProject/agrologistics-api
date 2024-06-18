@@ -58,7 +58,7 @@ export class PurchaseController {
       limit as string
     );
 
-    const total = Purchase.countDocuments();
+    const total = await Purchase.countDocuments();
 
     res
       .status(StatusCodes.OK)

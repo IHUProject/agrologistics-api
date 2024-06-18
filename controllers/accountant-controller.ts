@@ -1,7 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import { AccountantService } from '../services/accountant-service';
 import { Request, Response } from 'express';
-import { IUserWithID } from '../interfaces/interfaces';
 
 export class AccountantController {
   private accountantService: AccountantService;
@@ -14,7 +13,7 @@ export class AccountantController {
 
     const accountant = await this.accountantService.createAccountant(
       body,
-      currentUser as IUserWithID
+      currentUser
     );
 
     res.status(StatusCodes.CREATED).json({
