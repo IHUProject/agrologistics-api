@@ -1,5 +1,4 @@
 import { StatusCodes } from 'http-status-codes';
-import { IUserWithID } from '../interfaces/interfaces';
 import { CategoryService } from '../services/category-service';
 import { Request, Response } from 'express';
 import Category from '../models/Category';
@@ -15,7 +14,7 @@ export class CategoryController {
 
     const client = await this.categoryService.createCategory(
       body,
-      currentUser as IUserWithID
+      currentUser
     );
 
     res

@@ -1,6 +1,5 @@
 import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
-import { IUserWithID } from '../interfaces/interfaces';
 import { SupplierService } from '../services/supplier-service';
 import Supplier from '../models/Supplier';
 
@@ -12,7 +11,7 @@ export class SupplierController {
 
   public async createSupplier(req: Request, res: Response) {
     const { body, currentUser } = req;
-    const { company, userId } = currentUser as IUserWithID;
+    const { company, userId } = currentUser;
 
     const supplier = await this.supplierService.createSupplier({
       ...body,

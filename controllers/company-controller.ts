@@ -14,15 +14,14 @@ export class CompanyController {
   public async createCompany(req: Request, res: Response) {
     const { body, currentUser } = req;
     const { file } = req;
-    console.log(body);
 
     const company = await this.companyService.createCompany(
       body,
-      currentUser as IUserWithID,
+      currentUser,
       file
     );
 
-    await reattachTokens(res, (currentUser as IUserWithID)?.userId.toString());
+    await reattachTokens(res, currentUser.userId.toString());
     res
       .status(StatusCodes.CREATED)
       .json({ company, message: 'Company had been successfully created!' });

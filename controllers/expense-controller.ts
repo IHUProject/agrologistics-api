@@ -1,6 +1,5 @@
 import { ExpenseService } from './../services/expense-service';
 import { StatusCodes } from 'http-status-codes';
-import { IUserWithID } from '../interfaces/interfaces';
 import { Request, Response } from 'express';
 import { normalizeFilesInput } from '../helpers/handle-images';
 import Expanse from '../models/Expense';
@@ -18,7 +17,7 @@ export class ExpenseController {
     const client = await this.expenseService.createExpense(
       body,
       fileArray,
-      currentUser as IUserWithID
+      currentUser
     );
 
     res
