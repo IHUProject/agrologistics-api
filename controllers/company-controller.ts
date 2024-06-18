@@ -1,7 +1,6 @@
 import { Response, Request } from 'express';
 import { CompanyService } from '../services/company-service';
 import { StatusCodes } from 'http-status-codes';
-import { IUserWithID } from '../interfaces/interfaces';
 import { reattachTokens } from '../helpers/re-attack-tokens';
 
 export class CompanyController {
@@ -47,7 +46,7 @@ export class CompanyController {
   public async deleteCompany(req: Request, res: Response) {
     const { id } = req.params;
     const { currentUser } = req;
-    const { userId } = currentUser as IUserWithID;
+    const { userId } = currentUser;
 
     const company = await this.companyService.deleteCompany(id);
     const token = await reattachTokens(res, userId.toString());

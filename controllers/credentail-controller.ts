@@ -1,7 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 import { CredentialService } from '../services/credential-service';
-import { IUserWithID } from '../interfaces/interfaces';
 
 export class CredsController {
   private credService: CredentialService;

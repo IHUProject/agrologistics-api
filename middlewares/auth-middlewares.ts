@@ -19,7 +19,6 @@ export const authenticateUser = async (
 
   try {
     const payload = isValidToken(token) as IUserWithID;
-
     const user = await User.findById(payload.userId);
     
     if(!user){
