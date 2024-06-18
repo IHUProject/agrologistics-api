@@ -12,21 +12,21 @@ export class AuthController {
   public async register(req: Request, res: Response) {
     const { file, body } = req;
     const user = await this.authService.registerUser(body, file);
-    attachTokens(res, user);
+    const token = attachTokens(res, user);
 
     res
       .status(StatusCodes.CREATED)
-      .json({ user, message: 'User has been successfully created!' });
+      .json({ user, token, message: 'User has been successfully created!' });
   }
 
   public async login(req: Request, res: Response) {
     const { body } = req;
     const user = await this.authService.loginUser(body);
-    attachTokens(res, user);
+    const token = attachTokens(res, user);
 
     res
       .status(StatusCodes.OK)
-      .json({ user, message: 'User has been successfully logged in!' });
+      .json({ user, token, message: 'User has been successfully logged in!' });
   }
 
   logout(req: Request, res: Response) {

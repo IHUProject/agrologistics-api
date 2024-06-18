@@ -4,13 +4,14 @@ import { Request, Response, NextFunction } from 'express';
 import { BadRequestError } from '../errors';
 import { Roles } from '../interfaces/enums';
 import { isValidToken } from '../helpers/jwt';
+import User from '../models/User';
 
 export const authenticateUser = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const token: string = req.signedCookies.token;
+  const token: string = req.signedCookies.token || req.headers.authorization?.split(' ')[1] || '';
 
   if (!token) {
     throw new ForbiddenError('Access denied, no user available!');
@@ -19,16 +20,22 @@ export const authenticateUser = async (
   try {
     const payload = isValidToken(token) as IUserWithID;
 
+    const user = await User.findById(payload.userId);
+    
+    if(!user){
+      throw new BadRequestError('User token/id problem...');
+    }
+
     // Attach the user to the req object
     req.currentUser = {
-      userId: payload.userId,
-      firstName: payload.firstName,
-      lastName: payload.lastName,
-      email: payload.email,
-      role: payload.role,
-      image: payload.image,
-      phone: payload.phone,
-      company: payload.company,
+      userId: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+      image: user.image,
+      phone: user.phone,
+      company: user.company,
     } as IUserWithID;
 
     next();
@@ -42,7 +49,7 @@ export const isLoggedIn = async (
   res: Response,
   next: NextFunction
 ) => {
-  const token: string = req.signedCookies.token;
+  const token: string = req.signedCookies.token || req.headers.authorization?.split(' ')[1] || '';
 
   if (token) {
     throw new BadRequestError('You are all ready logged in');
@@ -56,7 +63,7 @@ export const isNotLoggedIn = async (
   res: Response,
   next: NextFunction
 ) => {
-  const token: string = req.signedCookies.token;
+  const token: string = req.signedCookies.token || req.headers.authorization?.split(' ')[1] || '';
 
   if (!token) {
     throw new BadRequestError('There is no user to logout');
