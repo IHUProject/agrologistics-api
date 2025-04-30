@@ -1,28 +1,24 @@
-import { ForbiddenError } from '../errors/forbidden';
-import { IUserWithID } from '../interfaces/interfaces';
-import { Request, Response, NextFunction } from 'express';
-import { BadRequestError } from '../errors';
-import { Roles } from '../interfaces/enums';
-import { isValidToken } from '../helpers/jwt';
-import User from '../models/User';
+import { ForbiddenError } from '../errors/forbidden'
+import { IUserWithID } from '../interfaces/interfaces'
+import { Request, Response, NextFunction } from 'express'
+import { BadRequestError } from '../errors'
+import { Roles } from '../interfaces/enums'
+import { isValidToken } from '../helpers/jwt'
+import User from '../models/User'
 
-export const authenticateUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const token: string = req.signedCookies.token || req.headers.authorization?.split(' ')[1] || '';
+export const authenticateUser = async (req: Request, res: Response, next: NextFunction) => {
+  const token: string = req.signedCookies.token || req.headers.authorization?.split(' ')[1] || ''
 
   if (!token) {
-    throw new ForbiddenError('Access denied, no user available!');
+    throw new ForbiddenError('Access denied, no user available!')
   }
 
   try {
-    const payload = isValidToken(token) as IUserWithID;
-    const user = await User.findById(payload.userId);
-    
-    if(!user){
-      throw new BadRequestError('User token/id problem...');
+    const payload = isValidToken(token) as IUserWithID
+    const user = await User.findById(payload.userId)
+
+    if (!user) {
+      throw new BadRequestError('User token/id problem...')
     }
 
     // Attach the user to the req object
@@ -34,48 +30,40 @@ export const authenticateUser = async (
       role: user.role,
       image: user.image,
       phone: user.phone,
-      company: user.company,
-    } as IUserWithID;
+      company: user.company
+    } as IUserWithID
 
-    next();
+    next()
   } catch (error) {
-    throw new ForbiddenError('Access denied');
+    throw new ForbiddenError('Access denied')
   }
-};
+}
 
-export const isLoggedIn = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const token: string = req.signedCookies.token || req.headers.authorization?.split(' ')[1] || '';
+export const isLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
+  const token: string = req.signedCookies.token || req.headers.authorization?.split(' ')[1] || ''
 
   if (token) {
-    throw new BadRequestError('You are all ready logged in');
+    throw new BadRequestError('You are all ready logged in')
   }
 
-  next();
-};
+  next()
+}
 
-export const isNotLoggedIn = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const token: string = req.signedCookies.token || req.headers.authorization?.split(' ')[1] || '';
+export const isNotLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
+  const token: string = req.signedCookies.token || req.headers.authorization?.split(' ')[1] || ''
 
   if (!token) {
-    throw new BadRequestError('There is no user to logout');
+    throw new BadRequestError('There is no user to logout')
   }
 
-  next();
-};
+  next()
+}
 
 export const authorizePermissions =
   (...roles: Roles[]) =>
   (req: Request, res: Response, next: NextFunction) => {
     if (!roles.includes(req.currentUser?.role as Roles)) {
-      throw new ForbiddenError('Unauthorized to access this route');
+      throw new ForbiddenError('Unauthorized to access this route')
     }
-    next();
-  };
+    next()
+  }

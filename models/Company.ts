@@ -1,17 +1,17 @@
-import mongoose, { Schema } from 'mongoose';
-import './Expense';
-import './Supplier';
-import './Category';
-import './Credential';
-import { ICompany } from '../interfaces/interfaces';
+import mongoose, { Schema } from 'mongoose'
+import './Expense'
+import './Supplier'
+import './Category'
+import './Credential'
+import { ICompany } from '../interfaces/interfaces'
 import {
   validateAFM,
   validateDate,
   validateLatitude,
   validateLongitude,
-  validatePhoneNumber,
-} from '../helpers/validate-schema-properties';
-import { DefaultImage } from '../interfaces/enums';
+  validatePhoneNumber
+} from '../helpers/validate-schema-properties'
+import { DefaultImage } from '../interfaces/enums'
 
 const companySchema = new Schema<ICompany>(
   {
@@ -19,16 +19,13 @@ const companySchema = new Schema<ICompany>(
       type: String,
       required: [true, 'Please provide company name.'],
       minlength: 3,
-      maxlength: 35,
+      maxlength: 35
     },
     phone: {
       type: Number,
       unique: true,
       default: null,
-      validate: [
-        validatePhoneNumber,
-        'Invalid phone number, must be 10 digits.',
-      ],
+      validate: [validatePhoneNumber, 'Invalid phone number, must be 10 digits.']
     },
     address: { type: String, minlength: 5, maxlength: 35 },
     afm: {
@@ -36,90 +33,89 @@ const companySchema = new Schema<ICompany>(
       required: [true, 'Please provide AFM.'],
       validate: {
         validator: validateAFM,
-        message: (props) => `${props.value} is not a valid AFM.`,
-      },
+        message: props => `${props.value} is not a valid AFM.`
+      }
     },
     logo: {
       link: { type: String, default: DefaultImage.LOGO },
-      deletehash: { type: String, default: '' },
+      deletehash: { type: String, default: '' }
     },
     founded: {
       type: Date,
       default: null,
       validate: {
         validator: validateDate,
-        message: (props) =>
-          `${props.value} is not a valid date, please use the format YYYY/MM/DD.`,
-      },
+        message: props => `${props.value} is not a valid date, please use the format YYYY/MM/DD.`
+      }
     },
     latitude: {
       type: Number,
       default: null,
       validate: {
         validator: validateLatitude,
-        message: (props) =>
-          `${props.value} is not a valid latitude, latitude must be a number between -90 and 90.`,
-      },
+        message: props =>
+          `${props.value} is not a valid latitude, latitude must be a number between -90 and 90.`
+      }
     },
     longitude: {
       type: Number,
       default: null,
       validate: {
         validator: validateLongitude,
-        message: (props) =>
-          `${props.value} is not a valid longitude, longitude must be a number between -180 and 180.`,
-      },
+        message: props =>
+          `${props.value} is not a valid longitude, longitude must be a number between -180 and 180.`
+      }
     },
     owner: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'Please provide an owner.'],
+      required: [true, 'Please provide an owner.']
     },
     employees: {
       type: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-      default: [],
+      default: []
     },
     accountant: {
       type: Schema.Types.ObjectId,
       ref: 'Accountant',
-      default: null,
+      default: null
     },
     credentials: {
       type: Schema.Types.ObjectId,
       ref: 'Credential',
-      default: null,
+      default: null
     },
     products: {
       type: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
-      default: [],
+      default: []
     },
     suppliers: {
       type: [{ type: Schema.Types.ObjectId, ref: 'Supplier' }],
-      default: [],
+      default: []
     },
     expenses: {
       type: [{ type: Schema.Types.ObjectId, ref: 'Expanse' }],
-      default: [],
+      default: []
     },
     purchases: {
       type: [{ type: Schema.Types.ObjectId, ref: 'Purchase' }],
-      default: [],
+      default: []
     },
     clients: {
       type: [{ type: Schema.Types.ObjectId, ref: 'Client' }],
-      default: [],
+      default: []
     },
     categories: {
       type: [{ type: Schema.Types.ObjectId, ref: 'Category' }],
-      default: [],
-    },
+      default: []
+    }
   },
   {
     timestamps: true,
-    versionKey: false,
+    versionKey: false
   }
-);
+)
 
-const Company = mongoose.model<ICompany>('Company', companySchema);
+const Company = mongoose.model<ICompany>('Company', companySchema)
 
-export default Company;
+export default Company

@@ -1,6 +1,6 @@
-import mongoose, { Schema } from 'mongoose';
-import { ICredential } from '../interfaces/interfaces';
-import { validateGmail } from '../helpers/validate-schema-properties';
+import mongoose, { Schema } from 'mongoose'
+import { ICredential } from '../interfaces/interfaces'
+import { validateGmail } from '../helpers/validate-schema-properties'
 
 const credentialSchema = new Schema<ICredential>(
   {
@@ -12,30 +12,29 @@ const credentialSchema = new Schema<ICredential>(
       maxlength: 35,
       validate: {
         validator: validateGmail,
-        message: (props) =>
-          `${props.value} is not a valid Google email address.`,
-      },
+        message: props => `${props.value} is not a valid Google email address.`
+      }
     },
     pass: {
       type: String,
       required: [true, 'Provide last  name name for the client.'],
       minlength: 3,
-      maxlength: 50,
+      maxlength: 50
     },
     createdBy: {
       type: Schema.Types.ObjectId,
       required: [true, 'Please provide the creator.'],
-      ref: 'User',
+      ref: 'User'
     },
     company: {
       type: Schema.Types.ObjectId,
       required: [true, 'Please provide the company.'],
-      ref: 'Company',
-    },
+      ref: 'Company'
+    }
   },
   { timestamps: true, versionKey: false }
-);
+)
 
-const Credential = mongoose.model<ICredential>('Credential', credentialSchema);
+const Credential = mongoose.model<ICredential>('Credential', credentialSchema)
 
-export default Credential;
+export default Credential

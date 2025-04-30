@@ -1,18 +1,12 @@
-import { Request, Response, NextFunction } from 'express';
-import Accountant from '../models/Accountant';
-import { NotFoundError } from '../errors';
+import { Request, Response, NextFunction } from 'express'
+import Accountant from '../models/Accountant'
+import { NotFoundError } from '../errors'
 
-export const hasEmail = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const accountant = await Accountant.findOne();
+export const hasEmail = async (req: Request, res: Response, next: NextFunction) => {
+  const accountant = await Accountant.findOne()
   if (!accountant || !accountant.email) {
-    throw new NotFoundError(
-      'Accountant does not have email or does not exists!'
-    );
+    throw new NotFoundError('Accountant does not have email or does not exists!')
   }
 
-  next();
-};
+  next()
+}

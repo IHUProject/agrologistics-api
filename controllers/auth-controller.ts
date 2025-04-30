@@ -12,8 +12,7 @@ export class AuthController {
   public async register(req: Request, res: Response) {
     const { file, body } = req;
     const user = await this.authService.registerUser(body, file);
-    const token = attachTokens(res, user);
-
+    const token = attachTokens(res, user)
     res
       .status(StatusCodes.CREATED)
       .json({ user, token, message: 'User has been successfully created!' });

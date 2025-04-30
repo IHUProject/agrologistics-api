@@ -1,23 +1,20 @@
-import express from 'express';
-import { ExpenseController } from '../controllers/expense-controller';
+import express from 'express'
+import { ExpenseController } from '../controllers/expense-controller'
 import {
   hasCompanyOrUserId,
-  validateQueryPageAndQueryLimit,
-} from '../middlewares/validate-request-properties-middlewares';
-import multer, { memoryStorage } from 'multer';
-import {
-  isEntityExists,
-  isEntityExistsIdOnPayload,
-} from '../middlewares/is-entity-exists';
-import Expanse from '../models/Expense';
-import Supplier from '../models/Supplier';
-import Category from '../models/Category';
+  validateQueryPageAndQueryLimit
+} from '../middlewares/validate-request-properties-middlewares'
+import multer, { memoryStorage } from 'multer'
+import { isEntityExists, isEntityExistsIdOnPayload } from '../middlewares/is-entity-exists'
+import Expanse from '../models/Expense'
+import Supplier from '../models/Supplier'
+import Category from '../models/Category'
 
-const expenseController = new ExpenseController();
-const router = express.Router();
+const expenseController = new ExpenseController()
+const router = express.Router()
 
-const storage = memoryStorage();
-const upload = multer({ storage: storage });
+const storage = memoryStorage()
+const upload = multer({ storage: storage })
 
 router.post(
   '/create-expense',
@@ -26,22 +23,22 @@ router.post(
   isEntityExistsIdOnPayload(Category, 'category'),
   hasCompanyOrUserId,
   expenseController.createExpense.bind(expenseController)
-);
+)
 router.get(
   '/:id/get-expense',
   isEntityExists(Expanse),
   expenseController.getSingleExpense.bind(expenseController)
-);
+)
 router.get(
   '/get-expenses',
   validateQueryPageAndQueryLimit,
   expenseController.getExpenses.bind(expenseController)
-);
+)
 router.delete(
   '/:id/delete-expense',
   isEntityExists(Expanse),
   expenseController.deleteCategory.bind(expenseController)
-);
+)
 router.patch(
   '/:id/update-expense',
   isEntityExists(Expanse),
@@ -49,17 +46,17 @@ router.patch(
   isEntityExistsIdOnPayload(Supplier, 'supplier', true),
   isEntityExistsIdOnPayload(Category, 'category', true),
   expenseController.updateExpense.bind(expenseController)
-);
+)
 router.delete(
   '/:id/delete-image',
   isEntityExists(Expanse),
   expenseController.deleteImage.bind(expenseController)
-);
+)
 router.patch(
   '/:id/upload-images',
   upload.array('images'),
   isEntityExists(Expanse),
   expenseController.uploadImages.bind(expenseController)
-);
+)
 
-export default router;
+export default router

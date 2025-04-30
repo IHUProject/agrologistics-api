@@ -2,13 +2,13 @@ export enum Roles {
   OWNER = 'owner',
   SENIOR_EMPLOY = 'senior_employ',
   EMPLOY = 'typical_employ',
-  UNCATEGORIZED = 'uncategorized',
+  UNCATEGORIZED = 'uncategorized'
 }
 
 export enum DefaultImage {
   PROFILE_IMAGE = 'https://i.imgur.com/KrDUZ06.png',
   LOGO = 'https://i.imgur.com/WPgl8tQ.png',
-  EXPENSE_IMAGE = 'https://i.imgur.com/zhLkqWv.png',
+  EXPENSE_IMAGE = 'https://i.imgur.com/zhLkqWv.png'
 }
 
 export enum PaymentMethod {
@@ -16,16 +16,16 @@ export enum PaymentMethod {
   PAYPAL = 'Paypal',
   CASH = 'Cash',
   BANK_TRANSFER = 'Bank transfer',
-  OTHER = 'Other',
+  OTHER = 'Other'
 }
 
 export enum PurchaseExpenseStatus {
   PENDING = 'Pending',
   COMPLETED = 'Completed',
-  CANCELLED = 'Cancelled',
+  CANCELLED = 'Cancelled'
 }
 
 export enum EmailSubjects {
   EXPENSE = 'Δαπάνη',
-  PURCHASE = 'Αγορά',
+  PURCHASE = 'Αγορά'
 }

@@ -1,17 +1,17 @@
-import express from 'express';
-import { authorizePermissions } from '../middlewares/auth-middlewares';
-import { Roles } from '../interfaces/enums';
-import { SupplierController } from '../controllers/supplier-controller';
+import express from 'express'
+import { authorizePermissions } from '../middlewares/auth-middlewares'
+import { Roles } from '../interfaces/enums'
+import { SupplierController } from '../controllers/supplier-controller'
 import {
   hasCompanyOrUserId,
   hasExpenses,
-  validateQueryPageAndQueryLimit,
-} from '../middlewares/validate-request-properties-middlewares';
-import { isEntityExists } from '../middlewares/is-entity-exists';
-import Supplier from '../models/Supplier';
+  validateQueryPageAndQueryLimit
+} from '../middlewares/validate-request-properties-middlewares'
+import { isEntityExists } from '../middlewares/is-entity-exists'
+import Supplier from '../models/Supplier'
 
-const supplierController = new SupplierController();
-const router = express.Router();
+const supplierController = new SupplierController()
+const router = express.Router()
 
 router.post(
   '/create-supplier',
@@ -19,25 +19,25 @@ router.post(
   hasCompanyOrUserId,
   hasExpenses,
   supplierController.createSupplier.bind(supplierController)
-);
+)
 router.get(
   '/:id/get-supplier',
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
   isEntityExists(Supplier),
   supplierController.getSingleSupplier.bind(supplierController)
-);
+)
 router.get(
   '/get-suppliers',
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
   validateQueryPageAndQueryLimit,
   supplierController.getSuppliers.bind(supplierController)
-);
+)
 router.delete(
   '/:id/delete-supplier',
   authorizePermissions(Roles.OWNER, Roles.SENIOR_EMPLOY),
   isEntityExists(Supplier),
   supplierController.deleteSupplier.bind(supplierController)
-);
+)
 router.patch(
   '/:id/update-supplier',
   authorizePermissions(Roles.SENIOR_EMPLOY, Roles.OWNER, Roles.EMPLOY),
@@ -45,6 +45,6 @@ router.patch(
   hasCompanyOrUserId,
   hasExpenses,
   supplierController.updateSupplier.bind(supplierController)
-);
+)
 
-export default router;
+export default router
