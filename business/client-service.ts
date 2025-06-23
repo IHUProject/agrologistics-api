@@ -1,4 +1,4 @@
-import { populateClientOpt } from '../config/populate'
+import { populateClientOpt } from './config/populate'
 import { BadRequestError } from '../common/errors'
 import { IClient, IPopulate, IUserWithID } from '../types/interfaces'
 import Client from '../data-access/models/Client'

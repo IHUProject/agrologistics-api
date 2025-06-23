@@ -1,4 +1,4 @@
-import { populateExpensesOpt } from '../config/populate'
+import { populateExpensesOpt } from './config/populate'
 import { BadRequestError, NotFoundError } from '../common/errors'
 import { DefaultImage } from '../types/enums'
 import {

@@ -1,4 +1,4 @@
-import { populateProductOpt } from '../config/populate'
+import { populateProductOpt } from './config/populate'
 import { IPopulate, IProduct, IUserWithID } from '../types/interfaces'
 import Company from '../data-access/models/Company'
 import Product from '../data-access/models/Product'

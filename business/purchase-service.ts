@@ -1,4 +1,4 @@
-import { populatePurchaseOpt } from '../config/populate'
+import { populatePurchaseOpt } from './config/populate'
 import { BadRequestError } from '../common/errors'
 import { IPopulate, IPurchase, IUserWithID } from '../types/interfaces'
 import Client from '../data-access/models/Client'

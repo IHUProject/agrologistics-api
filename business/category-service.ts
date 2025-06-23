@@ -1,4 +1,4 @@
-import { populateCategoryOpt } from '../config/populate'
+import { populateCategoryOpt } from './config/populate'
 import { ICategory, IPopulate, IUserWithID } from '../types/interfaces'
 import Category from '../data-access/models/Category'
 import Company from '../data-access/models/Company'

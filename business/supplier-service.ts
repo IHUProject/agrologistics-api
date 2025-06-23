@@ -1,4 +1,4 @@
-import { populateSupplierOpt } from '../config/populate'
+import { populateSupplierOpt } from './config/populate'
 import { IPopulate, ISupplier } from '../types/interfaces'
 import Company from '../data-access/models/Company'
 import Expanse from '../data-access/models/Expense'

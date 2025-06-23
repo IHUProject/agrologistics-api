@@ -2,7 +2,7 @@ import Accountant from '../data-access/models/Accountant'
 import { IAccountant, IPopulate, IUserWithID } from '../types/interfaces'
 import Company from '../data-access/models/Company'
 import { BaseRepository } from '../data-access/base-repository'
-import { populateAccountantOpt } from '../config/populate'
+import { populateAccountantOpt } from './config/populate'
 import { checkIsFirstDocument } from '../common/helpers/is-first-doc'
 
 export class AccountantService extends BaseRepository<IAccountant> {

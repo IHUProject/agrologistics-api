@@ -1,4 +1,4 @@
-import { populateCredOpt } from '../config/populate'
+import { populateCredOpt } from './config/populate'
 import { checkIsFirstDocument } from '../common/helpers/is-first-doc'
 import { ICredential, IPopulate, IUserWithID } from '../types/interfaces'
 import Company from '../data-access/models/Company'
