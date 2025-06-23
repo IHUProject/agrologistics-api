@@ -1,4 +1,4 @@
-import { EmailSenderService } from './email-serder-service'
+import { EmailSenderService } from '../intergration/email-serder-service'
 import { BadRequestError, NotFoundError } from '../common/errors'
 import User from '../data-access/models/User'
 import { IDataImgur, IPasswordPayload, IUser } from '../types/interfaces'

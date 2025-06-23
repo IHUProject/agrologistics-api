@@ -1,6 +1,6 @@
 import { Response, Request } from 'express'
 import { StatusCodes } from 'http-status-codes'
-import { EmailSenderService } from '../../business/email-serder-service'
+import { EmailSenderService } from '../../intergration/email-serder-service'
 
 export class EmailSenderController {
   senderService: EmailSenderService
