@@ -1,5 +1,5 @@
 import express, { Router } from 'express'
-import { AuthController } from '../controllers/auth-controller'
+import { AuthController } from '../presentaition/auth-controller'
 import { isLoggedIn, isNotLoggedIn } from '../middlewares/auth-middlewares'
 import multer, { memoryStorage } from 'multer'
 import { hasRoleProperty } from '../middlewares/user-middlewares'
@@ -19,7 +19,16 @@ router.post(
   isLoggedIn,
   authController.register.bind(authController)
 )
-router.post('/login', upload.none(), isLoggedIn, authController.login.bind(authController))
-router.get('/logout', isNotLoggedIn, authController.logout.bind(authController))
+router.post(
+  '/login',
+  upload.none(),
+  isLoggedIn,
+  authController.login.bind(authController)
+)
+router.get(
+  '/logout',
+  isNotLoggedIn,
+  authController.logout.bind(authController)
+)
 
 export default router

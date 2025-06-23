@@ -1,17 +1,21 @@
 import { EmailSenderService } from './email-serder-service'
 import { BadRequestError, NotFoundError } from '../errors'
 import User from '../models/User'
-import { IDataImgur, IPasswordPayload, IUser } from '../interfaces/interfaces'
+import {
+  IDataImgur,
+  IPasswordPayload,
+  IUser
+} from '../interfaces/interfaces'
 import { ImageService } from './general-services/image-service'
 import { Roles } from '../interfaces/enums'
 import { ForbiddenError } from '../errors/forbidden'
 import Company from '../models/Company'
 import { createTokenUser } from '../helpers/create-token-user'
-import { DataLayerService } from './general-services/data-layer-service'
+import { BaseRepository } from '../data-access/base-repository'
 import { Types } from 'mongoose'
 import { randomBytes } from 'crypto'
 
-export class UserService extends DataLayerService<IUser> {
+export class UserService extends BaseRepository<IUser> {
   private imageService: ImageService
   private emailService: EmailSenderService
   private select: string
@@ -25,15 +29,24 @@ export class UserService extends DataLayerService<IUser> {
     this.searchFields = ['firstName', 'lastName', 'role']
   }
 
-  public async deleteUser(userId: string, isExternalRequest: boolean = false, userInfo?: IUser) {
+  public async deleteUser(
+    userId: string,
+    isExternalRequest: boolean = false,
+    userInfo?: IUser
+  ) {
     const user = !userInfo ? await this.getOne(userId) : userInfo
 
     const { role, company } = user
     if (role === Roles.OWNER && !isExternalRequest) {
-      throw new ForbiddenError('Please delete your company to proceed to this action!')
+      throw new ForbiddenError(
+        'Please delete your company to proceed to this action!'
+      )
     }
 
-    await Company.updateOne({ _id: company }, { $pull: { employees: userId } })
+    await Company.updateOne(
+      { _id: company },
+      { $pull: { employees: userId } }
+    )
 
     const { deletehash } = user.image
     if (deletehash) {
@@ -43,7 +56,11 @@ export class UserService extends DataLayerService<IUser> {
     return await this.delete(userId)
   }
 
-  public async updateUser(payload: IUser, userId: string, file: Express.Multer.File | undefined) {
+  public async updateUser(
+    payload: IUser,
+    userId: string,
+    file: Express.Multer.File | undefined
+  ) {
     await super.validateData(payload)
 
     let user = await this.getOne(userId)
@@ -62,7 +79,11 @@ export class UserService extends DataLayerService<IUser> {
     return createTokenUser(user)
   }
 
-  public async getUsers(page: string, searchString: string, limit: string) {
+  public async getUsers(
+    page: string,
+    searchString: string,
+    limit: string
+  ) {
     return await this.getMany(
       page,
       searchString,
@@ -96,7 +117,10 @@ export class UserService extends DataLayerService<IUser> {
     return 'Password has been change!'
   }
 
-  public async createUser(payload: IUser, file: Express.Multer.File | undefined) {
+  public async createUser(
+    payload: IUser,
+    file: Express.Multer.File | undefined
+  ) {
     await super.validateData(payload)
 
     const image = await this.imageService.handleSingleImage(file)
@@ -106,12 +130,19 @@ export class UserService extends DataLayerService<IUser> {
     })
     const { _id, company } = user
 
-    await Company.updateOne({ _id: company }, { $push: { employees: _id } })
+    await Company.updateOne(
+      { _id: company },
+      { $push: { employees: _id } }
+    )
 
     return await this.getOne(user._id, this.select)
   }
 
-  public async changeUserRole(userId: string, role: Roles, isExternalRequest: boolean = false) {
+  public async changeUserRole(
+    userId: string,
+    role: Roles,
+    isExternalRequest: boolean = false
+  ) {
     const user = await this.getOne(userId)
 
     if (!role) {
@@ -135,9 +166,15 @@ export class UserService extends DataLayerService<IUser> {
     } has been changed to ${user.role.replace('_', ' ')}`
   }
 
-  async addToCompany(userId: string, role: Roles, company: Types.ObjectId) {
+  async addToCompany(
+    userId: string,
+    role: Roles,
+    company: Types.ObjectId
+  ) {
     if (role === Roles.OWNER || role === Roles.UNCATEGORIZED) {
-      throw new BadRequestError('You can not make an employ owner or uncategorized!')
+      throw new BadRequestError(
+        'You can not make an employ owner or uncategorized!'
+      )
     }
 
     const user = await this.getSingleUser(userId)
@@ -152,11 +189,16 @@ export class UserService extends DataLayerService<IUser> {
       company
     })
 
-    await Company.updateOne({ _id: company }, { $push: { employees: userId } })
+    await Company.updateOne(
+      { _id: company },
+      { $push: { employees: userId } }
+    )
 
     const message = `The user ${user.firstName} ${
       user.lastName
-    } has been added to the company with role: ${role.replace('_', ' ') || Roles.EMPLOY}`
+    } has been added to the company with role: ${
+      role.replace('_', ' ') || Roles.EMPLOY
+    }`
 
     return message
   }

@@ -1,5 +1,5 @@
 import express from 'express'
-import { EmailSenderController } from '../controllers/email-sender-controller'
+import { EmailSenderController } from '../presentaition/email-sender-controller'
 import { isEntityExists } from '../middlewares/is-entity-exists'
 import Expanse from '../models/Expense'
 import { checkUnsendItems } from '../middlewares/check-unsend-items'

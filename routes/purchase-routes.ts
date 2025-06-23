@@ -1,5 +1,5 @@
 import express from 'express'
-import { PurchaseController } from '../controllers/purchase-controller'
+import { PurchaseController } from '../presentaition/purchase-controller'
 import {
   areProductsExists,
   hasCompanyOrUserId,
@@ -7,7 +7,10 @@ import {
   validateQueryPageAndQueryLimit
 } from '../middlewares/validate-request-properties-middlewares'
 import multer, { memoryStorage } from 'multer'
-import { isEntityExists, isEntityExistsIdOnPayload } from '../middlewares/is-entity-exists'
+import {
+  isEntityExists,
+  isEntityExistsIdOnPayload
+} from '../middlewares/is-entity-exists'
 import Purchase from '../models/Purchase'
 import Client from '../models/Client'
 

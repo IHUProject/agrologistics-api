@@ -22,7 +22,7 @@ import { UserService } from './user-service'
 import Product from '../models/Product'
 import Client from '../models/Client'
 import { deleteDocuments } from '../helpers/delete-docs'
-import { DataLayerService } from './general-services/data-layer-service'
+import { BaseRepository } from '../data-access/base-repository'
 import Purchase from '../models/Purchase'
 import { populateCompanyOpt } from '../config/populate'
 import Company from '../models/Company'
@@ -31,7 +31,7 @@ import Expanse from '../models/Expense'
 import Credential from '../models/Credential'
 import { checkIsFirstDocument } from '../helpers/is-first-doc'
 
-export class CompanyService extends DataLayerService<ICompany> {
+export class CompanyService extends BaseRepository<ICompany> {
   private imageService: ImageService
   private userService: UserService
   private populateOptions: IPopulate[]
@@ -84,7 +84,12 @@ export class CompanyService extends DataLayerService<ICompany> {
       logo = await this.imageService.handleSingleImage(file)
     }
 
-    company = await this.update(companyId, { ...payload, logo }, this.select, this.populateOptions)
+    company = await this.update(
+      companyId,
+      { ...payload, logo },
+      this.select,
+      this.populateOptions
+    )
 
     return company
   }

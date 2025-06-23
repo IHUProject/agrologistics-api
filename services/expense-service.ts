@@ -1,15 +1,20 @@
 import { populateExpensesOpt } from '../config/populate'
 import { BadRequestError, NotFoundError } from '../errors'
 import { DefaultImage } from '../interfaces/enums'
-import { IDataImgur, IExpense, IPopulate, IUserWithID } from '../interfaces/interfaces'
+import {
+  IDataImgur,
+  IExpense,
+  IPopulate,
+  IUserWithID
+} from '../interfaces/interfaces'
 import Category from '../models/Category'
 import Company from '../models/Company'
 import Expanse from '../models/Expense'
 import Supplier from '../models/Supplier'
-import { DataLayerService } from './general-services/data-layer-service'
+import { BaseRepository } from '../data-access/base-repository'
 import { ImageService } from './general-services/image-service'
 
-export class ExpenseService extends DataLayerService<IExpense> {
+export class ExpenseService extends BaseRepository<IExpense> {
   private select: string
   private populateOptions: IPopulate[]
   private searchFields: string[]
@@ -41,8 +46,14 @@ export class ExpenseService extends DataLayerService<IExpense> {
 
     const { _id, supplier, category } = expense
     await Company.updateOne({ _id: company }, { $push: { expenses: _id } })
-    await Supplier.updateOne({ _id: supplier }, { $push: { expenses: _id } })
-    await Category.updateOne({ _id: category }, { $push: { expenses: _id } })
+    await Supplier.updateOne(
+      { _id: supplier },
+      { $push: { expenses: _id } }
+    )
+    await Category.updateOne(
+      { _id: category },
+      { $push: { expenses: _id } }
+    )
 
     return this.getOne(_id, this.select, this.populateOptions)
   }
@@ -51,7 +62,11 @@ export class ExpenseService extends DataLayerService<IExpense> {
     return await this.getOne(expenseId, this.select, this.populateOptions)
   }
 
-  public async getExpenses(page: string, searchString: string, limit: string) {
+  public async getExpenses(
+    page: string,
+    searchString: string,
+    limit: string
+  ) {
     return await this.getMany(
       page,
       searchString,
@@ -69,16 +84,33 @@ export class ExpenseService extends DataLayerService<IExpense> {
     if (supplier || category) {
       const expense = await this.getOne(expenseId)
       if (supplier && supplier !== expense.supplier) {
-        await Supplier.updateOne({ _id: expense.supplier }, { $pull: { expenses: expenseId } })
-        await Supplier.updateOne({ _id: supplier }, { $push: { expenses: expenseId } })
+        await Supplier.updateOne(
+          { _id: expense.supplier },
+          { $pull: { expenses: expenseId } }
+        )
+        await Supplier.updateOne(
+          { _id: supplier },
+          { $push: { expenses: expenseId } }
+        )
       }
       if (category && category !== expense.category) {
-        await Category.updateOne({ _id: expense.category }, { $pull: { expenses: expenseId } })
-        await Category.updateOne({ _id: category }, { $push: { expenses: expenseId } })
+        await Category.updateOne(
+          { _id: expense.category },
+          { $pull: { expenses: expenseId } }
+        )
+        await Category.updateOne(
+          { _id: category },
+          { $push: { expenses: expenseId } }
+        )
       }
     }
 
-    return await this.update(expenseId, payload, this.select, this.populateOptions)
+    return await this.update(
+      expenseId,
+      payload,
+      this.select,
+      this.populateOptions
+    )
   }
 
   public async deleteExpense(expenseId: string) {
@@ -86,8 +118,14 @@ export class ExpenseService extends DataLayerService<IExpense> {
     const { company, _id } = deletedExpense
 
     await Company.updateOne({ _id: company }, { $pull: { expenses: _id } })
-    await Supplier.updateOne({ expenses: _id }, { $pull: { expenses: _id } })
-    await Category.updateOne({ expenses: _id }, { $pull: { expenses: _id } })
+    await Supplier.updateOne(
+      { expenses: _id },
+      { $pull: { expenses: _id } }
+    )
+    await Category.updateOne(
+      { expenses: _id },
+      { $pull: { expenses: _id } }
+    )
 
     return deletedExpense
   }
@@ -98,11 +136,15 @@ export class ExpenseService extends DataLayerService<IExpense> {
       throw new NotFoundError('Expense did not found!')
     }
 
-    expense.images = expense.images.filter(image => image?._id!.toString() !== imageId)
+    expense.images = expense.images.filter(
+      image => image?._id!.toString() !== imageId
+    )
 
     await expense.save()
 
-    const imageToDelete = expense.images.find(image => image._id!.toString() === imageId)
+    const imageToDelete = expense.images.find(
+      image => image._id!.toString() === imageId
+    )
 
     const { deletehash } = imageToDelete as IDataImgur
     if (deletehash) {
@@ -122,7 +164,10 @@ export class ExpenseService extends DataLayerService<IExpense> {
     await this.getOne(expenseId, this.select, this.populateOptions)
   }
 
-  public async uploadImages(expenseId: string, files: Express.Multer.File[] | undefined) {
+  public async uploadImages(
+    expenseId: string,
+    files: Express.Multer.File[] | undefined
+  ) {
     const images = await this.imageService.handleMultipleImages(files)
     if (!images) {
       throw new BadRequestError('No images found!')

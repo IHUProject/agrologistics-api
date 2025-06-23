@@ -1,7 +1,7 @@
 import express from 'express'
 import { authorizePermissions } from '../middlewares/auth-middlewares'
 import { Roles } from '../interfaces/enums'
-import { ProductController } from '../controllers/product-controller'
+import { ProductController } from '../presentaition/product-controller'
 import {
   hasCompanyOrUserId,
   hasPurchasesProperty,

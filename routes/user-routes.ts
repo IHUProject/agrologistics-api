@@ -1,6 +1,10 @@
 import express from 'express'
-import { authenticateUser, authorizePermissions, isLoggedIn } from '../middlewares/auth-middlewares'
-import { UserController } from '../controllers/user-controller'
+import {
+  authenticateUser,
+  authorizePermissions,
+  isLoggedIn
+} from '../middlewares/auth-middlewares'
+import { UserController } from '../presentaition/user-controller'
 import {
   hasCompanyOrUserId,
   validateQueryPageAndQueryLimit

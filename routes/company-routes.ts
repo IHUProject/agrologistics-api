@@ -1,6 +1,6 @@
 import express from 'express'
 import { authorizePermissions } from '../middlewares/auth-middlewares'
-import { CompanyController } from '../controllers/company-controller'
+import { CompanyController } from '../presentaition/company-controller'
 import { Roles } from '../interfaces/enums'
 import multer, { memoryStorage } from 'multer'
 import {
@@ -44,6 +44,9 @@ router.patch(
   validateCoordinates,
   companyController.updateCompany.bind(companyController)
 )
-router.get('/is-company-exists', companyController.isCompanyExists.bind(companyController))
+router.get(
+  '/is-company-exists',
+  companyController.isCompanyExists.bind(companyController)
+)
 
 export default router

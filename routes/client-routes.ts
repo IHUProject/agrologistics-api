@@ -1,7 +1,7 @@
 import express from 'express'
 import { authorizePermissions } from '../middlewares/auth-middlewares'
 import { Roles } from '../interfaces/enums'
-import { ClientController } from '../controllers/client-controller'
+import { ClientController } from '../presentaition/client-controller'
 import {
   hasCompanyOrUserId,
   hasPurchasesProperty,

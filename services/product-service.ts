@@ -3,9 +3,9 @@ import { IPopulate, IProduct, IUserWithID } from '../interfaces/interfaces'
 import Company from '../models/Company'
 import Product from '../models/Product'
 import Purchase from '../models/Purchase'
-import { DataLayerService } from './general-services/data-layer-service'
+import { BaseRepository } from '../data-access/base-repository'
 
-export class ProductService extends DataLayerService<IProduct> {
+export class ProductService extends BaseRepository<IProduct> {
   private select: string
   private populateOptions: IPopulate[]
   private searchFields: string[]
@@ -37,7 +37,11 @@ export class ProductService extends DataLayerService<IProduct> {
     return await this.getOne(productId, this.select, this.populateOptions)
   }
 
-  public async getProducts(page: string, searchString: string, limit: string) {
+  public async getProducts(
+    page: string,
+    searchString: string,
+    limit: string
+  ) {
     return await this.getMany(
       page,
       searchString,
@@ -50,7 +54,12 @@ export class ProductService extends DataLayerService<IProduct> {
 
   public async updateProduct(payload: IProduct, productId: string) {
     await super.validateData(payload)
-    return await this.update(productId, payload, this.select, this.populateOptions)
+    return await this.update(
+      productId,
+      payload,
+      this.select,
+      this.populateOptions
+    )
   }
 
   public async deleteProduct(productId: string) {
@@ -58,7 +67,10 @@ export class ProductService extends DataLayerService<IProduct> {
     const { company, _id } = deletedProduct
 
     await Company.updateOne({ _id: company }, { $pull: { products: _id } })
-    await Purchase.updateMany({ products: _id }, { $pull: { products: _id } })
+    await Purchase.updateMany(
+      { products: _id },
+      { $pull: { products: _id } }
+    )
 
     return deletedProduct
   }

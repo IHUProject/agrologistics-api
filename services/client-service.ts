@@ -4,9 +4,9 @@ import { IClient, IPopulate, IUserWithID } from '../interfaces/interfaces'
 import Client from '../models/Client'
 import Company from '../models/Company'
 import Purchase from '../models/Purchase'
-import { DataLayerService } from './general-services/data-layer-service'
+import { BaseRepository } from '../data-access/base-repository'
 
-export class ClientService extends DataLayerService<IClient> {
+export class ClientService extends BaseRepository<IClient> {
   private select: string
   private populateOptions: IPopulate[]
   private searchFields: string[]
@@ -44,7 +44,11 @@ export class ClientService extends DataLayerService<IClient> {
     return await this.getOne(clientId, this.select, this.populateOptions)
   }
 
-  public async getClients(page: string, searchString: string, limit: string) {
+  public async getClients(
+    page: string,
+    searchString: string,
+    limit: string
+  ) {
     return await this.getMany(
       page,
       searchString,
@@ -58,14 +62,25 @@ export class ClientService extends DataLayerService<IClient> {
   public async deleteClient(clientId: string) {
     const deleteClient = (await this.delete(clientId)) as IClient
 
-    await Purchase.updateMany({ client: clientId }, { $unset: { client: null } })
-    await Company.updateOne({ _id: deleteClient.company }, { $pull: { clients: clientId } })
+    await Purchase.updateMany(
+      { client: clientId },
+      { $unset: { client: null } }
+    )
+    await Company.updateOne(
+      { _id: deleteClient.company },
+      { $pull: { clients: clientId } }
+    )
 
     return deleteClient
   }
 
   public async updateClient(payload: IClient, clientId: string) {
     await super.validateData(payload)
-    return await this.update(clientId, payload, this.select, this.populateOptions)
+    return await this.update(
+      clientId,
+      payload,
+      this.select,
+      this.populateOptions
+    )
   }
 }

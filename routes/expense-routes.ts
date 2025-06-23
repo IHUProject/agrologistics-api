@@ -1,11 +1,14 @@
 import express from 'express'
-import { ExpenseController } from '../controllers/expense-controller'
+import { ExpenseController } from '../presentaition/expense-controller'
 import {
   hasCompanyOrUserId,
   validateQueryPageAndQueryLimit
 } from '../middlewares/validate-request-properties-middlewares'
 import multer, { memoryStorage } from 'multer'
-import { isEntityExists, isEntityExistsIdOnPayload } from '../middlewares/is-entity-exists'
+import {
+  isEntityExists,
+  isEntityExistsIdOnPayload
+} from '../middlewares/is-entity-exists'
 import Expanse from '../models/Expense'
 import Supplier from '../models/Supplier'
 import Category from '../models/Category'

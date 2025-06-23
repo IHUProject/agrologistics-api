@@ -1,5 +1,5 @@
 import express, { Router } from 'express'
-import { AccountantController } from '../controllers/accountant-controller'
+import { AccountantController } from '../presentaition/accountant-controller'
 import { authorizePermissions } from '../middlewares/auth-middlewares'
 import { Roles } from '../interfaces/enums'
 import {

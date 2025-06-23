@@ -3,9 +3,9 @@ import User from '../models/User'
 import { createTokenUser } from '../helpers/create-token-user'
 import { IUser } from '../interfaces/interfaces'
 import { ImageService } from './general-services/image-service'
-import { DataLayerService } from './general-services/data-layer-service'
+import { BaseRepository } from '../data-access/base-repository'
 
-export class AuthService extends DataLayerService<IUser> {
+export class AuthService extends BaseRepository<IUser> {
   private imageService: ImageService
 
   constructor() {
@@ -13,7 +13,10 @@ export class AuthService extends DataLayerService<IUser> {
     this.imageService = new ImageService()
   }
 
-  public async registerUser(payload: IUser, file: Express.Multer.File | undefined) {
+  public async registerUser(
+    payload: IUser,
+    file: Express.Multer.File | undefined
+  ) {
     await super.validateData(payload)
     const image = await this.imageService.handleSingleImage(file)
     const user = await super.create({ ...payload, image })
@@ -25,12 +28,16 @@ export class AuthService extends DataLayerService<IUser> {
 
     const user = await User.findOne({ email })
     if (!user) {
-      throw new UnauthorizedError('The e-mail or password are not correct!')
+      throw new UnauthorizedError(
+        'The e-mail or password are not correct!'
+      )
     }
 
     const isPasswordCorrect = await user.comparePassword(password)
     if (!isPasswordCorrect) {
-      throw new UnauthorizedError('The e-mail or password are not correct!')
+      throw new UnauthorizedError(
+        'The e-mail or password are not correct!'
+      )
     }
 
     return createTokenUser(user)

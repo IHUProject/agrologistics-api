@@ -1,9 +1,9 @@
 import { Model } from 'mongoose'
-import { createSearchQuery } from '../../helpers/create-search-query'
-import { IPopulate } from '../../interfaces/interfaces'
-import { BadRequestError } from '../../errors'
+import { createSearchQuery } from '../helpers/create-search-query'
+import { IPopulate } from '../interfaces/interfaces'
+import { BadRequestError } from '../errors'
 
-export class DataLayerService<T> {
+export class BaseRepository<T> {
   public model: Model<T>
 
   constructor(model: Model<T>) {
@@ -29,8 +29,15 @@ export class DataLayerService<T> {
       .populate(populateOptions)) as T[]
   }
 
-  public async getOne(id: string, selectOptions = '', populateOptions: Array<IPopulate> = []) {
-    return (await this.model.findById(id).select(selectOptions).populate(populateOptions)) as T
+  public async getOne(
+    id: string,
+    selectOptions = '',
+    populateOptions: Array<IPopulate> = []
+  ) {
+    return (await this.model
+      .findById(id)
+      .select(selectOptions)
+      .populate(populateOptions)) as T
   }
 
   public async create(data: Partial<T>) {
@@ -51,7 +58,9 @@ export class DataLayerService<T> {
   }
 
   public async delete(id: string) {
-    return (await this.model.findByIdAndDelete(id).select('-createdAt')) as T
+    return (await this.model
+      .findByIdAndDelete(id)
+      .select('-createdAt')) as T
   }
 
   public async validateData(data: Partial<T>) {
@@ -64,7 +73,9 @@ export class DataLayerService<T> {
     })
 
     if (invalidKeys.length) {
-      throw new BadRequestError(`Invalid properties in data: ${invalidKeys.join(', ')}`)
+      throw new BadRequestError(
+        `Invalid properties in data: ${invalidKeys.join(', ')}`
+      )
     }
   }
 }

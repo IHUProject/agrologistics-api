@@ -3,9 +3,9 @@ import { IPopulate, ISupplier } from '../interfaces/interfaces'
 import Company from '../models/Company'
 import Expanse from '../models/Expense'
 import Supplier from '../models/Supplier'
-import { DataLayerService } from './general-services/data-layer-service'
+import { BaseRepository } from '../data-access/base-repository'
 
-export class SupplierService extends DataLayerService<ISupplier> {
+export class SupplierService extends BaseRepository<ISupplier> {
   private select: string
   private populateOptions: IPopulate[]
   private searchFields: string[]
@@ -23,7 +23,10 @@ export class SupplierService extends DataLayerService<ISupplier> {
     const supplier = await super.create(payload)
     const { _id, company } = supplier
 
-    await Company.updateOne({ _id: company }, { $push: { suppliers: _id } })
+    await Company.updateOne(
+      { _id: company },
+      { $push: { suppliers: _id } }
+    )
 
     return await this.getOne(_id, this.select, this.populateOptions)
   }
@@ -32,7 +35,11 @@ export class SupplierService extends DataLayerService<ISupplier> {
     return await this.getOne(supplierId, this.select, this.populateOptions)
   }
 
-  public async getSuppliers(page: string, searchString: string, limit: string) {
+  public async getSuppliers(
+    page: string,
+    searchString: string,
+    limit: string
+  ) {
     return await this.getMany(
       page,
       searchString,
@@ -47,14 +54,25 @@ export class SupplierService extends DataLayerService<ISupplier> {
     const deletedSupplier = (await this.delete(supplierId)) as ISupplier
     const { _id, company } = deletedSupplier
 
-    await Company.updateOne({ _id: company }, { $pull: { suppliers: _id } })
-    await Expanse.updateMany({ supplier: _id }, { $unset: { supplier: null } })
+    await Company.updateOne(
+      { _id: company },
+      { $pull: { suppliers: _id } }
+    )
+    await Expanse.updateMany(
+      { supplier: _id },
+      { $unset: { supplier: null } }
+    )
 
     return deletedSupplier
   }
 
   public async updateSupplier(payload: ISupplier, supplierId: string) {
     await super.validateData(payload)
-    return await this.update(supplierId, payload, this.select, this.populateOptions)
+    return await this.update(
+      supplierId,
+      payload,
+      this.select,
+      this.populateOptions
+    )
   }
 }

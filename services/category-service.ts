@@ -1,11 +1,15 @@
 import { populateCategoryOpt } from '../config/populate'
-import { ICategory, IPopulate, IUserWithID } from '../interfaces/interfaces'
+import {
+  ICategory,
+  IPopulate,
+  IUserWithID
+} from '../interfaces/interfaces'
 import Category from '../models/Category'
 import Company from '../models/Company'
 import Expanse from '../models/Expense'
-import { DataLayerService } from './general-services/data-layer-service'
+import { BaseRepository } from '../data-access/base-repository'
 
-export class CategoryService extends DataLayerService<ICategory> {
+export class CategoryService extends BaseRepository<ICategory> {
   private select: string
   private populateOptions: IPopulate[]
   private searchFields: string[]
@@ -17,7 +21,10 @@ export class CategoryService extends DataLayerService<ICategory> {
     this.select = '-createdAt'
   }
 
-  public async createCategory(payload: ICategory, currentUser: IUserWithID) {
+  public async createCategory(
+    payload: ICategory,
+    currentUser: IUserWithID
+  ) {
     await super.validateData(payload)
 
     const { userId, company } = currentUser
@@ -28,7 +35,10 @@ export class CategoryService extends DataLayerService<ICategory> {
     })
     const { _id } = category
 
-    await Company.updateOne({ _id: company }, { $push: { categories: _id } })
+    await Company.updateOne(
+      { _id: company },
+      { $push: { categories: _id } }
+    )
 
     return this.getOne(_id, this.select, this.populateOptions)
   }
@@ -37,7 +47,11 @@ export class CategoryService extends DataLayerService<ICategory> {
     return await this.getOne(categoryId, this.select, this.populateOptions)
   }
 
-  public async getCategories(page: string, searchString: string, limit: string) {
+  public async getCategories(
+    page: string,
+    searchString: string,
+    limit: string
+  ) {
     return await this.getMany(
       page,
       searchString,
@@ -50,15 +64,26 @@ export class CategoryService extends DataLayerService<ICategory> {
 
   public async updateCategory(payload: ICategory, categoryId: string) {
     await super.validateData(payload)
-    return await this.update(categoryId, payload, this.select, this.populateOptions)
+    return await this.update(
+      categoryId,
+      payload,
+      this.select,
+      this.populateOptions
+    )
   }
 
   public async deleteCategory(categoryId: string) {
     const deletedCategory = await this.delete(categoryId)
     const { company, _id } = deletedCategory
 
-    await Company.updateOne({ _id: company }, { $pull: { categories: _id } })
-    await Expanse.updateMany({ category: _id }, { $unset: { category: _id } })
+    await Company.updateOne(
+      { _id: company },
+      { $pull: { categories: _id } }
+    )
+    await Expanse.updateMany(
+      { category: _id },
+      { $unset: { category: _id } }
+    )
 
     return deletedCategory
   }

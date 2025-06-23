@@ -1,5 +1,5 @@
 import express from 'express'
-import { CredsController } from '../controllers/credentail-controller'
+import { CredsController } from '../presentaition/credentail-controller'
 import { hasCompanyOrUserId } from '../middlewares/validate-request-properties-middlewares'
 import { isEntityExists } from '../middlewares/is-entity-exists'
 import Credential from '../models/Credential'
@@ -7,7 +7,10 @@ import Credential from '../models/Credential'
 const credController = new CredsController()
 const router = express.Router()
 
-router.get('/get-credentials', credController.getCreds.bind(credController))
+router.get(
+  '/get-credentials',
+  credController.getCreds.bind(credController)
+)
 router.post(
   '/create-credentials',
   hasCompanyOrUserId,

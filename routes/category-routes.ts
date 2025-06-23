@@ -4,7 +4,7 @@ import {
   hasExpenses,
   validateQueryPageAndQueryLimit
 } from '../middlewares/validate-request-properties-middlewares'
-import { CategoryController } from '../controllers/category-controller'
+import { CategoryController } from '../presentaition/category-controller'
 import Category from '../models/Category'
 import { isEntityExists } from '../middlewares/is-entity-exists'
 

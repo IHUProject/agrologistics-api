@@ -1,13 +1,17 @@
 import { populatePurchaseOpt } from '../config/populate'
 import { BadRequestError } from '../errors'
-import { IPopulate, IPurchase, IUserWithID } from '../interfaces/interfaces'
+import {
+  IPopulate,
+  IPurchase,
+  IUserWithID
+} from '../interfaces/interfaces'
 import Client from '../models/Client'
 import Company from '../models/Company'
 import Product from '../models/Product'
 import Purchase from '../models/Purchase'
-import { DataLayerService } from './general-services/data-layer-service'
+import { BaseRepository } from '../data-access/base-repository'
 
-export class PurchaseService extends DataLayerService<IPurchase> {
+export class PurchaseService extends BaseRepository<IPurchase> {
   private select: string
   private populateOptions: IPopulate[]
   private searchFields: string[]
@@ -19,7 +23,10 @@ export class PurchaseService extends DataLayerService<IPurchase> {
     this.select = '-createdAt'
   }
 
-  public async createPurchase(payload: IPurchase, currentUser: IUserWithID) {
+  public async createPurchase(
+    payload: IPurchase,
+    currentUser: IUserWithID
+  ) {
     await super.validateData(payload)
 
     const { products, client } = payload
@@ -37,7 +44,10 @@ export class PurchaseService extends DataLayerService<IPurchase> {
     })
     const { _id } = purchase
 
-    await Company.updateOne({ _id: company }, { $push: { purchases: _id } })
+    await Company.updateOne(
+      { _id: company },
+      { $push: { purchases: _id } }
+    )
     await Client.updateOne({ _id: client }, { $push: { purchases: _id } })
 
     for (const id of products) {
@@ -51,7 +61,11 @@ export class PurchaseService extends DataLayerService<IPurchase> {
     return await this.getOne(purchaseId, this.select, this.populateOptions)
   }
 
-  public async getPurchases(page: string, searchString: string, limit: string) {
+  public async getPurchases(
+    page: string,
+    searchString: string,
+    limit: string
+  ) {
     return await this.getMany(
       page,
       searchString,
@@ -66,9 +80,15 @@ export class PurchaseService extends DataLayerService<IPurchase> {
     const deletedPurchase = await this.delete(purchaseId)
     const { _id, client, company } = deletedPurchase
 
-    await Company.updateOne({ _id: company }, { $pull: { purchases: _id } })
+    await Company.updateOne(
+      { _id: company },
+      { $pull: { purchases: _id } }
+    )
     await Client.updateOne({ _id: client }, { $pull: { purchases: _id } })
-    await Product.updateMany({ purchases: _id }, { $pull: { purchases: _id } })
+    await Product.updateMany(
+      { purchases: _id },
+      { $pull: { purchases: _id } }
+    )
 
     return deletedPurchase
   }
@@ -76,13 +96,24 @@ export class PurchaseService extends DataLayerService<IPurchase> {
   public async updatePurchase(payload: IPurchase, purchaseId: string) {
     await super.validateData(payload)
 
-    const purchase = await this.update(purchaseId, payload, this.select, this.populateOptions)
+    const purchase = await this.update(
+      purchaseId,
+      payload,
+      this.select,
+      this.populateOptions
+    )
 
     const { client, products } = payload
 
     if (client && client !== purchase.client) {
-      await Client.updateOne({ _id: purchase.client }, { $pull: { purchases: purchaseId } })
-      await Client.updateOne({ _id: client }, { $push: { purchases: purchaseId } })
+      await Client.updateOne(
+        { _id: purchase.client },
+        { $pull: { purchases: purchaseId } }
+      )
+      await Client.updateOne(
+        { _id: client },
+        { $push: { purchases: purchaseId } }
+      )
     }
 
     if (products?.length) {
@@ -91,13 +122,19 @@ export class PurchaseService extends DataLayerService<IPurchase> {
 
       for (const productId of existingProductIds) {
         if (!newProductIds.has(productId)) {
-          await Product.updateOne({ _id: productId }, { $pull: { purchases: purchaseId } })
+          await Product.updateOne(
+            { _id: productId },
+            { $pull: { purchases: purchaseId } }
+          )
         }
       }
 
       for (const productId of newProductIds) {
         if (!existingProductIds.has(productId)) {
-          await Product.updateOne({ _id: productId }, { $push: { purchases: purchaseId } })
+          await Product.updateOne(
+            { _id: productId },
+            { $push: { purchases: purchaseId } }
+          )
         }
       }
     }
