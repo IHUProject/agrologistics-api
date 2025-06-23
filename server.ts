@@ -6,32 +6,35 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import morgan from 'morgan'
 
-import { Roles } from './interfaces/enums'
-import { IUserWithID } from './interfaces/interfaces'
-import { InternalServerError } from './errors'
-import { connectDB } from './db/connect'
+import { Roles } from './types/enums'
+import { IUserWithID } from './types/interfaces'
+import { InternalServerError } from './common/errors'
+import { connectDB } from './data-access/db/connect'
 
 //middlewares
-import { notFoundMiddleware } from './middlewares/not-found'
-import { headersMiddleware } from './middlewares/headers'
-import { errorHandlerMiddleware } from './middlewares/error-handler'
-import { authenticateUser, authorizePermissions } from './middlewares/auth-middlewares'
-import { hasEmail } from './middlewares/is-accountant-have-email'
-import { hasCreds } from './middlewares/has-credentials'
+import { notFoundMiddleware } from './presentaition/middlewares/not-found'
+import { headersMiddleware } from './presentaition/middlewares/headers'
+import { errorHandlerMiddleware } from './presentaition/middlewares/error-handler'
+import {
+  authenticateUser,
+  authorizePermissions
+} from './presentaition/middlewares/auth-middlewares'
+import { hasEmail } from './presentaition/middlewares/is-accountant-have-email'
+import { hasCreds } from './presentaition/middlewares/has-credentials'
 
 //routes
-import authRouter from './routes/auth-routes'
-import userRouter from './routes/user-routes'
-import companyRouter from './routes/company-routes'
-import accountantRouter from './routes/accountant-routes'
-import productRouter from './routes/product-routes'
-import supplierRouter from './routes/supplier-routes'
-import clientRouter from './routes/client-routes'
-import purchaseRouter from './routes/purchase-routes'
-import categoryRouter from './routes/category-routes'
-import expenseRouter from './routes/expense-routes'
-import sendEmailRouter from './routes/email-sender-routes'
-import credRouter from './routes/credentail-routes'
+import authRouter from './presentaition/routes/auth-routes'
+import userRouter from './presentaition/routes/user-routes'
+import companyRouter from './presentaition/routes/company-routes'
+import accountantRouter from './presentaition/routes/accountant-routes'
+import productRouter from './presentaition/routes/product-routes'
+import supplierRouter from './presentaition/routes/supplier-routes'
+import clientRouter from './presentaition/routes/client-routes'
+import purchaseRouter from './presentaition/routes/purchase-routes'
+import categoryRouter from './presentaition/routes/category-routes'
+import expenseRouter from './presentaition/routes/expense-routes'
+import sendEmailRouter from './presentaition/routes/email-sender-routes'
+import credRouter from './presentaition/routes/credentail-routes'
 
 const server = express()
 const corsObject = {
@@ -110,7 +113,9 @@ const startServer = async () => {
         console.log(`Server listening at PORT ${port}...`)
       })
     } else {
-      throw new InternalServerError('Something went wrong with the database connection.')
+      throw new InternalServerError(
+        'Something went wrong with the database connection.'
+      )
     }
   } catch (error) {
     console.log(error)

@@ -1,7 +1,7 @@
 import { Model } from 'mongoose'
-import { createSearchQuery } from '../helpers/create-search-query'
-import { IPopulate } from '../interfaces/interfaces'
-import { BadRequestError } from '../errors'
+import { createSearchQuery } from '../common/helpers/create-search-query'
+import { IPopulate } from '../types/interfaces'
+import { BadRequestError } from '../common/errors'
 
 export class BaseRepository<T> {
   public model: Model<T>
